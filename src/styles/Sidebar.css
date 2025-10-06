@@ -1,0 +1,28 @@
+.sidebar {
+  width: 220px;
+  height: 100vh;
+  background-color: #f0f7f3;
+  padding: 1.5rem;
+  border-right: 1px solid #e5e5e5;
+}
+
+.sidebar h2 {
+  margin-bottom: 2rem;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar li {
+  padding: 0.8rem 0;
+  cursor: pointer;
+}
+
+.sidebar .active {
+  color: #fff;
+  background-color: #3b7a57;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+}

@@ -1,0 +1,31 @@
+.grant-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.grant-table th, .grant-table td {
+  padding: 0.8rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.status.active { color: green; }
+.status.approved { color: blue; }
+.status.under-review { color: orange; }
+.status.pending { color: gray; }
+.status.rejected { color: red; }
+
+.progress-bar {
+  background: #eee;
+  height: 8px;
+  border-radius: 5px;
+}
+.progress-bar div {
+  height: 8px;
+  background: #3b7a57;
+  border-radius: 5px;
+}
