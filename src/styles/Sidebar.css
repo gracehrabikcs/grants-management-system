@@ -4,25 +4,49 @@
   background-color: #f0f7f3;
   padding: 1.5rem;
   border-right: 1px solid #e5e5e5;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar h2 {
   margin-bottom: 2rem;
+  white-space: normal;
+  word-wrap: break-word;
+  line-height: 1.2;
+  font-size: 1.05rem;
 }
 
 .sidebar ul {
   list-style: none;
   padding: 0;
+  margin: 0;
+  flex: 1;
 }
 
 .sidebar li {
-  padding: 0.8rem 0;
-  cursor: pointer;
+  padding: 0.2rem 0;
 }
 
+/* make the <a> (NavLink) block-level and styled */
+.sidebar a {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: background-color 120ms ease, transform 120ms ease;
+}
+
+/* Active Link */
 .sidebar .active {
   color: #fff;
   background-color: #3b7a57;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
 }
+
+/* Hover effect */
+.sidebar a:hover {
+  background-color: #e3eee7;
+  transform: translateX(2px);
+}
+

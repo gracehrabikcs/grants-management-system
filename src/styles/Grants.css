@@ -1,0 +1,38 @@
+.grants-container {
+padding: 20px;
+}
+.grants-header {
+margin-bottom: 20px;
+}
+.grant-grid {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 20px;
+}
+.grant-card {
+background: #fff;
+border: 1px solid #eaeaea;
+border-radius: 12px;
+padding: 20px;
+box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.status {
+display: inline-block;
+padding: 4px 10px;
+border-radius: 8px;
+font-size: 12px;
+margin-bottom: 10px;
+}
+.status.active { background: #d4f5d4; }
+.status.review { background: #fff5c2; }
+.status.approved { background: #d4e8ff; }
+.progress-bar {
+height: 8px;
+background: #eee;
+border-radius: 4px;
+margin-top: 10px;
+}
+.progress-fill {
+height: 100%;
+border-radius: 4px;
+}
