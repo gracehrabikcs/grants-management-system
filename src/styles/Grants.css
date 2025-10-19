@@ -68,3 +68,42 @@
   height: 100%;
   border-radius: 4px;
 }
+.grant-main-content .section {
+  margin-bottom: 25px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fafafa;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.field-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.field-group input,
+.field-group select,
+.field-group textarea {
+  padding: 5px 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.field-group textarea {
+  resize: vertical;
+  min-height: 40px;
+}
+
+.file-name {
+  margin-left: 10px;
+  font-style: italic;
+  font-size: 14px;
+}
+
