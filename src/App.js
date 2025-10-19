@@ -6,7 +6,7 @@ import Grants from "../src/pages/Grants/Grants";
 import Calendar from "../src/pages/Calendar/Calendar";
 import Reports from "../src/pages/Reports/Reports";
 import "./App.css";
-import GrantDetails from "../src/pages/Grants/GrantDetails/GrantDetailsMain";
+import GrantDetailsMain from "../src/pages/Grants/GrantDetails/GrantDetailsMain";
 
 function App() {
   return (
@@ -17,7 +17,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/grants" element={<Grants />} />
-            <Route path="/grants/:id" element={<GrantDetails />} /> 
+            <Route path="/grants/:id/*" element={<GrantDetailsMain />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/reports" element={<Reports />} />
           </Routes>
