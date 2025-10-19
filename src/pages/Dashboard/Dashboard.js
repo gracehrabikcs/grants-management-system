@@ -1,8 +1,8 @@
 import React from "react";
-import Sidebar from "../components/Sidebar";
-import StatCard from "../components/StatCard";
-import GrantTable from "../components/GrantTable";
-import "../styles/Dashboard.css";
+import Sidebar from "../../components/Sidebar";
+import StatCard from "../../components/StatCard";
+import GrantTable from "../../components/GrantTable";
+import "../../styles/Dashboard.css";
 
 const Dashboard = () => (
   <div className="dashboard">
