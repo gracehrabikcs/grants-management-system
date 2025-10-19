@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../styles/Grants.css";
+import "../../styles/Grants.css";
 
 const grantData = [
   {
