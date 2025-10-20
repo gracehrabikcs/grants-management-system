@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import "../styles/Grants.css";
+import "../../styles/Grants.css";
+import { useNavigate } from "react-router-dom"; 
+
 
 const grantData = [
   {
@@ -49,6 +51,12 @@ const Grants = () => {
     const matchesStatus = statusFilter === "All" || grant.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+  const navigate = useNavigate();
+
+  const handleCardClick = (id) => {
+    navigate(`/grants/${id}`);
+  };
+
 
   return (
     <div className="grants-container">
@@ -83,7 +91,12 @@ const Grants = () => {
       {/* Grants Grid */}
       <div className="grant-grid">
         {filteredGrants.map((grant) => (
-          <div key={grant.id} className="grant-card">
+          <div 
+            key={grant.id} 
+            className="grant-card"
+            onClick={() => handleCardClick(grant.id)}
+            style={{ cursor: "pointer" }}>
+
             <h3>{grant.title}</h3>
             <p className="organization">{grant.organization}</p>
             <span className={`status ${grant.status.toLowerCase().replace(" ", "")}`}>
