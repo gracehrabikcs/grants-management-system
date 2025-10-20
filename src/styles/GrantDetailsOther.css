@@ -1,0 +1,50 @@
+
+.gms-wrap { display: grid; gap: 16px; }
+
+.gms-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.03);
+}
+
+.gms-head { font-weight: 600; }
+.gms-subtle { color:#6b7280; font-size: 13px; }
+.gms-mb8 { margin-bottom: 8px; }
+.gms-flex-between { display:flex; align-items:center; justify-content:space-between; }
+.gms-btn { border:1px solid #e5e7eb; background:#fff; padding:8px 12px; border-radius:10px; cursor:pointer; }
+.gms-btn:hover { background:#f9fafb; }
+.gms-btn.ghost { background:#fff; }
+.gms-paragraph { margin: 6px 0 2px 0; line-height: 1.6; color:#111827; }
+
+
+.gms-conditions { display: flex; flex-direction: column; gap: 12px; margin: 8px 0 4px 0; }
+.gms-condition-row {
+  display:flex; align-items:center; justify-content:space-between;
+  border:1px solid #e5e7eb; border-radius:12px; padding:12px 14px; background:#fff;
+}
+.gms-condition-text { color:#111827; }
+
+
+.gms-status {
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+.status-active {
+  background: #ecfdf5;      
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+.status-pending {
+  background: #fffbeb;     
+  color: #92400e;
+  border-color: #fde68a;
+}
+.status-completed {
+  background: #eef2ff;      
+  color: #3730a3;
+  border-color: #c7d2fe;
+}
