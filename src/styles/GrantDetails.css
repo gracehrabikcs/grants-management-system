@@ -273,3 +273,216 @@
 .task-table tr:hover {
   background-color: #f9f9f9;
 }
+
+/* --------------------------- Gifts Tab --------------------------- */
+
+.grant-gifts-container {
+  padding: 18px 12px;
+}
+
+/* Summary cards */
+.gifts-summary-container {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 12px;
+  align-items: stretch;
+}
+
+.summary-card {
+  background: #ffffff;
+  border: 1px solid #e3e6ea;
+  padding: 12px;
+  border-radius: 8px;
+  min-width: 160px;
+  box-shadow: 0 1px 0 rgba(16,24,40,0.02);
+}
+
+.summary-card label {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+
+.summary-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.summary-sub {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 6px;
+}
+
+/* Meta row */
+.gifts-meta-row {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 14px;
+  align-items: center;
+  color: #374151;
+  font-size: 13px;
+}
+
+/* Toolbar */
+.gifts-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.gifts-toolbar .left { flex: 0 0 auto; }
+.gifts-toolbar .center { flex: 1 1 40%; display:flex; align-items:center; gap:8px; }
+.gifts-toolbar .right { flex: 0 0 auto; display:flex; align-items:center; gap:8px; }
+
+.btn-primary {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background: #0b5fff;
+  color: white;
+  font-weight: 600;
+}
+
+.gifts-search {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+}
+
+.btn-clear {
+  padding: 6px 10px;
+  border-radius:6px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  cursor: pointer;
+}
+
+.btn-filter {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  cursor: pointer;
+}
+
+.btn-sort {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-sort.active {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+}
+
+/* Table wrapper */
+.gifts-table-wrapper {
+  overflow-x: auto;
+  background: white;
+  border: 1px solid #e6e9ee;
+  border-radius: 8px;
+}
+
+/* Table */
+.gifts-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1100px;
+}
+
+.gifts-table thead th {
+  text-align: left;
+  padding: 12px;
+  border-bottom: 1px solid #eef2f6;
+  background: #fbfdff;
+  color: #374151;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.gifts-table tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f3f6f9;
+  font-size: 13px;
+  color: #111827;
+  vertical-align: middle;
+}
+
+.gifts-table tbody tr.no-results td {
+  text-align: center;
+  padding: 20px;
+  color: #6b7280;
+}
+
+/* Column sizing helpers */
+.gifts-table .col-id { width: 110px; }
+.gifts-table .col-date { width: 110px; }
+.gifts-table .col-amount, .gifts-table .col-spent, .gifts-table .col-remaining { width: 110px; text-align: right; }
+.gifts-table .col-purpose { min-width: 220px; }
+
+/* Badges */
+.badge {
+  display:inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+/* Status badges */
+.status-received { background:#ECFDF5; color:#166534; border:1px solid rgba(16,185,129,0.12); }
+.status-pending  { background:#F8FAFC; color:#6B7280; border:1px solid rgba(107,114,128,0.08); }
+
+/* Compliance badges */
+.compliance-compliant { background:#ECFDF5; color:#166534; border:1px solid rgba(16,185,129,0.12); }
+.compliance-under-review { background:#FFFBEB; color:#92400E; border:1px solid rgba(245,158,11,0.12); }
+
+/* Acknowledge button */
+.btn-ack {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+}
+.btn-ack.ack-true { background: #eef2ff; color: #1e3a8a; border-color: #c7d2fe; }
+.btn-ack.ack-false { background: #fff7ed; color: #92400e; border-color: #fed7aa; }
+
+/* small responsive tweaks */
+@media (max-width: 880px) {
+  .gifts-summary-container { flex-direction: column; }
+  .gifts-meta-row { flex-direction: column; align-items:flex-start; gap:6px; }
+}
+
+/* --------------------------- Bio Tab --------------------------- */
+.grant-bio-container .grant-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 15px;
+}
+
+.grant-bio-container .action-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.grant-bio-container .action-btn:hover {
+  background-color: #0056b3;
+}
