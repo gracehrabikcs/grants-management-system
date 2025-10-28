@@ -1,5 +1,5 @@
 import React from "react";
-import "../../../styles/GrantDetailsAddresses.css";
+import "../../../styles/GrantDetailsAddress.css";
 
 
 const GrantDetailsAddresses = () => {
@@ -135,3 +135,4 @@ function AddButton({ label }) {
 }
 
 export default GrantDetailsAddresses;
+
