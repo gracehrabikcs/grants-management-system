@@ -1,62 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../styles/Grants.css";
-import { useNavigate } from "react-router-dom"; 
-
-
-const grantData = [
-  {
-    id: 1,
-    title: "Education Innovation Fund",
-    organization: "Future Learning Institute",
-    status: "Active",
-    description: "Supporting innovative educational technologies and methodologies...",
-    amount: "$50,000",
-    category: "Education",
-    location: "📍 San Francisco, CA",
-    deadline: "🗓 Deadline: 2024-03-15",
-    progress: 75,
-  },
-  {
-    id: 2,
-    title: "Community Development Grant",
-    organization: "Horizon Outreach Foundation",
-    status: "Under Review",
-    description: "Funding local community programs and neighborhood revitalization.",
-    amount: "$80,000",
-    category: "Community",
-    location: "📍 Chicago, IL",
-    deadline: "🗓 Deadline: 2024-04-01",
-    progress: 50,
-  },
-  {
-    id: 3,
-    title: "Healthcare Access Initiative",
-    organization: "Wellness First Foundation",
-    status: "Approved",
-    description: "Expanding healthcare access for underserved rural communities.",
-    amount: "$120,000",
-    category: "Health",
-    location: "📍 Atlanta, GA",
-    deadline: "🗓 Deadline: 2024-02-20",
-    progress: 100,
-  },
-];
+import { useNavigate } from "react-router-dom";
 
 const Grants = () => {
+  const [grants, setGrants] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const navigate = useNavigate();
 
-  const filteredGrants = grantData.filter((grant) => {
+  // Load mock data
+  useEffect(() => {
+    fetch("/data/grantDetails.json")
+      .then((response) => response.json())
+      .then((data) => setGrants(data))
+      .catch((error) => console.error("Error loading grants data:", error));
+  }, []);
+
+  const filteredGrants = grants.filter((grant) => {
     const matchesSearch = grant.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "All" || grant.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
-  const navigate = useNavigate();
 
   const handleCardClick = (id) => {
     navigate(`/grants/${id}`);
   };
-
 
   return (
     <div className="grants-container">
@@ -91,12 +59,12 @@ const Grants = () => {
       {/* Grants Grid */}
       <div className="grant-grid">
         {filteredGrants.map((grant) => (
-          <div 
-            key={grant.id} 
+          <div
+            key={grant.id}
             className="grant-card"
             onClick={() => handleCardClick(grant.id)}
-            style={{ cursor: "pointer" }}>
-
+            style={{ cursor: "pointer" }}
+          >
             <h3>{grant.title}</h3>
             <p className="organization">{grant.organization}</p>
             <span className={`status ${grant.status.toLowerCase().replace(" ", "")}`}>
