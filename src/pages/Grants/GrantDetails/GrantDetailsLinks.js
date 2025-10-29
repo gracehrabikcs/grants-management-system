@@ -73,8 +73,8 @@ const GrantDetailsLinks = () => {
   ];
 
   return (
-    <div className="content">
-      <div className="gms-wrap">
+    <div className="links-wrapper">
+      <div className="links-container">
         {/* Organizational Relationships */}
         <Section title="Organizational Relationships" actionLabel="+ Add Relationship">
           {organizationalRelationships.map((org, i) => (
@@ -103,12 +103,12 @@ const GrantDetailsLinks = () => {
 // --- Reusable Section Component ---
 function Section({ title, actionLabel, children }) {
   return (
-    <div className="gms-section">
-      <div className="gms-section-header">
-        <h3 className="gms-section-title">{title}</h3>
-        <button className="gms-add-btn">{actionLabel}</button>
+    <div className="links-section">
+      <div className="links-section-header">
+        <h3 className="links-section-title">{title}</h3>
+        <button className="links-add-btn">{actionLabel}</button>
       </div>
-      <div className="gms-section-content">{children}</div>
+      <div className="links-section-content">{children}</div>
     </div>
   );
 }
@@ -116,16 +116,16 @@ function Section({ title, actionLabel, children }) {
 // --- Subcomponents ---
 function OrgRelationship({ name, role, since, status }) {
   return (
-    <div className="gms-card gms-link-card">
-      <div className="gms-link-info">
-        <div className="gms-link-name">{name}</div>
-        <div className="gms-link-role">{role}</div>
-        <div className="gms-link-meta">Since {since}</div>
+    <div className="links-card links-relationship-card">
+      <div className="links-info">
+        <div className="links-name">{name}</div>
+        <div className="links-role">{role}</div>
+        <div className="links-meta">Since {since}</div>
       </div>
-      <div className="gms-link-status">
-        <span className={`gms-status ${status.toLowerCase()}`}>{status}</span>
+      <div className="links-status">
+        <span className={`links-status-tag ${status.toLowerCase()}`}>{status}</span>
       </div>
-      <div className="gms-link-actions">
+      <div className="links-actions">
         <i className="ri-external-link-line" title="Open"></i>
         <i className="ri-delete-bin-line" title="Delete"></i>
       </div>
@@ -135,15 +135,15 @@ function OrgRelationship({ name, role, since, status }) {
 
 function ConnectedGrant({ title, id, status, type, amount }) {
   return (
-    <div className="gms-card gms-grant-card">
-      <div className="gms-grant-title">{title}</div>
-      <div className="gms-grant-details">
+    <div className="links-card links-grant-card">
+      <div className="links-grant-title">{title}</div>
+      <div className="links-grant-details">
         <span>Grant ID: {id}</span> | <span>{type}</span> | <span>{amount}</span>
       </div>
-      <div className="gms-link-status">
-        <span className={`gms-status ${status.toLowerCase()}`}>{status}</span>
+      <div className="links-status">
+        <span className={`links-status-tag ${status.toLowerCase()}`}>{status}</span>
       </div>
-      <div className="gms-link-actions">
+      <div className="links-actions">
         <i className="ri-external-link-line" title="Open"></i>
         <i className="ri-delete-bin-line" title="Delete"></i>
       </div>
@@ -153,18 +153,18 @@ function ConnectedGrant({ title, id, status, type, amount }) {
 
 function KeyContact({ initials, name, title, tag, email, phone }) {
   return (
-    <div className="gms-card gms-contact-card">
-      <div className="gms-contact-avatar">{initials}</div>
-      <div className="gms-contact-info">
-        <div className="gms-contact-name">
-          {name} {tag && <span className="gms-tag">{tag}</span>}
+    <div className="links-card links-contact-card">
+      <div className="links-avatar">{initials}</div>
+      <div className="links-contact-info">
+        <div className="links-contact-name">
+          {name} {tag && <span className="links-tag">{tag}</span>}
         </div>
-        <div className="gms-contact-role">{title}</div>
-        <div className="gms-contact-meta">
+        <div className="links-contact-role">{title}</div>
+        <div className="links-contact-meta">
           <a href={`mailto:${email}`}>{email}</a> | {phone}
         </div>
       </div>
-      <div className="gms-link-actions">
+      <div className="links-actions">
         <i className="ri-mail-line" title="Email"></i>
         <i className="ri-delete-bin-line" title="Delete"></i>
       </div>
@@ -173,4 +173,5 @@ function KeyContact({ initials, name, title, tag, email, phone }) {
 }
 
 export default GrantDetailsLinks;
+
 
