@@ -1,133 +1,191 @@
-.gms-section {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  padding: 20px;
-  margin-bottom: 24px;
+/* GrantDetailsLinks.css - Namespaced with 'links-' */
+
+.links-wrapper {
+  padding: 24px;
+  background-color: #f9fafb;
 }
 
-.gms-section-header {
+.links-container {
+  max-width: 1000px;
+  margin: 0 auto;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.gms-section-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #222;
-}
-
-.gms-add-btn {
-  background: #f8f9fa;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 6px 12px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  color: #444;
-  transition: background 0.2s;
-}
-
-.gms-add-btn:hover {
-  background: #eef2f5;
-}
-
-.gms-card {
+/* Section */
+.links-section {
   background: #fff;
-  border: 1px solid #eaeaea;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
   padding: 16px;
-  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.links-section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 12px;
 }
 
-.gms-link-info {
-  flex: 1;
-}
-
-.gms-link-name {
+.links-section-title {
+  margin: 0;
+  font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: #111827;
 }
 
-.gms-link-role,
-.gms-link-meta {
-  font-size: 0.9rem;
-  color: #777;
-}
-
-.gms-link-status .gms-status {
+.links-add-btn {
+  background: #111827;
+  color: #fff;
+  border: none;
   border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.links-add-btn:hover {
+  background: #1f2937;
+}
+
+/* Cards */
+.links-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  background: #fff;
+  transition: background 0.2s ease;
+}
+
+.links-card:hover {
+  background: #f9fafb;
+}
+
+/* Relationships */
+.links-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.links-name {
+  font-weight: 600;
+}
+
+.links-role {
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.links-meta {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Status */
+.links-status {
+  margin-left: auto;
+  margin-right: 16px;
+}
+
+.links-status-tag {
   padding: 2px 8px;
-  font-size: 0.8rem;
-  text-transform: capitalize;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #fff;
   font-weight: 500;
 }
 
-.gms-status.active {
-  background: #e0f7e9;
-  color: #1e7b3f;
+.links-status-tag.active {
+  background: #10b981;
 }
 
-.gms-status.completed {
-  background: #e6f0ff;
-  color: #264d9b;
+.links-status-tag.pending {
+  background: #f59e0b;
 }
 
-.gms-status.pending {
-  background: #fff4e0;
-  color: #b77a00;
+.links-status-tag.completed {
+  background: #6b7280;
 }
 
-.gms-link-actions i {
-  font-size: 1.1rem;
-  margin-left: 10px;
-  color: #666;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.gms-link-actions i:hover {
-  color: #111;
-}
-
-/* Key Contacts */
-.gms-contact-card {
+/* Actions */
+.links-actions {
   display: flex;
-  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  color: #6b7280;
+  cursor: pointer;
 }
 
-.gms-contact-avatar {
-  background: #e0e7ff;
-  color: #2b2f5c;
+.links-actions i:hover {
+  color: #111827;
+}
+
+/* Grants */
+.links-grant-title {
+  font-weight: 600;
+  color: #111827;
+}
+
+.links-grant-details {
+  font-size: 13px;
+  color: #4b5563;
+}
+
+/* Contacts */
+.links-avatar {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  width: 42px;
-  height: 42px;
+  background: #111827;
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  margin-right: 14px;
+  margin-right: 12px;
 }
 
-.gms-contact-info a {
-  color: #0077cc;
+.links-contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.links-contact-name {
+  font-weight: 600;
+}
+
+.links-tag {
+  background: #10b981;
+  color: #fff;
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 11px;
+  margin-left: 4px;
+}
+
+.links-contact-role {
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.links-contact-meta {
+  font-size: 12px;
+}
+
+.links-contact-meta a {
+  color: #2563eb;
   text-decoration: none;
 }
 
-.gms-contact-info a:hover {
+.links-contact-meta a:hover {
   text-decoration: underline;
 }
 
-.gms-tag {
-  background: #0077cc;
-  color: #fff;
-  padding: 2px 6px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  margin-left: 8px;
-}
