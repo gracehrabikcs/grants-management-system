@@ -194,7 +194,13 @@
           "address": ["P.O. Box 8910", "Oakland, CA 94607", "United States"]
         }
       ],
-      "historicalAddresses": []
+      "historicalAddresses": [
+        {
+          "type": "Business",
+          "range": "2022-01-01 - 2023-12-31",
+          "address": ["321 Health Street", "San Jose, CA 95112", "United States"]
+        }
+      ]
     }
   },
   {
@@ -276,7 +282,13 @@
           "address": ["789 Wellness Ave", "Suite 200", "San Jose, CA 95112", "United States"]
         }
       ],
-      "alternateAddresses": [],
+      "alternateAddresses": [
+        {
+          "type": "Mailing",
+          "verified": "2025-02-10",
+          "address": ["P.O. Box 1234", "San Jose, CA 95112", "United States"]
+        }
+      ],
       "historicalAddresses": [
         {
           "type": "Home",
