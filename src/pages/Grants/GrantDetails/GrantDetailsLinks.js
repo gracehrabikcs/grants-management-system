@@ -8,20 +8,21 @@ const GrantDetailsLinks = ({ grantId }) => {
   const [keyContacts, setKeyContacts] = useState([]);
 
   useEffect(() => {
-    fetch("/data/links.json")
-      .then((res) => res.json())
-      .then((data) => {
-        const grantData = data[grantId] || {
-          organizationalRelationships: [],
-          connectedGrants: [],
-          keyContacts: [],
-        };
-        setOrganizationalRelationships(grantData.organizationalRelationships);
-        setConnectedGrants(grantData.connectedGrants);
-        setKeyContacts(grantData.keyContacts);
-      })
-      .catch(console.error);
-  }, [grantId]);
+  fetch("/data/grantDetails.json")
+    .then(res => res.json())
+    .then(data => {
+      const grantData = data.find(g => g.id === parseInt(grantId));
+      if (!grantData || !grantData.links) return;
+
+      const { organizationalRelationships, connectedGrants, keyContacts } = grantData.links;
+      setOrganizationalRelationships(organizationalRelationships || []);
+      setConnectedGrants(connectedGrants || []);
+      setKeyContacts(keyContacts || []);
+    })
+    .catch(console.error);
+}, [grantId]);
+
+
 
   // --- Add Handlers ---
   const handleAddOrg = () => {

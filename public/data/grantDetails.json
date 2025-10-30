@@ -56,6 +56,56 @@
     "additionalInfo": {
       "Special Conditions": "None",
       "Additional Notes": "Requires quarterly report submission"
+    },
+
+    "links": {
+      "organizationalRelationships": [
+        { "name": "Global Education Alliance", "role": "Parent Organization", "since": "2021", "status": "Active" }
+      ],
+      "connectedGrants": [
+        { "title": "STEM Education Initiative", "id": "155789", "type": "Related Program", "amount": "$75,000", "status": "Active" }
+      ],
+      "keyContacts": [
+        { "initials": "MC", "name": "Dr. Michael Chen", "title": "Program Director", "tag": "Primary", "email": "m.chen@futurelearning.org", "phone": "(415) 555-0142" }
+      ]
+    },
+    "addresses": {
+      "currentAddresses": [
+        {
+          "type": "Business",
+          "tag": "Primary",
+          "verified": "2024-09-14",
+          "address": [
+            "123 Innovation Drive",
+            "Suite 400",
+            "San Francisco, CA 94103",
+            "United States"
+          ]
+        }
+      ],
+      "alternateAddresses": [
+        {
+          "type": "Mailing",
+          "verified": "2024-08-21",
+          "address": [
+            "P.O. Box 5678",
+            "San Francisco, CA 94104",
+            "United States"
+          ]
+        }
+      ],
+      "historicalAddresses": [
+        {
+          "type": "Business",
+          "range": "1/14/2020 - 12/30/2023",
+          "address": [
+            "789 Old Market Street",
+            "Floor 2",
+            "San Francisco, CA 94108",
+            "United States"
+          ]
+        }
+      ]
     }
   },
   {
@@ -115,6 +165,36 @@
     "additionalInfo": {
       "Special Conditions": "Annual review required",
       "Additional Notes": "Priority given to urban areas"
+    },
+     "links": {
+      "organizationalRelationships": [
+        { "name": "National Community Network", "role": "Partner Organization", "since": "2019", "status": "Active" }
+      ],
+      "connectedGrants": [
+        { "title": "Neighborhood Revitalization Program", "id": "267890", "type": "Related Program", "amount": "$60,000", "status": "Under Review" }
+      ],
+      "keyContacts": [
+        { "initials": "LG", "name": "Laura Green", "title": "Program Officer", "tag": "Primary", "email": "laura@hof.org", "phone": "555-234-5678" },
+        { "initials": "JW", "name": "James White", "title": "Grant Manager", "tag": "Secondary", "email": "james@hof.org", "phone": "555-234-5679" }
+      ]
+    },
+    "addresses": {
+      "currentAddresses": [
+        {
+          "type": "Business",
+          "tag": "Primary",
+          "verified": "2025-01-10",
+          "address": ["456 Horizon Drive", "Suite 300", "Oakland, CA 94607", "United States"]
+        }
+      ],
+      "alternateAddresses": [
+        {
+          "type": "Mailing",
+          "verified": "2025-02-15",
+          "address": ["P.O. Box 8910", "Oakland, CA 94607", "United States"]
+        }
+      ],
+      "historicalAddresses": []
     }
   },
   {
@@ -174,6 +254,36 @@
     "additionalInfo": {
       "Special Conditions": "Quarterly progress reports",
       "Additional Notes": "Priority on rural communities"
+    },
+    "links": {
+      "organizationalRelationships": [
+        { "name": "Global Health Partnership", "role": "Parent Organization", "since": "2020", "status": "Active" }
+      ],
+      "connectedGrants": [
+        { "title": "Rural Health Outreach", "id": "378901", "type": "Related Program", "amount": "$90,000", "status": "Approved" }
+      ],
+      "keyContacts": [
+        { "initials": "DK", "name": "David Kim", "title": "Program Officer", "tag": "Primary", "email": "david@wff.org", "phone": "555-345-6789" },
+        { "initials": "EW", "name": "Emma Wilson", "title": "Grant Manager", "tag": "Secondary", "email": "emma@wff.org", "phone": "555-345-6790" }
+      ]
+    },
+    "addresses": {
+      "currentAddresses": [
+        {
+          "type": "Business",
+          "tag": "Primary",
+          "verified": "2025-03-05",
+          "address": ["789 Wellness Ave", "Suite 200", "San Jose, CA 95112", "United States"]
+        }
+      ],
+      "alternateAddresses": [],
+      "historicalAddresses": [
+        {
+          "type": "Home",
+          "range": "2022-01-01 - 2023-12-31",
+          "address": ["321 Health Street", "San Jose, CA 95112", "United States"]
+        }
+      ]
     }
   }
 ]

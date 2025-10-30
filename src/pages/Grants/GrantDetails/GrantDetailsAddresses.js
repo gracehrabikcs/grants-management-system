@@ -1,64 +1,28 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "../../../styles/GrantDetailsAddress.css";
 
+const GrantDetailsAddresses = ({ grantId }) => {
+  const [addresses, setAddresses] = useState({
+    currentAddresses: [],
+    alternateAddresses: [],
+    historicalAddresses: []
+  });
 
-const GrantDetailsAddresses = () => {
-  const currentAddresses = [
-    {
-      type: "Business",
-      tag: "Primary",
-      verified: "2024-09-14",
-      address: [
-        "123 Innovation Drive",
-        "Suite 400",
-        "San Francisco, CA 94103",
-        "United States",
-      ],
-    },
-  ];
+  useEffect(() => {
+    fetch("/data/grantDetails.json")
+      .then(res => res.json())
+      .then(data => {
+        const grantData = data.find(g => g.id === grantId)?.addresses || {
+          currentAddresses: [],
+          alternateAddresses: [],
+          historicalAddresses: []
+        };
+        setAddresses(grantData);
+      })
+      .catch(err => console.error("Error loading addresses:", err));
+  }, [grantId]);
 
-  const alternateAddresses = [
-    {
-      type: "Mailing",
-      verified: "2024-08-21",
-      address: [
-        "P.O. Box 5678",
-        "San Francisco, CA 94104",
-        "United States",
-      ],
-    },
-    {
-      type: "Home",
-      verified: "2024-07-09",
-      address: [
-        "456 Residential Lane",
-        "Berkeley, CA 94702",
-        "United States",
-      ],
-    },
-  ];
-
-  const historicalAddresses = [
-    {
-      type: "Business",
-      range: "1/14/2020 - 12/30/2023",
-      address: [
-        "789 Old Market Street",
-        "Floor 2",
-        "San Francisco, CA 94108",
-        "United States",
-      ],
-    },
-    {
-      type: "Business",
-      range: "5/31/2018 - 12/30/2019",
-      address: [
-        "321 Startup Boulevard",
-        "Palo Alto, CA 94301",
-        "United States",
-      ],
-    },
-  ];
+  const { currentAddresses, alternateAddresses, historicalAddresses } = addresses;
 
   return (
     <div className="content">
