@@ -173,5 +173,3 @@ function KeyContact({ initials, name, title, tag, email, phone }) {
 }
 
 export default GrantDetailsLinks;
-
-
