@@ -1,0 +1,89 @@
+{
+  "1": {
+    "organizationalRelationships": [
+      {
+        "name": "Global Education Alliance",
+        "role": "Parent Organization",
+        "since": "2021",
+        "status": "Active"
+      }
+    ],
+    "connectedGrants": [
+      {
+        "title": "STEM Education Initiative",
+        "id": "155789",
+        "status": "Active",
+        "type": "Related Program",
+        "amount": "$75,000"
+      }
+    ],
+    "keyContacts": [
+      {
+        "initials": "MC",
+        "name": "Dr. Michael Chen",
+        "title": "Program Director",
+        "tag": "Primary",
+        "email": "m.chen@futurelearning.org",
+        "phone": "(415) 555-0142"
+      }
+    ]
+  },
+"2": {
+    "organizationalRelationships": [
+      {
+        "name": "Horizon Community Network",
+        "role": "Parent Organization",
+        "since": "2020",
+        "status": "Active"
+      }
+    ],
+    "connectedGrants": [
+      {
+        "title": "Neighborhood Improvement Fund",
+        "id": "155790",
+        "status": "Pending",
+        "type": "Related Program",
+        "amount": "$30,000"
+      }
+    ],
+    "keyContacts": [
+      {
+        "initials": "BM",
+        "name": "Bob Martin",
+        "title": "Program Coordinator",
+        "tag": "Primary",
+        "email": "b.martin@hof.org",
+        "phone": "(555) 234-5678"
+      }
+    ]
+  },
+  "3": {
+    "organizationalRelationships": [
+      {
+        "name": "Wellness First Network",
+        "role": "Parent Organization",
+        "since": "2019",
+        "status": "Active"
+      }
+    ],
+    "connectedGrants": [
+      {
+        "title": "Healthcare Outreach Program",
+        "id": "155791",
+        "status": "Active",
+        "type": "Related Program",
+        "amount": "$100,000"
+      }
+    ],
+    "keyContacts": [
+      {
+        "initials": "CL",
+        "name": "Carol Lee",
+        "title": "Program Director",
+        "tag": "Primary",
+        "email": "c.lee@wff.org",
+        "phone": "(555) 345-6789"
+      }
+    ]
+  }
+}
