@@ -1,0 +1,179 @@
+[
+  {
+    "id": 1,
+    "organization": "Future Learning Institute",
+    "title": "Education Innovation Fund",
+    "status": "Active",
+    "amount": "$50,000",
+    "progress": 75,
+    "deadline": "2024-03-15",
+    "lastUpdated": "2025-10-19",
+    "nextAction": "Submit quarterly report",
+    "applicationStatus": "Pending",
+    "applicationType": "Standard",
+    "donorInfo": {
+      "Donor ID": "D001",
+      "First Name": "Alice",
+      "Last Name": "Johnson",
+      "Organization": "Future Learning Institute",
+      "Email": "alice@fli.org",
+      "Phone": "555-123-4567"
+    },
+    "grantDetails": {
+      "Grant ID": "1",
+      "Grant Name": "Education Innovation Fund",
+      "Status": { "value": "Active", "options": ["Active", "Inactive"] },
+      "Priority": { "value": "High", "options": ["High", "Medium", "Low"] }
+    },
+    "financialInfo": {
+      "Requested Amount": "$50,000",
+      "Awarded Amount": "$50,000",
+      "Disbursed Amount": "$25,000",
+      "Remaining Balance": "$25,000",
+      "Currency": "USD",
+      "Payment Schedule": "Quarterly"
+    },
+    "timeline": {
+      "Application Date": "2024-01-01",
+      "Approval Date": "2024-02-01",
+      "Start Date": "2024-03-01",
+      "End Date": "2024-12-31",
+      "Next Deadline": "2024-06-30",
+      "Duration (months)": "12"
+    },
+    "contactAssignment": {
+      "Program Officer": "John Smith",
+      "Officer Email": "john@fli.org",
+      "Fiscal Sponsor": "N/A",
+      "Grant Manager": "Mary Brown"
+    },
+    "purposeDescription": {
+      "Grant Purpose": "Support educational innovation",
+      "Project Summary": "Funding new educational programs and technology",
+      "Project Objectives": "Improve student engagement",
+      "Expected Outcomes": "Higher graduation rates"
+    },
+    "additionalInfo": {
+      "Special Conditions": "None",
+      "Additional Notes": "Requires quarterly report submission"
+    }
+  },
+  {
+    "id": 2,
+    "organization": "Horizon Outreach Foundation",
+    "title": "Community Development Grant",
+    "status": "Under Review",
+    "amount": "$80,000",
+    "progress": 50,
+    "deadline": "2024-04-01",
+    "lastUpdated": "2025-10-10",
+    "nextAction": "Submit mid-term evaluation",
+    "applicationStatus": "Pending",
+    "applicationType": "Standard",
+    "donorInfo": {
+      "Donor ID": "D002",
+      "First Name": "Bob",
+      "Last Name": "Martin",
+      "Organization": "Horizon Outreach Foundation",
+      "Email": "bob@hof.org",
+      "Phone": "555-234-5678"
+    },
+    "grantDetails": {
+      "Grant ID": "2",
+      "Grant Name": "Community Development Grant",
+      "Status": { "value": "Under Review", "options": ["Active", "Inactive"] },
+      "Priority": { "value": "Medium", "options": ["High", "Medium", "Low"] }
+    },
+    "financialInfo": {
+      "Requested Amount": "$80,000",
+      "Awarded Amount": "$0",
+      "Disbursed Amount": "$0",
+      "Remaining Balance": "$80,000",
+      "Currency": "USD",
+      "Payment Schedule": "Quarterly"
+    },
+    "timeline": {
+      "Application Date": "2024-02-01",
+      "Approval Date": "2024-03-15",
+      "Start Date": "2024-04-01",
+      "End Date": "2025-03-31",
+      "Next Deadline": "2024-10-01",
+      "Duration (months)": "12"
+    },
+    "contactAssignment": {
+      "Program Officer": "Laura Green",
+      "Officer Email": "laura@hof.org",
+      "Fiscal Sponsor": "N/A",
+      "Grant Manager": "James White"
+    },
+    "purposeDescription": {
+      "Grant Purpose": "Community improvement",
+      "Project Summary": "Fund neighborhood programs",
+      "Project Objectives": "Increase community engagement",
+      "Expected Outcomes": "Safer neighborhoods"
+    },
+    "additionalInfo": {
+      "Special Conditions": "Annual review required",
+      "Additional Notes": "Priority given to urban areas"
+    }
+  },
+  {
+    "id": 3,
+    "organization": "Wellness First Foundation",
+    "title": "Healthcare Access Initiative",
+    "status": "Approved",
+    "amount": "$120,000",
+    "progress": 100,
+    "deadline": "2024-02-20",
+    "lastUpdated": "2025-09-30",
+    "nextAction": "Finalize reporting documents",
+    "applicationStatus": "Approved",
+    "applicationType": "Standard",
+    "donorInfo": {
+      "Donor ID": "D003",
+      "First Name": "Carol",
+      "Last Name": "Lee",
+      "Organization": "Wellness First Foundation",
+      "Email": "carol@wff.org",
+      "Phone": "555-345-6789"
+    },
+    "grantDetails": {
+      "Grant ID": "3",
+      "Grant Name": "Healthcare Access Initiative",
+      "Status": { "value": "Approved", "options": ["Active", "Inactive"] },
+      "Priority": { "value": "High", "options": ["High", "Medium", "Low"] }
+    },
+    "financialInfo": {
+      "Requested Amount": "$120,000",
+      "Awarded Amount": "$120,000",
+      "Disbursed Amount": "$120,000",
+      "Remaining Balance": "$0",
+      "Currency": "USD",
+      "Payment Schedule": "Quarterly"
+    },
+    "timeline": {
+      "Application Date": "2023-11-01",
+      "Approval Date": "2024-01-15",
+      "Start Date": "2024-02-01",
+      "End Date": "2024-12-31",
+      "Next Deadline": "N/A",
+      "Duration (months)": "11"
+    },
+    "contactAssignment": {
+      "Program Officer": "David Kim",
+      "Officer Email": "david@wff.org",
+      "Fiscal Sponsor": "N/A",
+      "Grant Manager": "Emma Wilson"
+    },
+    "purposeDescription": {
+      "Grant Purpose": "Expand healthcare access",
+      "Project Summary": "Provide healthcare services in underserved areas",
+      "Project Objectives": "Increase patient reach and access",
+      "Expected Outcomes": "Improved community health metrics"
+    },
+    "additionalInfo": {
+      "Special Conditions": "Quarterly progress reports",
+      "Additional Notes": "Priority on rural communities"
+    }
+  }
+]
