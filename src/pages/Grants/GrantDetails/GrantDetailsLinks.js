@@ -1,110 +1,176 @@
 import React, { useState, useEffect } from "react";
 import "../../../styles/GrantDetailsLinks.css";
 
-
 const GrantDetailsLinks = ({ grantId }) => {
   const [organizationalRelationships, setOrganizationalRelationships] = useState([]);
   const [connectedGrants, setConnectedGrants] = useState([]);
   const [keyContacts, setKeyContacts] = useState([]);
 
+  const [modal, setModal] = useState({
+    open: false,
+    section: null, // "org", "grant", "contact"
+    index: null, // for edit
+    data: {}, // form data
+  });
+
   useEffect(() => {
-  fetch("/data/grantDetails.json")
-    .then(res => res.json())
-    .then(data => {
-      const grantData = data.find(g => g.id === parseInt(grantId));
-      if (!grantData || !grantData.links) return;
+    fetch("/data/grantDetails.json")
+      .then((res) => res.json())
+      .then((data) => {
+        const grantData = data.find((g) => g.id === parseInt(grantId));
+        if (!grantData || !grantData.links) return;
 
-      const { organizationalRelationships, connectedGrants, keyContacts } = grantData.links;
-      setOrganizationalRelationships(organizationalRelationships || []);
-      setConnectedGrants(connectedGrants || []);
-      setKeyContacts(keyContacts || []);
-    })
-    .catch(console.error);
-}, [grantId]);
+        const { organizationalRelationships, connectedGrants, keyContacts } = grantData.links;
+        setOrganizationalRelationships(organizationalRelationships || []);
+        setConnectedGrants(connectedGrants || []);
+        setKeyContacts(keyContacts || []);
+      })
+      .catch(console.error);
+  }, [grantId]);
 
-
-
-  // --- Add Handlers ---
-  const handleAddOrg = () => {
-    const name = prompt("Enter Organization Name:");
-    if (!name) return;
-    const role = prompt("Enter Role:");
-    const since = prompt("Enter Since Year:");
-    const status = prompt("Enter Status (Active/Inactive):") || "Active";
-    setOrganizationalRelationships([
-      ...organizationalRelationships,
-      { name, role, since, status },
-    ]);
+  // --- Modal Handlers ---
+  const openModal = (section, index = null, data = {}) => {
+    setModal({ open: true, section, index, data });
   };
 
-  const handleAddGrant = () => {
-    const title = prompt("Enter Grant Title:");
-    if (!title) return;
-    const id = prompt("Enter Grant ID:");
-    const type = prompt("Enter Grant Type:");
-    const amount = prompt("Enter Amount:");
-    const status = prompt("Enter Status (Active/Completed/Pending):") || "Active";
-    setConnectedGrants([
-      ...connectedGrants,
-      { title, id, type, amount, status },
-    ]);
+  const closeModal = () => setModal({ open: false, section: null, index: null, data: {} });
+
+  const handleInputChange = (field, value) => {
+    setModal((prev) => ({
+      ...prev,
+      data: { ...prev.data, [field]: value },
+    }));
   };
 
-  const handleAddContact = () => {
-    const initials = prompt("Enter Initials:");
-    if (!initials) return;
-    const name = prompt("Enter Name:");
-    const title = prompt("Enter Title:");
-    const tag = prompt("Enter Tag (optional):");
-    const email = prompt("Enter Email:");
-    const phone = prompt("Enter Phone:");
-    setKeyContacts([
-      ...keyContacts,
-      { initials, name, title, tag, email, phone },
-    ]);
+  const handleSave = () => {
+    const { section, index, data } = modal;
+
+    if (section === "org") {
+      const list = [...organizationalRelationships];
+      if (index === null) list.push(data);
+      else list[index] = data;
+      setOrganizationalRelationships(list);
+    } else if (section === "grant") {
+      const list = [...connectedGrants];
+      if (index === null) list.push(data);
+      else list[index] = data;
+      setConnectedGrants(list);
+    } else if (section === "contact") {
+      const list = [...keyContacts];
+      if (index === null) list.push(data);
+      else list[index] = data;
+      setKeyContacts(list);
+    }
+
+    closeModal();
   };
 
   // --- Delete Handlers ---
-  const handleDeleteOrg = (index) => {
-    setOrganizationalRelationships(
-      organizationalRelationships.filter((_, i) => i !== index)
-    );
-  };
-
-  const handleDeleteGrant = (index) => {
-    setConnectedGrants(connectedGrants.filter((_, i) => i !== index));
-  };
-
-  const handleDeleteContact = (index) => {
-    setKeyContacts(keyContacts.filter((_, i) => i !== index));
+  const handleDelete = (section, index) => {
+    if (section === "org") setOrganizationalRelationships(organizationalRelationships.filter((_, i) => i !== index));
+    if (section === "grant") setConnectedGrants(connectedGrants.filter((_, i) => i !== index));
+    if (section === "contact") setKeyContacts(keyContacts.filter((_, i) => i !== index));
   };
 
   return (
-    <div className="links-wrapper">
-      <div className="links-container">
-        <Section title="Organizational Relationships" actionLabel="+ Add Relationship" onAdd={handleAddOrg}>
-          {organizationalRelationships.map((org, i) => (
-            <OrgRelationship key={i} {...org} onDelete={() => handleDeleteOrg(i)} />
-          ))}
-        </Section>
+    <>
+      <div className="links-wrapper">
+        <div className="links-container">
+          <Section title="Organizational Relationships" actionLabel="+ Add Relationship" onAdd={() => openModal("org")}>
+            {organizationalRelationships.map((org, i) => (
+              <OrgRelationship
+                key={i}
+                {...org}
+                onDelete={() => handleDelete("org", i)}
+                onEdit={() => openModal("org", i, org)}
+              />
+            ))}
+          </Section>
 
-        <Section title="Connected Grants" actionLabel="+ Link Grant" onAdd={handleAddGrant}>
-          {connectedGrants.map((grant, i) => (
-            <ConnectedGrant key={i} {...grant} onDelete={() => handleDeleteGrant(i)} />
-          ))}
-        </Section>
+          <Section title="Connected Grants" actionLabel="+ Link Grant" onAdd={() => openModal("grant")}>
+            {connectedGrants.map((grant, i) => (
+              <ConnectedGrant
+                key={i}
+                {...grant}
+                onDelete={() => handleDelete("grant", i)}
+                onEdit={() => openModal("grant", i, grant)}
+              />
+            ))}
+          </Section>
 
-        <Section title="Key Contacts" actionLabel="+ Add Contact" onAdd={handleAddContact}>
-          {keyContacts.map((contact, i) => (
-            <KeyContact key={i} {...contact} onDelete={() => handleDeleteContact(i)} />
-          ))}
-        </Section>
+          <Section title="Key Contacts" actionLabel="+ Add Contact" onAdd={() => openModal("contact")}>
+            {keyContacts.map((contact, i) => (
+              <KeyContact
+                key={i}
+                {...contact}
+                onDelete={() => handleDelete("contact", i)}
+                onEdit={() => openModal("contact", i, contact)}
+              />
+            ))}
+          </Section>
+        </div>
       </div>
-    </div>
+
+      {/* Modal */}
+      {modal.open && (
+        <div className="gms-modal-backdrop">
+          <div className="gms-modal-content">
+            <h2>
+              {modal.index === null
+                ? modal.section === "org"
+                  ? "Add Organizational Relationship"
+                  : modal.section === "grant"
+                  ? "Add Connected Grant"
+                  : "Add Key Contact"
+                : modal.section === "org"
+                ? "Edit Organizational Relationship"
+                : modal.section === "grant"
+                ? "Edit Connected Grant"
+                : "Edit Key Contact"}
+            </h2>
+
+            {modal.section === "org" && (
+              <>
+                <input placeholder="Organization Name" value={modal.data.name || ""} onChange={(e) => handleInputChange("name", e.target.value)} />
+                <input placeholder="Role" value={modal.data.role || ""} onChange={(e) => handleInputChange("role", e.target.value)} />
+                <input placeholder="Since Year" value={modal.data.since || ""} onChange={(e) => handleInputChange("since", e.target.value)} />
+                <input placeholder="Status" value={modal.data.status || ""} onChange={(e) => handleInputChange("status", e.target.value)} />
+              </>
+            )}
+
+            {modal.section === "grant" && (
+              <>
+                <input placeholder="Grant Title" value={modal.data.title || ""} onChange={(e) => handleInputChange("title", e.target.value)} />
+                <input placeholder="Grant ID" value={modal.data.id || ""} onChange={(e) => handleInputChange("id", e.target.value)} />
+                <input placeholder="Type" value={modal.data.type || ""} onChange={(e) => handleInputChange("type", e.target.value)} />
+                <input placeholder="Amount" value={modal.data.amount || ""} onChange={(e) => handleInputChange("amount", e.target.value)} />
+                <input placeholder="Status" value={modal.data.status || ""} onChange={(e) => handleInputChange("status", e.target.value)} />
+              </>
+            )}
+
+            {modal.section === "contact" && (
+              <>
+                <input placeholder="Initials" value={modal.data.initials || ""} onChange={(e) => handleInputChange("initials", e.target.value)} />
+                <input placeholder="Name" value={modal.data.name || ""} onChange={(e) => handleInputChange("name", e.target.value)} />
+                <input placeholder="Title" value={modal.data.title || ""} onChange={(e) => handleInputChange("title", e.target.value)} />
+                <input placeholder="Tag" value={modal.data.tag || ""} onChange={(e) => handleInputChange("tag", e.target.value)} />
+                <input placeholder="Email" value={modal.data.email || ""} onChange={(e) => handleInputChange("email", e.target.value)} />
+                <input placeholder="Phone" value={modal.data.phone || ""} onChange={(e) => handleInputChange("phone", e.target.value)} />
+              </>
+            )}
+
+            <div className="gms-modal-buttons">
+              <button className="gms-modal-cancel" onClick={closeModal}>Cancel</button>
+              <button className="gms-modal-save" onClick={handleSave}>Save</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
-// --- Reusable Section Component ---
+// Section Component
 function Section({ title, actionLabel, children, onAdd }) {
   return (
     <div className="links-section">
@@ -117,8 +183,8 @@ function Section({ title, actionLabel, children, onAdd }) {
   );
 }
 
-// --- Subcomponents ---
-function OrgRelationship({ name, role, since, status, onDelete }) {
+// --- Cards ---
+function OrgRelationship({ name, role, since, status, onDelete, onEdit }) {
   return (
     <div className="links-card links-relationship-card">
       <div className="links-info">
@@ -130,14 +196,14 @@ function OrgRelationship({ name, role, since, status, onDelete }) {
         <span className={`links-status-tag ${status.toLowerCase()}`}>{status}</span>
       </div>
       <div className="links-actions">
-        <i className="ri-external-link-line" title="Open"></i>
         <i className="ri-delete-bin-line" title="Delete" onClick={onDelete}></i>
+        <i className="ri-edit-line" title="Edit" onClick={onEdit}></i>
       </div>
     </div>
   );
 }
 
-function ConnectedGrant({ title, id, status, type, amount, onDelete }) {
+function ConnectedGrant({ title, id, status, type, amount, onDelete, onEdit }) {
   return (
     <div className="links-card links-grant-card">
       <div className="links-grant-title">{title}</div>
@@ -148,14 +214,14 @@ function ConnectedGrant({ title, id, status, type, amount, onDelete }) {
         <span className={`links-status-tag ${status.toLowerCase()}`}>{status}</span>
       </div>
       <div className="links-actions">
-        <i className="ri-external-link-line" title="Open"></i>
         <i className="ri-delete-bin-line" title="Delete" onClick={onDelete}></i>
+        <i className="ri-edit-line" title="Edit" onClick={onEdit}></i>
       </div>
     </div>
   );
 }
 
-function KeyContact({ initials, name, title, tag, email, phone, onDelete }) {
+function KeyContact({ initials, name, title, tag, email, phone, onDelete, onEdit }) {
   return (
     <div className="links-card links-contact-card">
       <div className="links-avatar">{initials}</div>
@@ -169,13 +235,14 @@ function KeyContact({ initials, name, title, tag, email, phone, onDelete }) {
         </div>
       </div>
       <div className="links-actions">
-        <i className="ri-mail-line" title="Email"></i>
         <i className="ri-delete-bin-line" title="Delete" onClick={onDelete}></i>
+        <i className="ri-edit-line" title="Edit" onClick={onEdit}></i>
       </div>
     </div>
   );
 }
 
 export default GrantDetailsLinks;
+
 
 
