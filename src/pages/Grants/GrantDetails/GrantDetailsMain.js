@@ -1,30 +1,30 @@
-import React, { useState } from "react";
-import { useNavigate, useParams, Link, Routes, Route } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams, NavLink, Routes, Route } from "react-router-dom";
 import "../../../styles/GrantDetails.css";
-import GrantDetailsTracking from "../GrantDetails/GrantDetailsTracking.js";
-import { NavLink } from "react-router-dom";
-import GrantDetailsGifts from "../GrantDetails/GrantDetailsGifts.js"
-import GrantDetailsBio from "../GrantDetails/GrantDetailsBio.js"
-import GrantDetailsContacts from "../GrantDetails/GrantDetailsContacts.js"
-import GrantDetailsPledges from "../GrantDetails/GrantDetailsPledges.js"
-import GrantDetailsLinks from "../GrantDetails/GrantDetailsLinks.js"
-import GrantDetailsAddresses from "../GrantDetails/GrantDetailsAddresses.js"
-import GrantDetailsOther from "../GrantDetails/GrantDetailsOther.js"
+import GrantDetailsTracking from "./GrantDetailsTracking";
+import GrantDetailsGifts from "./GrantDetailsGifts";
+import GrantDetailsBio from "./GrantDetailsBio";
+import GrantDetailsContacts from "./GrantDetailsContacts";
+import GrantDetailsPledges from "./GrantDetailsPledges";
+import GrantDetailsLinks from "./GrantDetailsLinks";
+import GrantDetailsAddresses from "./GrantDetailsAddresses";
+import GrantDetailsOther from "./GrantDetailsOther";
 
 const GrantDetailsMain = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [grant, setGrant] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
 
-  const grant = {
-    id,
-    organization: "Future Learning Institute",
-    title: "Education Innovation Fund",
-    status: "Active",
-    amount: "$50,000",
-    progress: 75,
-    deadline: "2024-03-15",
-  };
+  useEffect(() => {
+    fetch("/data/grantDetails.json")
+      .then((response) => response.json())
+      .then((data) => {
+        const foundGrant = data.find((g) => g.id === parseInt(id));
+        setGrant(foundGrant || null);
+      })
+      .catch((error) => console.error("Error loading grant details:", error));
+  }, [id]);
 
   const handleFileChange = (event) => setSelectedFile(event.target.files[0]);
 
@@ -35,7 +35,8 @@ const GrantDetailsMain = () => {
     window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
   };
 
-  // Default content for Main tab
+  if (!grant) return <p>Loading grant details...</p>;
+
   const MainTabContent = () => (
     <div className="grant-main-content">
       {/* Application Management */}
@@ -43,7 +44,7 @@ const GrantDetailsMain = () => {
         <h3>Application Management</h3>
         <div className="field-group">
           <label>Application Status</label>
-          <select>
+          <select value={grant.applicationStatus}>
             <option>Pending</option>
             <option>Approved</option>
             <option>Rejected</option>
@@ -51,7 +52,7 @@ const GrantDetailsMain = () => {
         </div>
         <div className="field-group">
           <label>Application Type</label>
-          <select>
+          <select value={grant.applicationType}>
             <option>Standard</option>
             <option>Emergency</option>
           </select>
@@ -62,21 +63,21 @@ const GrantDetailsMain = () => {
         </div>
         <div className="field-group">
           <label>Last Updated</label>
-          <input type="text" value="2025-10-19" readOnly />
+          <input type="text" value={grant.lastUpdated} readOnly />
         </div>
         <div className="field-group">
           <label>Next Action Required</label>
-          <input type="text" value="Submit quarterly report" readOnly />
+          <input type="text" value={grant.nextAction} readOnly />
         </div>
       </div>
 
       {/* Donor Information */}
       <div className="section">
         <h3>Donor Information</h3>
-        {["Donor ID", "First Name", "Last Name", "Organization", "Email", "Phone"].map((field) => (
-          <div className="field-group" key={field}>
-            <label>{field}</label>
-            <input type="text" value={`Sample ${field}`} readOnly />
+        {Object.entries(grant.donorInfo).map(([key, value]) => (
+          <div className="field-group" key={key}>
+            <label>{key}</label>
+            <input type="text" value={value} readOnly />
           </div>
         ))}
       </div>
@@ -84,64 +85,38 @@ const GrantDetailsMain = () => {
       {/* Grant Details */}
       <div className="section">
         <h3>Grant Details</h3>
-        <div className="field-group">
-          <label>Grant ID</label>
-          <input type="text" value={grant.id} readOnly />
-        </div>
-        <div className="field-group">
-          <label>Grant Name</label>
-          <input type="text" value={grant.title} readOnly />
-        </div>
-        <div className="field-group">
-          <label>Status</label>
-          <select>
-            <option>Active</option>
-            <option>Inactive</option>
-          </select>
-        </div>
-        <div className="field-group">
-          <label>Priority</label>
-          <select>
-            <option>High</option>
-            <option>Medium</option>
-            <option>Low</option>
-          </select>
-        </div>
+        {Object.entries(grant.grantDetails).map(([key, value]) => (
+          <div className="field-group" key={key}>
+            <label>{key}</label>
+            {typeof value === "string" ? (
+              <input type="text" value={value} readOnly />
+            ) : (
+              <select value={value}>
+                {value.options && value.options.map((opt) => <option key={opt}>{opt}</option>)}
+              </select>
+            )}
+          </div>
+        ))}
       </div>
 
       {/* Financial Information */}
       <div className="section">
         <h3>Financial Information</h3>
-        {["Requested Amount", "Awarded Amount", "Disbursed Amount", "Remaining Balance"].map((field) => (
-          <div className="field-group" key={field}>
-            <label>{field}</label>
-            <input type="text" value="$0.00" readOnly />
+        {Object.entries(grant.financialInfo).map(([key, value]) => (
+          <div className="field-group" key={key}>
+            <label>{key}</label>
+            <input type="text" value={value} readOnly />
           </div>
         ))}
-        <div className="field-group">
-          <label>Currency</label>
-          <select>
-            <option>USD</option>
-            <option>EUR</option>
-          </select>
-        </div>
-        <div className="field-group">
-          <label>Payment Schedule</label>
-          <select>
-            <option>Quarterly</option>
-            <option>Monthly</option>
-            <option>Annually</option>
-          </select>
-        </div>
       </div>
 
       {/* Timeline */}
       <div className="section">
         <h3>Timeline</h3>
-        {["Application Date", "Approval Date", "Start Date", "End Date", "Next Deadline", "Duration (months)"].map((field) => (
-          <div className="field-group" key={field}>
-            <label>{field}</label>
-            <input type="text" value="N/A" readOnly />
+        {Object.entries(grant.timeline).map(([key, value]) => (
+          <div className="field-group" key={key}>
+            <label>{key}</label>
+            <input type="text" value={value} readOnly />
           </div>
         ))}
       </div>
@@ -149,10 +124,10 @@ const GrantDetailsMain = () => {
       {/* Contact and Assignment */}
       <div className="section">
         <h3>Contact and Assignment</h3>
-        {["Program Officer", "Officer Email", "Fiscal Sponsor", "Grant Manager"].map((field) => (
-          <div className="field-group" key={field}>
-            <label>{field}</label>
-            <input type="text" value="N/A" readOnly />
+        {Object.entries(grant.contactAssignment).map(([key, value]) => (
+          <div className="field-group" key={key}>
+            <label>{key}</label>
+            <input type="text" value={value} readOnly />
           </div>
         ))}
       </div>
@@ -160,10 +135,10 @@ const GrantDetailsMain = () => {
       {/* Grant Purpose and Description */}
       <div className="section">
         <h3>Grant Purpose and Description</h3>
-        {["Grant Purpose", "Project Summary", "Project Objectives", "Expected Outcomes"].map((field) => (
-          <div className="field-group" key={field}>
-            <label>{field}</label>
-            <textarea value="N/A" readOnly />
+        {Object.entries(grant.purposeDescription).map(([key, value]) => (
+          <div className="field-group" key={key}>
+            <label>{key}</label>
+            <textarea value={value} readOnly />
           </div>
         ))}
       </div>
@@ -171,10 +146,10 @@ const GrantDetailsMain = () => {
       {/* Additional Information */}
       <div className="section">
         <h3>Additional Information</h3>
-        {["Special Conditions", "Additional Notes"].map((field) => (
-          <div className="field-group" key={field}>
-            <label>{field}</label>
-            <textarea value="N/A" readOnly />
+        {Object.entries(grant.additionalInfo).map(([key, value]) => (
+          <div className="field-group" key={key}>
+            <label>{key}</label>
+            <textarea value={value} readOnly />
           </div>
         ))}
       </div>
@@ -183,12 +158,10 @@ const GrantDetailsMain = () => {
 
   return (
     <div className="grant-details-container">
-      {/* Back Button */}
       <button className="back-button" onClick={() => navigate("/grants")}>
         ← Back to Grants
       </button>
 
-      {/* Top Info Bar */}
       <div className="grant-info-bar">
         <div className="grant-left">
           <h2>{grant.organization} - {grant.title}</h2>
@@ -201,7 +174,6 @@ const GrantDetailsMain = () => {
         </div>
       </div>
 
-      {/* Action Buttons */}
       <div className="grant-actions">
         <label className="action-btn">
           Attach a File
@@ -211,21 +183,18 @@ const GrantDetailsMain = () => {
         <button className="action-btn" onClick={handleSendEmail}>Send Email</button>
       </div>
 
-      {/* Tab Navigation */}
       <div className="grant-nav-bar">
         {["", "gifts", "pledges", "contacts", "bio", "other", "links", "addresses", "tracking"].map((tab) => (
-            <NavLink
+          <NavLink
             key={tab}
             to={tab === "" ? `/grants/${id}` : `/grants/${id}/${tab}`}
             className={({ isActive }) => isActive ? "active-tab" : ""}
-            >
+          >
             {tab === "" ? "Main" : tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </NavLink>
+          </NavLink>
         ))}
-        </div>
+      </div>
 
-
-      {/* Tab Routes */}
       <Routes>
         <Route path="/" element={<MainTabContent />} />
         <Route path="gifts" element={<GrantDetailsGifts />} />
