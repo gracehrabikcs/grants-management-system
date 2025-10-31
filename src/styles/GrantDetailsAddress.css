@@ -5,7 +5,6 @@
   margin-bottom: 20px;
 }
 
-
 .gms-section-title {
   font-weight: 600;
   font-size: 15px;
@@ -58,7 +57,6 @@
   margin-left: 6px;
 }
 
-
 .gms-address-actions i {
   cursor: pointer;
   color: #6b7280;
@@ -102,4 +100,90 @@
 .gms-add-btn:hover {
   background: #1d4ed8;
 }
+
+/* -------------------- MODAL STYLES -------------------- */
+.gms-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.gms-modal-content {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;         /* space inside the modal */
+  width: 380px;
+  max-width: 90%;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box; /* includes padding in width */
+}
+
+
+.gms-modal-content h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.gms-modal-content input,
+.gms-modal-content textarea {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 10px 12px;    /* more internal padding for text */
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.gms-modal-content textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.gms-modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  width: 100%;
+  box-sizing:border-box;
+  margin-top: 12px;
+  text-align: center;
+}
+
+.gms-modal-buttons button {
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.gms-modal-cancel {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.gms-modal-save {
+  background: #2563eb;
+  color: white;
+}
+
+.gms-modal-save:hover {
+  background: #1d4ed8;
+}
+
+.gms-modal-cancel:hover {
+  background: #d1d5db;
+}
+
 

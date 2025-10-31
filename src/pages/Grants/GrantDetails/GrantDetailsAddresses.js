@@ -12,6 +12,15 @@ const GrantDetailsAddresses = () => {
     historicalAddresses: []
   });
 
+  const [modal, setModal] = useState({
+    open: false,
+    mode: "add", // "add" or "edit"
+    section: null,
+    index: null,
+    addr: { type: "", tag: "", verified: "", range: "", address: [] }
+  });
+
+  // Load addresses
   useEffect(() => {
     fetch("/data/grantDetails.json")
       .then((res) => res.json())
@@ -26,38 +35,55 @@ const GrantDetailsAddresses = () => {
       .catch((err) => console.error("Error loading addresses:", err));
   }, [grantId]);
 
-  const handleAddCurrent = () => {
-    const type = prompt("Enter Address Type (Business/Home/etc.):");
-    if (!type) return;
-    const tag = prompt("Enter Tag (optional):");
-    const verified = prompt("Enter Last Verified Date (YYYY-MM-DD):");
-    const lines = prompt("Enter Address Lines separated by |").split("|");
-    setAddresses((prev) => ({
+  // Open Add Modal
+  const openAddModal = (section) => {
+    setModal({
+      open: true,
+      mode: "add",
+      section,
+      index: null,
+      addr: { type: "", tag: "", verified: "", range: "", address: [] }
+    });
+  };
+
+  // Open Edit Modal
+  const openEditModal = (section, index, addr) => {
+    setModal({
+      open: true,
+      mode: "edit",
+      section,
+      index,
+      addr: { ...addr, address: addr.address || [] }
+    });
+  };
+
+  const closeModal = () => {
+    setModal({ open: false, mode: "add", section: null, index: null, addr: { type: "", tag: "", verified: "", range: "", address: [] } });
+  };
+
+  const handleInputChange = (field, value) => {
+    setModal((prev) => ({
       ...prev,
-      currentAddresses: [...prev.currentAddresses, { type, tag, verified, address: lines }]
+      addr: { ...prev.addr, [field]: value }
     }));
   };
 
-  const handleAddAlternate = () => {
-    const type = prompt("Enter Address Type (Mailing/Home/etc.):");
-    if (!type) return;
-    const verified = prompt("Enter Last Verified Date (YYYY-MM-DD):");
-    const lines = prompt("Enter Address Lines separated by |").split("|");
-    setAddresses((prev) => ({
-      ...prev,
-      alternateAddresses: [...prev.alternateAddresses, { type, verified, address: lines }]
-    }));
-  };
+  const handleSave = () => {
+    const section = modal.section;
+    const updatedAddr = { ...modal.addr };
+    updatedAddr.address = updatedAddr.address || [];
 
-  const handleAddHistorical = () => {
-    const type = prompt("Enter Address Type (Business/Home/etc.):");
-    if (!type) return;
-    const range = prompt("Enter Date Range (e.g., 2020-01-01 - 2022-12-31):");
-    const lines = prompt("Enter Address Lines separated by |").split("|");
-    setAddresses((prev) => ({
-      ...prev,
-      historicalAddresses: [...prev.historicalAddresses, { type, range, address: lines }]
-    }));
+    setAddresses((prev) => {
+      const list = [...prev[section]];
+      if (modal.mode === "add") {
+        list.push(updatedAddr);
+      } else {
+        list[modal.index] = updatedAddr;
+      }
+      return { ...prev, [section]: list };
+    });
+
+    closeModal();
   };
 
   const handleDelete = (section, index) => {
@@ -67,70 +93,95 @@ const GrantDetailsAddresses = () => {
     }));
   };
 
-  const handleEditSave = (section, index, updated) => {
-    setAddresses((prev) => ({
-      ...prev,
-      [section]: prev[section].map((item, i) => (i === index ? updated : item))
-    }));
-  };
-
-  const handleEdit = (section, index, addr) => {
-    const newType = prompt("Edit Address Type:", addr.type);
-    if (!newType) return;
-    const newLines = prompt("Edit Address Lines separated by |", addr.address.join("|"));
-    if (!newLines) return;
-
-    const updated = {
-      ...addr,
-      type: newType,
-      address: newLines.split("|")
-    };
-
-    handleEditSave(section, index, updated);
-  };
-
   const { currentAddresses, alternateAddresses, historicalAddresses } = addresses;
 
   return (
-    <div className="content">
-      <div className="gms-wrap">
-        <Section title="Current Addresses" onAdd={handleAddCurrent}>
-          {currentAddresses.map((addr, i) => (
-            <AddressCard
-              key={i}
-              {...addr}
-              onDelete={() => handleDelete("currentAddresses", i)}
-              onEdit={() => handleEdit("currentAddresses", i, addr)}
-            />
-          ))}
-        </Section>
+    <>
+      <div className="content">
+        <div className="gms-wrap">
+          <Section title="Current Addresses" onAdd={() => openAddModal("currentAddresses")}>
+            {currentAddresses.map((addr, i) => (
+              <AddressCard
+                key={i}
+                {...addr}
+                onEdit={() => openEditModal("currentAddresses", i, addr)}
+                onDelete={() => handleDelete("currentAddresses", i)}
+              />
+            ))}
+          </Section>
 
-        <Section title="Alternate Addresses" onAdd={handleAddAlternate}>
-          {alternateAddresses.map((addr, i) => (
-            <AddressCard
-              key={i}
-              {...addr}
-              onDelete={() => handleDelete("alternateAddresses", i)}
-              onEdit={() => handleEdit("alternateAddresses", i, addr)}
-            />
-          ))}
-        </Section>
+          <Section title="Alternate Addresses" onAdd={() => openAddModal("alternateAddresses")}>
+            {alternateAddresses.map((addr, i) => (
+              <AddressCard
+                key={i}
+                {...addr}
+                onEdit={() => openEditModal("alternateAddresses", i, addr)}
+                onDelete={() => handleDelete("alternateAddresses", i)}
+              />
+            ))}
+          </Section>
 
-        <Section title="Historical Addresses" onAdd={handleAddHistorical}>
-          {historicalAddresses.map((addr, i) => (
-            <AddressCard
-              key={i}
-              {...addr}
-              onDelete={() => handleDelete("historicalAddresses", i)}
-              onEdit={() => handleEdit("historicalAddresses", i, addr)}
-            />
-          ))}
-        </Section>
+          <Section title="Historical Addresses" onAdd={() => openAddModal("historicalAddresses")}>
+            {historicalAddresses.map((addr, i) => (
+              <AddressCard
+                key={i}
+                {...addr}
+                onEdit={() => openEditModal("historicalAddresses", i, addr)}
+                onDelete={() => handleDelete("historicalAddresses", i)}
+              />
+            ))}
+          </Section>
+        </div>
       </div>
-    </div>
+
+      {/* Modal */}
+      {modal.open && (
+        <div className="gms-modal-backdrop">
+          <div className="gms-modal-content">
+            <h2>{modal.mode === "add" ? "Add Address" : "Edit Address"}</h2>
+
+            <input
+              placeholder="Address Type"
+              value={modal.addr.type || ""}
+              onChange={(e) => handleInputChange("type", e.target.value)}
+            />
+            <input
+              placeholder="Tag (optional)"
+              value={modal.addr.tag || ""}
+              onChange={(e) => handleInputChange("tag", e.target.value)}
+            />
+            <input
+              placeholder="Last Verified Date (YYYY-MM-DD)"
+              value={modal.addr.verified || ""}
+              onChange={(e) => handleInputChange("verified", e.target.value)}
+            />
+            <input
+              placeholder="Date Range (for historical)"
+              value={modal.addr.range || ""}
+              onChange={(e) => handleInputChange("range", e.target.value)}
+            />
+            <textarea
+              placeholder="Address lines separated by |"
+              value={(modal.addr.address || []).join("|")}
+              onChange={(e) => handleInputChange("address", e.target.value ? e.target.value.split("|") : [])}
+            />
+
+            <div className="gms-modal-buttons">
+              <button className="gms-modal-cancel" onClick={closeModal}>
+                Cancel
+              </button>
+              <button className="gms-modal-save" onClick={handleSave}>
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
+// Section
 function Section({ title, children, onAdd }) {
   return (
     <div className="gms-section">
@@ -145,13 +196,13 @@ function Section({ title, children, onAdd }) {
   );
 }
 
-function AddressCard({ type, tag, verified, range, address, onDelete, onEdit }) {
+// AddressCard
+function AddressCard({ type, tag, verified, range, address, onEdit, onDelete }) {
   return (
     <div className="gms-card gms-address-card">
       <div className="gms-address-header">
         <div className="gms-address-type">
-          <i className="ri-map-pin-line" /> {type}
-          {tag && <span className="gms-tag">{tag}</span>}
+          <i className="ri-map-pin-line" /> {type} {tag && <span className="gms-tag">{tag}</span>}
         </div>
         <div className="gms-address-actions">
           <i className="ri-edit-line" title="Edit" onClick={onEdit}></i>
@@ -174,4 +225,8 @@ function AddressCard({ type, tag, verified, range, address, onDelete, onEdit }) 
 }
 
 export default GrantDetailsAddresses;
+
+
+
+
 
