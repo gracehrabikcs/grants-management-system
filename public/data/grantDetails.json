@@ -56,6 +56,33 @@
     "additionalInfo": {
       "Special Conditions": "None",
       "Additional Notes": "Requires quarterly report submission"
+    },
+    "tracking": {
+      "Application Process": [
+        {
+          "id": 1,
+          "name": "Review grant application",
+          "status": "To Do",
+          "files": [],
+          "assignee": "Alice"
+        },
+        {
+          "id": 2,
+          "name": "Verify budget",
+          "status": "In Progress",
+          "files": [],
+          "assignee": "Bob"
+        }
+      ],
+      "Reporting Requirements": [
+        {
+          "id": 3,
+          "name": "Quarterly financial report",
+          "status": "Done",
+          "files": [],
+          "assignee": "Charlie"
+        }
+      ]
     }
   },
   {

@@ -4,7 +4,7 @@ import "../../../styles/GrantDetails.css";
 import "../../../styles/GrantDetailsTracking.css";
 
 const GrantDetailsTracking = () => {
-  const { id } = useParams(); // so we can get the selected grant ID from the URL
+  const { id } = useParams();
   const [grant, setGrant] = useState(null);
   const [tasks, setTasks] = useState({});
   const [search, setSearch] = useState("");
@@ -12,64 +12,34 @@ const GrantDetailsTracking = () => {
   const [sortAsc, setSortAsc] = useState(true);
   const [hideDone, setHideDone] = useState(false);
 
-  // ✅ Load grant details and tasks from JSON
+  // Load grant details from JSON
   useEffect(() => {
     fetch("/data/grantDetails.json")
       .then((res) => res.json())
       .then((data) => {
         const selected = data.find((g) => g.id === parseInt(id));
-        if (selected) setGrant(selected);
+        if (selected) {
+          setGrant(selected);
 
-        // You could later fetch tasks from another source.
-        // For now, let's initialize example sections:
-        const defaultTasks = {
-          "Application Process": [
-            {
-              id: 1,
-              name: "Review grant application",
-              status: "To Do",
-              files: [],
-              assignee: "Alice",
-            },
-            {
-              id: 2,
-              name: "Verify budget",
-              status: "In Progress",
-              files: [],
-              assignee: "Bob",
-            },
-          ],
-          "Reporting Requirements": [
-            {
-              id: 3,
-              name: "Quarterly financial report",
-              status: "Done",
-              files: [],
-              assignee: "Charlie",
-            },
-          ],
-        };
+          // Use tasks from the JSON if available, otherwise default to empty
+          const grantTasks = selected.tracking || {};
+          setTasks(grantTasks);
 
-        setTasks(defaultTasks);
-        setShowSections(
-          Object.keys(defaultTasks).reduce((acc, key) => {
-            acc[key] = true;
-            return acc;
-          }, {})
-        );
+          setShowSections(
+            Object.keys(grantTasks).reduce((acc, key) => {
+              acc[key] = true;
+              return acc;
+            }, {})
+          );
+        }
       })
       .catch((err) => console.error("Error loading grant:", err));
   }, [id]);
 
-  // ✅ Toggle section visibility
   const handleToggleSection = (section) => {
-    setShowSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
+    setShowSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
-  // ✅ Add new section
   const handleAddSection = () => {
     const newSection = prompt("Enter new task category/section name:");
     if (newSection && !tasks[newSection]) {
@@ -78,7 +48,6 @@ const GrantDetailsTracking = () => {
     }
   };
 
-  // ✅ Delete section
   const handleDeleteSection = (section) => {
     if (window.confirm(`Delete the entire section "${section}"?`)) {
       const updated = { ...tasks };
@@ -87,82 +56,47 @@ const GrantDetailsTracking = () => {
     }
   };
 
-  // ✅ Add task
   const handleAddTask = (section) => {
     const taskName = prompt("Enter new task name:");
     if (!taskName) return;
-    const newTask = {
-      id: Date.now(),
-      name: taskName,
-      status: "To Do",
-      files: [],
-      assignee: "",
-    };
-    setTasks((prev) => ({
-      ...prev,
-      [section]: [...prev[section], newTask],
-    }));
+    const newTask = { id: Date.now(), name: taskName, status: "To Do", files: [], assignee: "" };
+    setTasks((prev) => ({ ...prev, [section]: [...prev[section], newTask] }));
   };
 
-  // ✅ Delete task
   const handleDeleteTask = (section, taskId) => {
     if (window.confirm("Delete this task?")) {
-      setTasks((prev) => ({
-        ...prev,
-        [section]: prev[section].filter((task) => task.id !== taskId),
-      }));
+      setTasks((prev) => ({ ...prev, [section]: prev[section].filter((task) => task.id !== taskId) }));
     }
   };
 
-  // ✅ File upload
   const handleFileChange = (section, taskId, event) => {
     const file = event.target.files[0];
     setTasks((prev) => ({
       ...prev,
       [section]: prev[section].map((task) =>
         task.id === taskId ? { ...task, files: [...task.files, file] } : task
-      ),
+      )
     }));
   };
 
-  // ✅ Status update
   const handleStatusChange = (section, taskId, event) => {
     const status = event.target.value;
     setTasks((prev) => ({
       ...prev,
-      [section]: prev[section].map((task) =>
-        task.id === taskId ? { ...task, status } : task
-      ),
+      [section]: prev[section].map((task) => (task.id === taskId ? { ...task, status } : task))
     }));
   };
 
-  // ✅ Filter and sort
   const filteredAndSortedTasks = (sectionTasks) => {
     let result = [...sectionTasks];
+    if (search) result = result.filter((task) => task.name.toLowerCase().includes(search.toLowerCase()));
+    if (hideDone) result = result.filter((task) => task.status !== "Done");
 
-    // Filter by search
-    if (search) {
-      result = result.filter((task) =>
-        task.name.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-
-    // Hide completed tasks if toggled
-    if (hideDone) {
-      result = result.filter((task) => task.status !== "Done");
-    }
-
-    // Sort by status instead of name
     const statusOrder = ["To Do", "In Progress", "Done"];
     result.sort((a, b) => {
-      const statusDiff =
-        statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
+      const statusDiff = statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
       if (statusDiff !== 0) return sortAsc ? statusDiff : -statusDiff;
-
-      // If same status, fall back to alphabetical order by name
-      return sortAsc
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name);
+      return sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
     });
 
     return result;
@@ -174,49 +108,22 @@ const GrantDetailsTracking = () => {
     <div className="tracking-container">
       <h2>{grant.title} – Task Tracking</h2>
 
-      {/* Top controls */}
       <div className="tracking-controls">
-        <button className="action-btn" onClick={handleAddSection}>
-          + New Section
-        </button>
-        <input
-          type="text"
-          placeholder="Search tasks..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <button className="action-btn" onClick={() => setSortAsc(!sortAsc)}>
-          Sort {sortAsc ? "▲" : "▼"}
-        </button>
-        <button className="action-btn" onClick={() => setHideDone(!hideDone)}>
-          {hideDone ? "Show All" : "Hide Done"}
-        </button>
+        <button className="action-btn" onClick={handleAddSection}>+ New Section</button>
+        <input type="text" placeholder="Search tasks..." value={search} onChange={(e) => setSearch(e.target.value)} />
+        <button className="action-btn" onClick={() => setSortAsc(!sortAsc)}>Sort {sortAsc ? "▲" : "▼"}</button>
+        <button className="action-btn" onClick={() => setHideDone(!hideDone)}>{hideDone ? "Show All" : "Hide Done"}</button>
       </div>
 
-      {/* Task Sections */}
       {Object.keys(tasks).map((section) => (
         <div className="task-section" key={section}>
           <div className="task-section-header">
-            <h3
-              className="task-section-title"
-              onClick={() => handleToggleSection(section)}
-              style={{ cursor: "pointer" }}
-            >
+            <h3 className="task-section-title" onClick={() => handleToggleSection(section)} style={{ cursor: "pointer" }}>
               {section} {showSections[section] ? "▼" : "▶"}
             </h3>
             <div className="section-actions">
-              <button
-                className="action-btn small"
-                onClick={() => handleAddTask(section)}
-              >
-                + Add Task
-              </button>
-              <button
-                className="action-btn small delete"
-                onClick={() => handleDeleteSection(section)}
-              >
-                ✕ Delete Section
-              </button>
+              <button className="action-btn small" onClick={() => handleAddTask(section)}>+ Add Task</button>
+              <button className="action-btn small delete" onClick={() => handleDeleteSection(section)}>✕ Delete Section</button>
             </div>
           </div>
 
@@ -236,31 +143,15 @@ const GrantDetailsTracking = () => {
                   <tr key={task.id}>
                     <td>{task.name}</td>
                     <td>
-                      <select
-                        value={task.status}
-                        onChange={(e) =>
-                          handleStatusChange(section, task.id, e)
-                        }
-                      >
+                      <select value={task.status} onChange={(e) => handleStatusChange(section, task.id, e)}>
                         <option>To Do</option>
                         <option>In Progress</option>
                         <option>Done</option>
                       </select>
                     </td>
                     <td>
-                      <input
-                        type="file"
-                        onChange={(e) =>
-                          handleFileChange(section, task.id, e)
-                        }
-                      />
-                      {task.files.length > 0 && (
-                        <ul>
-                          {task.files.map((file, idx) => (
-                            <li key={idx}>{file.name}</li>
-                          ))}
-                        </ul>
-                      )}
+                      <input type="file" onChange={(e) => handleFileChange(section, task.id, e)} />
+                      {task.files.length > 0 && <ul>{task.files.map((file, idx) => <li key={idx}>{file.name}</li>)}</ul>}
                     </td>
                     <td>
                       <input
@@ -270,21 +161,14 @@ const GrantDetailsTracking = () => {
                           setTasks((prev) => ({
                             ...prev,
                             [section]: prev[section].map((t) =>
-                              t.id === task.id
-                                ? { ...t, assignee: e.target.value }
-                                : t
-                            ),
+                              t.id === task.id ? { ...t, assignee: e.target.value } : t
+                            )
                           }))
                         }
                       />
                     </td>
                     <td>
-                      <button
-                        className="action-btn small delete"
-                        onClick={() => handleDeleteTask(section, task.id)}
-                      >
-                        Delete
-                      </button>
+                      <button className="action-btn small delete" onClick={() => handleDeleteTask(section, task.id)}>Delete</button>
                     </td>
                   </tr>
                 ))}
