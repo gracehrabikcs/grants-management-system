@@ -20,7 +20,8 @@
   font-size: 16px;
   width: 100%;
 }
-
+/* === Filter Buttons === */
+/* === Filter Buttons === */
 .filter-buttons {
   display: flex;
   gap: 10px;
@@ -32,10 +33,31 @@
   background: white;
   border-radius: 8px;
   cursor: pointer;
+  font-weight: 500;
+  color: #3b7a57;
+  transition: all 0.2s ease;
 }
 
+/* Hover effect */
+.filter-btn:hover {
+  background-color: #e6f3ec;
+  color: #2f6045;
+  transform: translateY(-1px);
+}
+
+/* Active (selected) button */
 .active-filter {
-  background: #3b7a57;
+  background-color: #3b7a57 !important;
+  color: white !important;
+  border-color: #3b7a57 !important;
+  box-shadow: 0 2px 6px rgba(59, 122, 87, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Optional: Hovering over an already active button */
+.active-filter:hover {
+  background-color: #326a4c;
+  border-color: #326a4c;
   color: white;
 }
 
