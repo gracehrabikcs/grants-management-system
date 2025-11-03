@@ -12,6 +12,14 @@ const GrantDetailsTracking = () => {
   const [sortAsc, setSortAsc] = useState(true);
   const [hideDone, setHideDone] = useState(false);
 
+  // Helper: calculate progress from tasks
+  const calculateProgress = (tasksObj) => {
+    const allTasks = Object.values(tasksObj).flat();
+    if (allTasks.length === 0) return 0;
+    const doneTasks = allTasks.filter((t) => t.status === "Done").length;
+    return Math.round((doneTasks / allTasks.length) * 100);
+  };
+
   // Load grant details from JSON
   useEffect(() => {
     fetch("/data/grantDetails.json")
@@ -21,7 +29,7 @@ const GrantDetailsTracking = () => {
         if (selected) {
           setGrant(selected);
 
-          // Use tasks from the JSON if available, otherwise default to empty
+          // Use tasks from JSON if available, otherwise empty
           const grantTasks = selected.tracking || {};
           setTasks(grantTasks);
 
@@ -36,10 +44,12 @@ const GrantDetailsTracking = () => {
       .catch((err) => console.error("Error loading grant:", err));
   }, [id]);
 
+  // Toggle section visibility
   const handleToggleSection = (section) => {
     setShowSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
+  // Section operations
   const handleAddSection = () => {
     const newSection = prompt("Enter new task category/section name:");
     if (newSection && !tasks[newSection]) {
@@ -56,6 +66,7 @@ const GrantDetailsTracking = () => {
     }
   };
 
+  // Task operations
   const handleAddTask = (section) => {
     const taskName = prompt("Enter new task name:");
     if (!taskName) return;
@@ -65,7 +76,10 @@ const GrantDetailsTracking = () => {
 
   const handleDeleteTask = (section, taskId) => {
     if (window.confirm("Delete this task?")) {
-      setTasks((prev) => ({ ...prev, [section]: prev[section].filter((task) => task.id !== taskId) }));
+      setTasks((prev) => ({
+        ...prev,
+        [section]: prev[section].filter((task) => task.id !== taskId)
+      }));
     }
   };
 
@@ -83,10 +97,13 @@ const GrantDetailsTracking = () => {
     const status = event.target.value;
     setTasks((prev) => ({
       ...prev,
-      [section]: prev[section].map((task) => (task.id === taskId ? { ...task, status } : task))
+      [section]: prev[section].map((task) =>
+        task.id === taskId ? { ...task, status } : task
+      )
     }));
   };
 
+  // Filter and sort tasks
   const filteredAndSortedTasks = (sectionTasks) => {
     let result = [...sectionTasks];
     if (search) result = result.filter((task) => task.name.toLowerCase().includes(search.toLowerCase()));
