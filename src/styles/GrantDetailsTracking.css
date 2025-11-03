@@ -1,0 +1,42 @@
+.tracking-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.action-btn {
+  background-color: #3b7a57;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  background-color: #326a4c;
+  transform: translateY(-1px);
+}
+
+.action-btn.small {
+  padding: 4px 8px;
+  font-size: 0.85em;
+}
+
+.action-btn.delete {
+  background-color: #c94b4b;
+}
+
+.action-btn.delete:hover {
+  background-color: #a63d3d;
+}
+
+.task-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}

@@ -5,7 +5,6 @@
     "title": "Education Innovation Fund",
     "status": "Active",
     "amount": "$50,000",
-    "progress": 75,
     "deadline": "2024-03-15",
     "lastUpdated": "2025-10-19",
     "nextAction": "Submit quarterly report",
@@ -56,6 +55,33 @@
     "additionalInfo": {
       "Special Conditions": "None",
       "Additional Notes": "Requires quarterly report submission"
+    },
+    "tracking": {
+      "Application Process": [
+        {
+          "id": 1,
+          "name": "Review grant application",
+          "status": "To Do",
+          "files": [],
+          "assignee": "Alice"
+        },
+        {
+          "id": 2,
+          "name": "Verify budget",
+          "status": "In Progress",
+          "files": [],
+          "assignee": "Bob"
+        }
+      ],
+      "Reporting Requirements": [
+        {
+          "id": 3,
+          "name": "Quarterly financial report",
+          "status": "Done",
+          "files": [],
+          "assignee": "Charlie"
+        }
+      ]
     }
   },
   {
@@ -64,7 +90,6 @@
     "title": "Community Development Grant",
     "status": "Under Review",
     "amount": "$80,000",
-    "progress": 50,
     "deadline": "2024-04-01",
     "lastUpdated": "2025-10-10",
     "nextAction": "Submit mid-term evaluation",
@@ -123,7 +148,6 @@
     "title": "Healthcare Access Initiative",
     "status": "Approved",
     "amount": "$120,000",
-    "progress": 100,
     "deadline": "2024-02-20",
     "lastUpdated": "2025-09-30",
     "nextAction": "Finalize reporting documents",

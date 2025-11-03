@@ -35,6 +35,14 @@ const GrantDetailsMain = () => {
     window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
   };
 
+  // Helper to calculate progress from tasks
+  const calculateProgress = (tasksObj) => {
+    const allTasks = Object.values(tasksObj).flat();
+    if (allTasks.length === 0) return 0;
+    const doneTasks = allTasks.filter((t) => t.status === "Done").length;
+    return Math.round((doneTasks / allTasks.length) * 100);
+  };
+
   if (!grant) return <p>Loading grant details...</p>;
 
   const MainTabContent = () => (
@@ -162,17 +170,18 @@ const GrantDetailsMain = () => {
         ← Back to Grants
       </button>
 
-      <div className="grant-info-bar">
+      <div className="grant-info-bar"> 
         <div className="grant-left">
           <h2>{grant.organization} - {grant.title}</h2>
           <span className={`status ${grant.status.toLowerCase()}`}>{grant.status}</span>
         </div>
         <div className="grant-right">
           <p><strong>Amount:</strong> {grant.amount}</p>
-          <p><strong>Progress:</strong> {grant.progress}%</p>
+          <p><strong>Progress:</strong> {calculateProgress(grant.tracking)}%</p>
           <p><strong>Deadline:</strong> {grant.deadline}</p>
         </div>
       </div>
+
 
       <div className="grant-actions">
         <label className="action-btn">
