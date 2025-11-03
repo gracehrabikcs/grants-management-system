@@ -48,5 +48,6 @@
 .sidebar a:hover {
   background-color: #e3eee7;
   transform: translateX(2px);
+  color: #3b7a57;
 }
 
