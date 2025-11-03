@@ -282,13 +282,34 @@ const GrantDetailsMain = () => {
     URL.revokeObjectURL(url);
   };
 
+  const flattenObject = (obj, prefix = '', result = {}) => {
+    for (const key in obj) {
+      if (!obj.hasOwnProperty(key)) continue;
+      const value = obj[key];
+      const newKey = prefix ? `${prefix}.${key}` : key;
+
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        // Recursively flatten nested objects
+        flattenObject(value, newKey, result);
+      } else if (Array.isArray(value)) {
+        // Convert arrays to JSON string
+        result[newKey] = JSON.stringify(value).replace(/"/g, '""');
+      } else {
+        result[newKey] = value;
+      }
+    }
+    return result;
+  };
+
+
   const exportAsCSV = () => {
     if (!grant) return;
 
-    // Convert key-value pairs to CSV rows
-    const headers = Object.keys(grant).join(",");
-    const values = Object.values(grant)
-      .map(v => `"${String(v).replace(/"/g, '""')}"`)
+    const flatGrant = flattenObject(grant);
+
+    const headers = Object.keys(flatGrant).join(",");
+    const values = Object.values(flatGrant)
+      .map((v) => `"${v ?? ""}"`) // wrap in quotes for CSV
       .join(",");
 
     const csvContent = `${headers}\n${values}`;
@@ -300,6 +321,8 @@ const GrantDetailsMain = () => {
     link.click();
     URL.revokeObjectURL(url);
   };
+
+
 
   if (!grant) return <p>Loading grant details...</p>;
 
