@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../../styles/GrantDetails.css";
 
 const GrantDetailsBio = () => {
   const [isEditing, setIsEditing] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
   const [bioData, setBioData] = useState({
     fundingPreferences: {
       focusAreas: "Education, Youth Development",
@@ -36,6 +37,14 @@ const GrantDetailsBio = () => {
     },
   });
 
+  // Load from localStorage on mount
+  useEffect(() => {
+    const storedData = localStorage.getItem("grantBioData");
+    if (storedData) {
+      setBioData(JSON.parse(storedData));
+    }
+  }, []);
+
   const handleChange = (section, field, value) => {
     setBioData((prev) => ({
       ...prev,
@@ -47,17 +56,38 @@ const GrantDetailsBio = () => {
   };
 
   const handleEditToggle = () => {
+    if (isEditing) {
+      // Simulate saving data
+      localStorage.setItem("grantBioData", JSON.stringify(bioData));
+      setSaveMessage("✅ Saved successfully!");
+      setTimeout(() => setSaveMessage(""), 2500);
+    }
     setIsEditing(!isEditing);
   };
 
   return (
     <div className="grant-bio-container">
       {/* Edit / Save Button */}
-      <div className="grant-actions" style={{ justifyContent: "flex-end" }}>
-        <button className="action-btn" onClick={handleEditToggle}>
-          {isEditing ? "Save" : "Edit"}
-        </button>
-      </div>
+     <div className="grant-actions" style={{ justifyContent: "flex-end" }}>
+  <button className="action-btn" onClick={handleEditToggle}>
+    {isEditing ? "Save" : "Edit"}
+  </button>
+</div>
+
+
+      {/* Save Message */}
+      {saveMessage && (
+        <div
+          style={{
+            color: "green",
+            textAlign: "right",
+            marginBottom: "10px",
+            fontWeight: "500",
+          }}
+        >
+          {saveMessage}
+        </div>
+      )}
 
       {/* Funding Preferences */}
       <div className="section">
@@ -65,9 +95,7 @@ const GrantDetailsBio = () => {
         {Object.entries(bioData.fundingPreferences).map(([field, value]) => (
           <div className="field-group" key={field}>
             <label>
-              {field
-                .replace(/([A-Z])/g, " $1")
-                .replace(/^./, (str) => str.toUpperCase())}
+              {field.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
             </label>
             <textarea
               value={value}
@@ -86,9 +114,7 @@ const GrantDetailsBio = () => {
         {Object.entries(bioData.contactInformation).map(([field, value]) => (
           <div className="field-group" key={field}>
             <label>
-              {field
-                .replace(/([A-Z])/g, " $1")
-                .replace(/^./, (str) => str.toUpperCase())}
+              {field.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
             </label>
             <input
               type="text"
@@ -108,9 +134,7 @@ const GrantDetailsBio = () => {
         {Object.entries(bioData.organizationDetails).map(([field, value]) => (
           <div className="field-group" key={field}>
             <label>
-              {field
-                .replace(/([A-Z])/g, " $1")
-                .replace(/^./, (str) => str.toUpperCase())}
+              {field.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
             </label>
             {field === "missionStatement" || field === "keyPrograms" ? (
               <textarea
@@ -140,9 +164,7 @@ const GrantDetailsBio = () => {
         {Object.entries(bioData.additionalInformation).map(([field, value]) => (
           <div className="field-group" key={field}>
             <label>
-              {field
-                .replace(/([A-Z])/g, " $1")
-                .replace(/^./, (str) => str.toUpperCase())}
+              {field.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
             </label>
             <textarea
               value={value}
