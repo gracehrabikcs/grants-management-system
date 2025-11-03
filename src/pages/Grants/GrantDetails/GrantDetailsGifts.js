@@ -85,6 +85,19 @@ const GrantDetailsGifts = () => {
   const [sortDir, setSortDir] = useState("desc"); // 'asc' or 'desc'
   const [showOnly, setShowOnly] = useState("all"); // placeholder for filter (all, received, pending)
 
+// Meta row state for editable fields
+  const [isEditingMeta, setIsEditingMeta] = useState(false);
+  const [meta, setMeta] = useState({
+    fiscalYear: "FY 2025",
+    grantManager: "Sarah Johnson",
+    nextReportDue: "2026-03-01",
+  });
+
+  const handleMetaChange = (e) => {
+    const { name, value } = e.target;
+    setMeta((prev) => ({ ...prev, [name]: value }));
+  };
+
   // Derived totals for summary cards
   const totals = useMemo(() => {
     const totalReceived = gifts.reduce((sum, g) => sum + g.amount * (g.status === "Received" ? 1 : 0), 0);
@@ -162,18 +175,61 @@ const GrantDetailsGifts = () => {
           <label>Remaining Balance</label>
           <div className="summary-value">{currencyFormat(totals.remaining)}</div>
         </div>
-        <div className="summary-card">
-          <label>Compliance</label>
-          <div className="summary-value">{totals.complianceOnTrack ? "On Track" : "Attention"}</div>
-        </div>
       </div>
 
-      {/* Meta row below summary */}
       <div className="gifts-meta-row">
-        <div><strong>Fiscal Year:</strong> FY 2025</div>
-        <div><strong>Grant Manager:</strong> Sarah Johnson</div>
-        <div><strong>Next Report Due:</strong> 03/01/2026</div>
-      </div>
+  <div>
+    <strong>Fiscal Year:</strong>{" "}
+    {isEditingMeta ? (
+      <input
+        type="text"
+        name="fiscalYear"
+        value={meta.fiscalYear}
+        onChange={handleMetaChange}
+      />
+    ) : (
+      meta.fiscalYear
+    )}
+  </div>
+
+  <div>
+    <strong>Grant Manager:</strong>{" "}
+    {isEditingMeta ? (
+      <input
+        type="text"
+        name="grantManager"
+        value={meta.grantManager}
+        onChange={handleMetaChange}
+      />
+    ) : (
+      meta.grantManager
+    )}
+  </div>
+
+  <div>
+    <strong>Next Report Due:</strong>{" "}
+    {isEditingMeta ? (
+      <input
+        type="date"
+        name="nextReportDue"
+        value={meta.nextReportDue}
+        onChange={handleMetaChange}
+      />
+    ) : (
+      meta.nextReportDue
+    )}
+  </div>
+
+  {/* Edit / Save button */}
+  <button
+    className="btn-primary"
+    onClick={() => setIsEditingMeta(!isEditingMeta)}
+  >
+    {isEditingMeta ? "Save" : "Edit"}
+  </button>
+</div>
+
+
 
       {/* Toolbar */}
       <div className="gifts-toolbar">
