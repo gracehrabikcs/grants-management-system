@@ -143,6 +143,54 @@
         }
       ]
     },
+
+    "links": {
+      "organizationalRelationships": [
+        { "name": "Global Education Alliance", "role": "Parent Organization", "since": "2021", "status": "Active" }
+      ],
+      "connectedGrants": [
+        { "title": "STEM Education Initiative", "id": "155789", "type": "Related Program", "amount": "$75,000", "status": "Active" }
+      ],
+      "keyContacts": [
+        { "initials": "MC", "name": "Dr. Michael Chen", "title": "Program Director", "tag": "Primary", "email": "m.chen@futurelearning.org", "phone": "(415) 555-0142" }
+      ]
+    },
+    "addresses": {
+      "currentAddresses": [
+        {
+          "type": "Business",
+          "tag": "Primary",
+          "verified": "2024-09-14",
+          "address": [
+            "123 Innovation Drive",
+            "Suite 400",
+            "San Francisco, CA 94103",
+            "United States"
+          ]
+        }
+      ],
+      "alternateAddresses": [
+        {
+          "type": "Mailing",
+          "verified": "2024-08-21",
+          "address": [
+            "P.O. Box 5678",
+            "San Francisco, CA 94104",
+            "United States"
+          ]
+        }
+      ],
+      "historicalAddresses": [
+        {
+          "type": "Business",
+          "range": "1/14/2020 - 12/30/2023",
+          "address": [
+            "789 Old Market Street",
+            "Floor 2",
+            "San Francisco, CA 94108",
+            "United States"
+          ]
+        }
     "other": {
       "budgetNotes": "Budget allocation for Q1–Q4 2024. Total grant amount: $150,000. Breakdown: Personnel (60%), Equipment (25%), Operations (15%). Quarterly reporting required. Unused funds must be returned within 30 days of project completion.",
       "internalNotes": "Internal tracking notes for grant management team. Primary contact: Dr. Sarah Johnson. Secondary contact: Prof. Michael Chen. Regular review meetings scheduled for the 15th of each month. Project milestone reviews every quarter.",
@@ -208,6 +256,105 @@
     "additionalInfo": {
       "Special Conditions": "Annual review required",
       "Additional Notes": "Priority given to urban areas"
+    },
+    "bio": {
+      "fundingPreferences": {
+        "focusAreas": "Community Development, Urban Renewal",
+        "geographicFocus": "California, Nevada",
+        "fundingRange": "$20,000 - $100,000",
+        "grantTypes": "Infrastructure, Program Support",
+        "restrictions": "No political organizations",
+        "otherNotes": "Focus on measurable community impact."
+      },
+      "contactInformation": {
+        "contactName": "Sarah Jones",
+        "title": "Outreach Director",
+        "email": "sarah.jones@hof.org",
+        "phone": "(555) 555-1212",
+        "address": "456 Horizon Blvd, Oakland, CA 94607",
+        "website": "www.hofoundation.org"
+      },
+      "organizationDetails": {
+        "foundedYear": "2008",
+        "missionStatement": "Empowering communities through inclusive development.",
+        "staffSize": "18",
+        "annualBudget": "$3,500,000",
+        "taxStatus": "501(c)(3)",
+        "keyPrograms": "Neighborhood Revitalization, Youth Workforce Training"
+      },
+      "additionalInformation": {
+        "recentChanges": "Increased funding for sustainability programs.",
+        "evaluationMethods": "Community surveys and program outcomes.",
+        "partnerships": "Local councils and regional nonprofits.",
+        "notes": "Strong focus on collaboration and innovation."
+      }
+    },
+    "gifts": [
+      {
+        "id": "GFT-101",
+        "date": "2025-08-10",
+        "amount": 20000,
+        "spent": 5000,
+        "budgetCode": "COM-201",
+        "type": "Restricted",
+        "status": "Pending",
+        "purpose": "Community center renovation",
+        "fiscalYear": "FY2025",
+        "compliance": "Under Review",
+        "acknowledged": false
+      }
+    ],
+    "tracking": {
+      "Application Process": [
+        { "id": 4, "name": "Initial screening", "status": "Done", "files": [], "assignee": "Laura" },
+        { "id": 5, "name": "Community feedback review", "status": "To Do", "files": [], "assignee": "James" }
+      ],
+      "Reporting Requirements": [
+        { "id": 6, "name": "Mid-term evaluation", "status": "Pending", "files": [], "assignee": "Laura" }
+      ]
+    },
+    "links": {
+      "organizationalRelationships": [
+        { "name": "National Community Network", "role": "Partner Organization", "since": "2019", "status": "Active" }
+      ]
+    },
+    "addresses": {
+      "currentAddresses": [
+        {
+          "type": "Business",
+          "tag": "Primary",
+          "verified": "2024-09-14",
+          "address": [
+            "123 Innovation Drive",
+            "Suite 400",
+            "San Francisco, CA 94103",
+            "United States"
+          ]
+        }
+      ],
+      "alternateAddresses": [
+        {
+          "type": "Mailing",
+          "verified": "2024-08-21",
+          "address": [
+            "P.O. Box 5678",
+            "San Francisco, CA 94104",
+            "United States"
+          ]
+        }
+      ],
+      "historicalAddresses": [
+        {
+          "type": "Business",
+          "range": "1/14/2020 - 12/30/2023",
+          "address": [
+            "789 Old Market Street",
+            "Floor 2",
+            "San Francisco, CA 94108",
+            "United States"
+          ]
+        }
+      ]
     }
   },
   {
@@ -266,6 +413,118 @@
     "additionalInfo": {
       "Special Conditions": "Quarterly progress reports",
       "Additional Notes": "Priority on rural communities"
+    },
+    "bio": {
+      "fundingPreferences": {
+        "focusAreas": "Healthcare, Rural Development",
+        "geographicFocus": "United States",
+        "fundingRange": "$50,000 - $200,000",
+        "grantTypes": "Medical Outreach, Infrastructure",
+        "restrictions": "No individual patient grants",
+        "otherNotes": "Prefers collaborations with healthcare nonprofits."
+      },
+      "contactInformation": {
+        "contactName": "David Kim",
+        "title": "Program Officer",
+        "email": "david@wff.org",
+        "phone": "555-345-6789",
+        "address": "789 Wellness Ave, San Jose, CA 95112",
+        "website": "www.wffoundation.org"
+      },
+      "organizationDetails": {
+        "foundedYear": "2010",
+        "missionStatement": "To ensure equitable healthcare access for all.",
+        "staffSize": "30",
+        "annualBudget": "$7,500,000",
+        "taxStatus": "501(c)(3)",
+        "keyPrograms": "Mobile Clinics, Rural Hospital Support"
+      },
+      "additionalInformation": {
+        "recentChanges": "Expanded telemedicine initiatives.",
+        "evaluationMethods": "Patient data analysis and outcome metrics.",
+        "partnerships": "Hospitals and state health departments.",
+        "notes": "Highly rated for transparency."
+      }
+    },
+    "gifts": [
+      {
+        "id": "GFT-201",
+        "date": "2025-07-01",
+        "amount": 30000,
+        "spent": 15000,
+        "budgetCode": "HLT-301",
+        "type": "Restricted",
+        "status": "Received",
+        "purpose": "Medical equipment purchases",
+        "fiscalYear": "FY2025",
+        "compliance": "Compliant",
+        "acknowledged": true
+      },
+      {
+        "id": "GFT-202",
+        "date": "2025-09-10",
+        "amount": 20000,
+        "spent": 5000,
+        "budgetCode": "HLT-302",
+        "type": "Unrestricted",
+        "status": "Pending",
+        "purpose": "Staff training",
+        "fiscalYear": "FY2025",
+        "compliance": "Under Review",
+        "acknowledged": false
+      }
+    ],
+    "tracking": {
+      "Application Process": [
+        { "id": 7, "name": "Application review", "status": "Done", "files": [], "assignee": "Emma" },
+        { "id": 8, "name": "Site visit", "status": "Done", "files": [], "assignee": "David" }
+      ],
+      "Reporting Requirements": [
+        { "id": 9, "name": "Final evaluation", "status": "Pending", "files": [], "assignee": "Emma" }
+      ]
+    },
+    "links": {
+      "organizationalRelationships": [
+        { "name": "Global Health Partnership", "role": "Parent Organization", "since": "2020", "status": "Active" }
+      ]
+    },
+    "addresses": {
+      "currentAddresses": [
+        {
+          "type": "Business",
+          "tag": "Primary",
+          "verified": "2024-09-14",
+          "address": [
+            "123 Innovation Drive",
+            "Suite 400",
+            "San Francisco, CA 94103",
+            "United States"
+          ]
+        }
+      ],
+      "alternateAddresses": [
+        {
+          "type": "Mailing",
+          "verified": "2024-08-21",
+          "address": [
+            "P.O. Box 5678",
+            "San Francisco, CA 94104",
+            "United States"
+          ]
+        }
+      ],
+      "historicalAddresses": [
+        {
+          "type": "Business",
+          "range": "1/14/2020 - 12/30/2023",
+          "address": [
+            "789 Old Market Street",
+            "Floor 2",
+            "San Francisco, CA 94108",
+            "United States"
+          ]
+        }
+      ]
     }
   }
 ]
