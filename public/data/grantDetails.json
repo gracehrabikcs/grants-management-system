@@ -191,6 +191,12 @@
             "United States"
           ]
         }
+    "other": {
+      "budgetNotes": "Budget allocation for Q1–Q4 2024. Total grant amount: $150,000. Breakdown: Personnel (60%), Equipment (25%), Operations (15%). Quarterly reporting required. Unused funds must be returned within 30 days of project completion.",
+      "internalNotes": "Internal tracking notes for grant management team. Primary contact: Dr. Sarah Johnson. Secondary contact: Prof. Michael Chen. Regular review meetings scheduled for the 15th of each month. Project milestone reviews every quarter.",
+      "conditions": [
+        { "id": "sc1", "text": "Quarterly progress reports required", "status": "Active" },
+        { "id": "sc2", "text": "Annual site visit by funding agency", "status": "Pending" }
       ]
     }
   },
