@@ -88,6 +88,50 @@
         "notes": "Very responsive to follow-up communications."
       }
     },
+
+      "pledges": [
+    {
+      "pledgeId": "PLD-001",
+      "donor": "John Smith Foundation",
+      "amount": 15000,
+      "pledgedDate": "2024-01-15",
+      "schedule": "Annual",
+      "received": 15000,
+      "outstanding": 0,
+      "notes": "Fully paid. Eligible for recognition."
+    },
+    {
+      "pledgeId": "PLD-002",
+      "donor": "Tech Innovation Corp",
+      "amount": 25000,
+      "pledgedDate": "2024-02-01",
+      "schedule": "Quarterly",
+      "received": 12500,
+      "outstanding": 12500,
+      "notes": "Next payment due Q3 2024."
+    },
+    {
+      "pledgeId": "PLD-003",
+      "donor": "Education Trust",
+      "amount": 10000,
+      "pledgedDate": "2024-03-10",
+      "schedule": "Semi-Annual",
+      "received": 5000,
+      "outstanding": 5000,
+      "notes": ""
+    },
+    {
+      "pledgeId": "PLD-004",
+      "donor": "Community Bank",
+      "amount": 8000,
+      "pledgedDate": "2024-01-20",
+      "schedule": "One-time",
+      "received": 0,
+      "outstanding": 8000,
+      "notes": "Follow up 30 days before due date."
+    }
+  ],
+
     "gifts": [
     {
       "id": "GFT-001",
@@ -351,6 +395,30 @@
         "notes": "Strong focus on collaboration and innovation."
       }
     },
+
+  "pledges": [
+    {
+      "pledgeId": "PLD-201",
+      "donor": "Downtown Business Council",
+      "amount": 20000,
+      "pledgedDate": "2024-03-10",
+      "schedule": "One-time",
+      "received": 10000,
+      "outstanding": 10000,
+      "notes": "Second half due after mid-term evaluation."
+    },
+    {
+      "pledgeId": "PLD-202",
+      "donor": "Neighborhood Revitalization Fund",
+      "amount": 15000,
+      "pledgedDate": "2024-04-05",
+      "schedule": "Quarterly",
+      "received": 0,
+      "outstanding": 15000,
+      "notes": "Send MOU for signature."
+    }
+  ],
+
     "gifts": [
       {
         "id": "GFT-101",
@@ -576,6 +644,41 @@
         "notes": "Highly rated for transparency."
       }
     },
+
+"pledges": [
+  {
+    "pledgeId": "PLD-301",
+    "donor": "Healthy Communities Alliance",
+    "amount": 25000,
+    "pledgedDate": "2024-02-10",
+    "schedule": "Quarterly",
+    "received": 12500,
+    "outstanding": 12500,
+    "notes": "Next installment expected in June 2024."
+  },
+  {
+    "pledgeId": "PLD-302",
+    "donor": "Global Health Partners",
+    "amount": 40000,
+    "pledgedDate": "2024-01-20",
+    "schedule": "Semi-Annual",
+    "received": 20000,
+    "outstanding": 20000,
+    "notes": "Funds restricted to medical outreach program."
+  },
+  {
+    "pledgeId": "PLD-303",
+    "donor": "Healthcare Advancement Trust",
+    "amount": 15000,
+    "pledgedDate": "2024-03-05",
+    "schedule": "One-time",
+    "received": 0,
+    "outstanding": 15000,
+    "notes": "Payment expected after final report submission."
+  }
+],
+
+
     "gifts": [
       {
         "id": "GFT-201",
