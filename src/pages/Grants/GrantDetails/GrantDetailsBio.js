@@ -1,40 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import "../../../styles/GrantDetails.css";
 
 const GrantDetailsBio = () => {
+  const { id } = useParams();
+  const [grant, setGrant] = useState(null);
+  const [bioData, setBioData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [bioData, setBioData] = useState({
-    fundingPreferences: {
-      focusAreas: "Education, Youth Development",
-      geographicFocus: "United States, Latin America",
-      fundingRange: "$10,000 - $100,000",
-      grantTypes: "Program Support, General Operating, Capital",
-      restrictions: "No grants to individuals",
-      otherNotes: "Prefers long-term partnerships and measurable outcomes.",
-    },
-    contactInformation: {
-      contactName: "Jane Smith",
-      title: "Director of Philanthropy",
-      email: "jane.smith@foundation.org",
-      phone: "(555) 123-4567",
-      address: "123 Foundation Ave, New York, NY 10001",
-      website: "www.foundation.org",
-    },
-    organizationDetails: {
-      foundedYear: "1995",
-      missionStatement: "To foster innovation in education through grantmaking.",
-      staffSize: "25",
-      annualBudget: "$5,000,000",
-      taxStatus: "501(c)(3)",
-      keyPrograms: "STEM Access Initiative, Teacher Leadership Fund",
-    },
-    additionalInformation: {
-      recentChanges: "Updated focus areas in 2025.",
-      evaluationMethods: "Quarterly reports and annual impact assessments.",
-      partnerships: "Collaborates with local nonprofits and schools.",
-      notes: "Very responsive to follow-up communications.",
-    },
-  });
+  const [saveMessage, setSaveMessage] = useState("");
+
+  // Fetch grant details from JSON
+  useEffect(() => {
+    fetch("/data/grantDetails.json")
+      .then((res) => res.json())
+      .then((data) => {
+        const selected = data.find((g) => g.id === parseInt(id));
+        if (selected && selected.bio) {
+          setGrant(selected);
+          setBioData(selected.bio);
+        }
+      })
+      .catch((err) => console.error("Error loading grant bio:", err));
+  }, [id]);
 
   const handleChange = (section, field, value) => {
     setBioData((prev) => ({
@@ -47,113 +34,78 @@ const GrantDetailsBio = () => {
   };
 
   const handleEditToggle = () => {
+    if (isEditing) {
+      // Simulate save (local only)
+      setSaveMessage("✅ Changes saved locally!");
+      setTimeout(() => setSaveMessage(""), 2500);
+    }
     setIsEditing(!isEditing);
   };
 
-  return (
-    <div className="grant-bio-container">
-      {/* Edit / Save Button */}
-      <div className="grant-actions" style={{ justifyContent: "flex-end" }}>
-        <button className="action-btn" onClick={handleEditToggle}>
-          {isEditing ? "Save" : "Edit"}
-        </button>
-      </div>
+  if (!bioData) return <p>Loading bio details...</p>;
 
-      {/* Funding Preferences */}
-      <div className="section">
-        <h3>Funding Preferences</h3>
-        {Object.entries(bioData.fundingPreferences).map(([field, value]) => (
+  const renderSection = (sectionTitle, sectionKey, textAreaFields = []) => (
+    <div className="section" key={sectionKey}>
+      <h3>{sectionTitle}</h3>
+      {Object.entries(bioData[sectionKey]).map(([field, value]) => {
+        const formattedLabel = field
+          .replace(/([A-Z])/g, " $1")
+          .replace(/^./, (str) => str.toUpperCase());
+        const isTextArea = textAreaFields.includes(field);
+        return (
           <div className="field-group" key={field}>
-            <label>
-              {field
-                .replace(/([A-Z])/g, " $1")
-                .replace(/^./, (str) => str.toUpperCase())}
-            </label>
-            <textarea
-              value={value}
-              readOnly={!isEditing}
-              onChange={(e) =>
-                handleChange("fundingPreferences", field, e.target.value)
-              }
-            />
-          </div>
-        ))}
-      </div>
-
-      {/* Contact Information */}
-      <div className="section">
-        <h3>Contact Information</h3>
-        {Object.entries(bioData.contactInformation).map(([field, value]) => (
-          <div className="field-group" key={field}>
-            <label>
-              {field
-                .replace(/([A-Z])/g, " $1")
-                .replace(/^./, (str) => str.toUpperCase())}
-            </label>
-            <input
-              type="text"
-              value={value}
-              readOnly={!isEditing}
-              onChange={(e) =>
-                handleChange("contactInformation", field, e.target.value)
-              }
-            />
-          </div>
-        ))}
-      </div>
-
-      {/* Organization Details */}
-      <div className="section">
-        <h3>Organization Details</h3>
-        {Object.entries(bioData.organizationDetails).map(([field, value]) => (
-          <div className="field-group" key={field}>
-            <label>
-              {field
-                .replace(/([A-Z])/g, " $1")
-                .replace(/^./, (str) => str.toUpperCase())}
-            </label>
-            {field === "missionStatement" || field === "keyPrograms" ? (
+            <label>{formattedLabel}</label>
+            {isTextArea ? (
               <textarea
                 value={value}
                 readOnly={!isEditing}
-                onChange={(e) =>
-                  handleChange("organizationDetails", field, e.target.value)
-                }
+                onChange={(e) => handleChange(sectionKey, field, e.target.value)}
               />
             ) : (
               <input
                 type="text"
                 value={value}
                 readOnly={!isEditing}
-                onChange={(e) =>
-                  handleChange("organizationDetails", field, e.target.value)
-                }
+                onChange={(e) => handleChange(sectionKey, field, e.target.value)}
               />
             )}
           </div>
-        ))}
+        );
+      })}
+    </div>
+  );
+
+  return (
+    <div className="grant-bio-container">
+      {/* Header and Edit Button */}
+      <div className="grant-actions" style={{ justifyContent: "flex-end" }}>
+        <button className="action-btn" onClick={handleEditToggle}>
+          {isEditing ? "Save" : "Edit"}
+        </button>
       </div>
 
-      {/* Additional Information */}
-      <div className="section">
-        <h3>Additional Information</h3>
-        {Object.entries(bioData.additionalInformation).map(([field, value]) => (
-          <div className="field-group" key={field}>
-            <label>
-              {field
-                .replace(/([A-Z])/g, " $1")
-                .replace(/^./, (str) => str.toUpperCase())}
-            </label>
-            <textarea
-              value={value}
-              readOnly={!isEditing}
-              onChange={(e) =>
-                handleChange("additionalInformation", field, e.target.value)
-              }
-            />
-          </div>
-        ))}
-      </div>
+      {/* Save Message */}
+      {saveMessage && (
+        <div
+          style={{
+            color: "green",
+            textAlign: "right",
+            marginBottom: "10px",
+            fontWeight: "500",
+          }}
+        >
+          {saveMessage}
+        </div>
+      )}
+
+      {/* Bio Sections */}
+      {renderSection("Funding Preferences", "fundingPreferences")}
+      {renderSection("Contact Information", "contactInformation")}
+      {renderSection("Organization Details", "organizationDetails", [
+        "missionStatement",
+        "keyPrograms",
+      ])}
+      {renderSection("Additional Information", "additionalInformation")}
     </div>
   );
 };

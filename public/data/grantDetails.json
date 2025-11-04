@@ -5,7 +5,6 @@
     "title": "Education Innovation Fund",
     "status": "Active",
     "amount": "$50,000",
-    "progress": 75,
     "deadline": "2024-03-15",
     "lastUpdated": "2025-10-19",
     "nextAction": "Submit quarterly report",
@@ -56,6 +55,93 @@
     "additionalInfo": {
       "Special Conditions": "None",
       "Additional Notes": "Requires quarterly report submission"
+    },
+    "bio": {
+      "fundingPreferences": {
+        "focusAreas": "Education, Youth Development",
+        "geographicFocus": "United States, Latin America",
+        "fundingRange": "$10,000 - $100,000",
+        "grantTypes": "Program Support, General Operating, Capital",
+        "restrictions": "No grants to individuals",
+        "otherNotes": "Prefers long-term partnerships and measurable outcomes."
+      },
+      "contactInformation": {
+        "contactName": "Jane Smith",
+        "title": "Director of Philanthropy",
+        "email": "jane.smith@foundation.org",
+        "phone": "(555) 123-4567",
+        "address": "123 Foundation Ave, New York, NY 10001",
+        "website": "www.foundation.org"
+      },
+      "organizationDetails": {
+        "foundedYear": "1995",
+        "missionStatement": "To foster innovation in education through grantmaking.",
+        "staffSize": "25",
+        "annualBudget": "$5,000,000",
+        "taxStatus": "501(c)(3)",
+        "keyPrograms": "STEM Access Initiative, Teacher Leadership Fund"
+      },
+      "additionalInformation": {
+        "recentChanges": "Updated focus areas in 2025.",
+        "evaluationMethods": "Quarterly reports and annual impact assessments.",
+        "partnerships": "Collaborates with local nonprofits and schools.",
+        "notes": "Very responsive to follow-up communications."
+      }
+    },
+    "gifts": [
+    {
+      "id": "GFT-001",
+      "date": "2025-09-15",
+      "amount": 15000,
+      "spent": 12000,
+      "budgetCode": "EDU-101",
+      "type": "Restricted",
+      "status": "Received",
+      "purpose": "Teacher training",
+      "fiscalYear": "FY2025",
+      "compliance": "Compliant",
+      "acknowledged": true
+    },
+    {
+      "id": "GFT-002",
+      "date": "2025-06-01",
+      "amount": 10000,
+      "spent": 2500,
+      "budgetCode": "EDU-102",
+      "type": "Unrestricted",
+      "status": "Pending",
+      "purpose": "Curriculum development",
+      "fiscalYear": "FY2025",
+      "compliance": "Under Review",
+      "acknowledged": false
+    }
+  ],
+    "tracking": {
+      "Application Process": [
+        {
+          "id": 1,
+          "name": "Review grant application",
+          "status": "To Do",
+          "files": [],
+          "assignee": "Alice"
+        },
+        {
+          "id": 2,
+          "name": "Verify budget",
+          "status": "In Progress",
+          "files": [],
+          "assignee": "Bob"
+        }
+      ],
+      "Reporting Requirements": [
+        {
+          "id": 3,
+          "name": "Quarterly financial report",
+          "status": "Done",
+          "files": [],
+          "assignee": "Charlie"
+        }
+      ]
     },
 
     "links": {
@@ -114,7 +200,6 @@
     "title": "Community Development Grant",
     "status": "Under Review",
     "amount": "$80,000",
-    "progress": 50,
     "deadline": "2024-04-01",
     "lastUpdated": "2025-10-10",
     "nextAction": "Submit mid-term evaluation",
@@ -209,7 +294,6 @@
     "title": "Healthcare Access Initiative",
     "status": "Approved",
     "amount": "$120,000",
-    "progress": 100,
     "deadline": "2024-02-20",
     "lastUpdated": "2025-09-30",
     "nextAction": "Finalize reporting documents",
