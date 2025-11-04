@@ -88,6 +88,34 @@
         "notes": "Very responsive to follow-up communications."
       }
     },
+    "gifts": [
+    {
+      "id": "GFT-001",
+      "date": "2025-09-15",
+      "amount": 15000,
+      "spent": 12000,
+      "budgetCode": "EDU-101",
+      "type": "Restricted",
+      "status": "Received",
+      "purpose": "Teacher training",
+      "fiscalYear": "FY2025",
+      "compliance": "Compliant",
+      "acknowledged": true
+    },
+    {
+      "id": "GFT-002",
+      "date": "2025-06-01",
+      "amount": 10000,
+      "spent": 2500,
+      "budgetCode": "EDU-102",
+      "type": "Unrestricted",
+      "status": "Pending",
+      "purpose": "Curriculum development",
+      "fiscalYear": "FY2025",
+      "compliance": "Under Review",
+      "acknowledged": false
+    }
+  ],
     "tracking": {
       "Application Process": [
         {
