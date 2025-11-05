@@ -1,46 +1,5 @@
-import React, { useState, useMemo } from "react";
-
-const initialGifts = [
-  {
-    id: "GFT-001",
-    date: "2025-09-15",
-    amount: 15000,
-    spent: 12000,
-    budgetCode: "EDU-101",
-    type: "Restricted",
-    status: "Received",
-    purpose: "Teacher training",
-    fiscalYear: "FY2025",
-    compliance: "Compliant",
-    acknowledged: true,
-  },
-  {
-    id: "GFT-002",
-    date: "2025-06-01",
-    amount: 10000,
-    spent: 2500,
-    budgetCode: "EDU-102",
-    type: "Unrestricted",
-    status: "Pending",
-    purpose: "Curriculum development",
-    fiscalYear: "FY2025",
-    compliance: "Under Review",
-    acknowledged: false,
-  },
-  {
-    id: "GFT-003",
-    date: "2024-12-10",
-    amount: 25000,
-    spent: 12500,
-    budgetCode: "EDU-103",
-    type: "Restricted",
-    status: "Received",
-    purpose: "Student scholarships",
-    fiscalYear: "FY2024",
-    compliance: "Compliant",
-    acknowledged: true,
-  },
-];
+import React, { useState, useEffect, useMemo } from "react";
+import { useParams } from "react-router-dom";
 
 const currencyFormat = (value) =>
   value.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -79,26 +38,29 @@ const GiftRow = ({ gift, onToggleAcknowledge }) => {
 };
 
 const GrantDetailsGifts = () => {
-  const [gifts, setGifts] = useState(initialGifts);
+  const { id } = useParams();
+  const [gifts, setGifts] = useState([]);
   const [query, setQuery] = useState("");
-  const [sortBy, setSortBy] = useState("date"); // 'date' or 'amount'
-  const [sortDir, setSortDir] = useState("desc"); // 'asc' or 'desc'
-  const [showOnly, setShowOnly] = useState("all"); // placeholder for filter (all, received, pending)
+  const [sortBy, setSortBy] = useState("date");
+  const [sortDir, setSortDir] = useState("desc");
+  const [showOnly, setShowOnly] = useState("all");
 
-// Meta row state for editable fields
-  const [isEditingMeta, setIsEditingMeta] = useState(false);
-  const [meta, setMeta] = useState({
-    fiscalYear: "FY 2025",
-    grantManager: "Sarah Johnson",
-    nextReportDue: "2026-03-01",
-  });
+  // Load gifts from JSON (just like in tracking)
+  useEffect(() => {
+    fetch("/data/grantDetails.json")
+      .then((res) => res.json())
+      .then((data) => {
+        const selected = data.find((g) => g.id === parseInt(id));
+        if (selected && selected.gifts) {
+          setGifts(selected.gifts);
+        } else {
+          setGifts([]); // fallback if no gifts section
+        }
+      })
+      .catch((err) => console.error("Error loading gifts:", err));
+  }, [id]);
 
-  const handleMetaChange = (e) => {
-    const { name, value } = e.target;
-    setMeta((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // Derived totals for summary cards
+  // Summary totals
   const totals = useMemo(() => {
     const totalReceived = gifts.reduce((sum, g) => sum + g.amount * (g.status === "Received" ? 1 : 0), 0);
     const totalSpent = gifts.reduce((sum, g) => sum + g.spent, 0);
@@ -107,14 +69,12 @@ const GrantDetailsGifts = () => {
     return { totalReceived, totalSpent, remaining, complianceOnTrack };
   }, [gifts]);
 
-  // Search + Filter + Sort applied to the table
+  // Search + Filter + Sort
   const displayed = useMemo(() => {
     let filtered = gifts.filter((g) => {
-      // showOnly filter
       if (showOnly === "received" && g.status !== "Received") return false;
       if (showOnly === "pending" && g.status !== "Pending") return false;
 
-      // search (match id, purpose, type, budget code)
       if (!query) return true;
       const q = query.toLowerCase();
       return (
@@ -169,67 +129,29 @@ const GrantDetailsGifts = () => {
         <div className="summary-card">
           <label>Total Spent</label>
           <div className="summary-value">{currencyFormat(totals.totalSpent)}</div>
-          <div className="summary-sub">({(totals.totalSpent === 0 ? 0 : Math.round((totals.totalSpent / (totals.totalReceived || 1)) * 100))}% of received)</div>
+          <div className="summary-sub">
+            ({totals.totalSpent === 0
+              ? 0
+              : Math.round((totals.totalSpent / (totals.totalReceived || 1)) * 100)}
+            % of received)
+          </div>
         </div>
         <div className="summary-card">
           <label>Remaining Balance</label>
           <div className="summary-value">{currencyFormat(totals.remaining)}</div>
         </div>
+        <div className="summary-card">
+          <label>Compliance</label>
+          <div className="summary-value">{totals.complianceOnTrack ? "On Track" : "Attention"}</div>
+        </div>
       </div>
 
+      {/* Meta row below summary */}
       <div className="gifts-meta-row">
-  <div>
-    <strong>Fiscal Year:</strong>{" "}
-    {isEditingMeta ? (
-      <input
-        type="text"
-        name="fiscalYear"
-        value={meta.fiscalYear}
-        onChange={handleMetaChange}
-      />
-    ) : (
-      meta.fiscalYear
-    )}
-  </div>
-
-  <div>
-    <strong>Grant Manager:</strong>{" "}
-    {isEditingMeta ? (
-      <input
-        type="text"
-        name="grantManager"
-        value={meta.grantManager}
-        onChange={handleMetaChange}
-      />
-    ) : (
-      meta.grantManager
-    )}
-  </div>
-
-  <div>
-    <strong>Next Report Due:</strong>{" "}
-    {isEditingMeta ? (
-      <input
-        type="date"
-        name="nextReportDue"
-        value={meta.nextReportDue}
-        onChange={handleMetaChange}
-      />
-    ) : (
-      meta.nextReportDue
-    )}
-  </div>
-
-  {/* Edit / Save button */}
-  <button
-    className="btn-primary"
-    onClick={() => setIsEditingMeta(!isEditingMeta)}
-  >
-    {isEditingMeta ? "Save" : "Edit"}
-  </button>
-</div>
-
-
+        <div><strong>Fiscal Year:</strong> FY 2025</div>
+        <div><strong>Grant Manager:</strong> Sarah Johnson</div>
+        <div><strong>Next Report Due:</strong> 03/01/2026</div>
+      </div>
 
       {/* Toolbar */}
       <div className="gifts-toolbar">
@@ -290,7 +212,9 @@ const GrantDetailsGifts = () => {
           </thead>
           <tbody>
             {displayed.length === 0 ? (
-              <tr className="no-results"><td colSpan="12">No gifts match your search or filter.</td></tr>
+              <tr className="no-results">
+                <td colSpan="12">No gifts match your search or filter.</td>
+              </tr>
             ) : (
               displayed.map((g) => (
                 <GiftRow key={g.id} gift={g} onToggleAcknowledge={handleToggleAcknowledge} />

@@ -130,3 +130,50 @@
 .dot.review { background: #3b82f6; }
 .dot.visit { background: #10b981; }
 .dot.report { background: #f59e0b; }
+
+
+/* Modal */
+.modal-backdrop {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.4);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 20px;
+  width: 350px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal input, .modal select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.save-btn {
+  background:#2563eb;
+  color:white;
+  border:none;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.filter-dropdown {
+  padding:6px;
+  border-radius:6px;
+  border:1px solid #ddd;
+}

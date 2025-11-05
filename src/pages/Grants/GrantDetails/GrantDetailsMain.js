@@ -397,8 +397,8 @@ const GrantDetailsMain = () => {
         <Route path="contacts" element={<GrantDetailsContacts />} />
         <Route path="bio" element={<GrantDetailsBio />} />
         <Route path="other" element={<GrantDetailsOther />} />
-        <Route path="links" element={<GrantDetailsLinks />} />
-        <Route path="addresses" element={<GrantDetailsAddresses />} />
+        <Route path="links" element={<GrantDetailsLinks grantId={id} />} />
+        <Route path="addresses" element={<GrantDetailsAddresses grantId={id} />} />
         <Route path="tracking" element={<GrantDetailsTracking />} />
       </Routes>
     </div>

@@ -39,6 +39,9 @@
 
 
 .gms-input { width:100%; border:1px solid #e5e7eb; border-radius:12px; padding:10px 12px; margin-bottom:10px; }
+.gms-input.contact-search {
+  width: 70%;        /* or use max-width: 280px; */
+}
 .gms-list { display:flex; flex-direction:column; gap:10px; }
 .gms-list-item { display:flex; align-items:center; gap:12px; border:1px solid #e5e7eb; border-radius:12px; padding:10px 12px; background:#fff; cursor:pointer; }
 .gms-list-item:hover { background:#f9fafb; }
