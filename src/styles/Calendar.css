@@ -1,0 +1,240 @@
+.calendar-page {
+  padding: 1rem;
+}
+
+.calendar-container {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.calendar-card {
+  background: white;
+  flex: 2;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.calendar-controls button {
+  margin-left: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.filter-btn {
+  background-color: #f3f4f6;
+}
+
+.add-event-btn {
+  background-color: #000;
+  color: #fff;
+}
+
+/* === FIXED: Calendar Grid Layout === */
+.calendar-grid table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  text-align: center;
+}
+
+.calendar-grid th,
+.calendar-grid td {
+  padding: 0.8rem;
+  border-radius: 8px;
+  width: 14.28%;
+  height: 120px;
+  vertical-align: top;
+  overflow: hidden;
+}
+
+.calendar-grid td.selected {
+  background-color: #000;
+  color: white;
+}
+
+.upcoming-events {
+  flex: 1.2;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.event-card {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid #eee;
+}
+
+.event-icon {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.event-icon.deadline { background-color: #ef4444; }
+.event-icon.review { background-color: #3b82f6; }
+.event-icon.visit { background-color: #10b981; }
+.event-icon.report { background-color: #f59e0b; }
+
+.event-details h4 {
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.event-details p {
+  margin: 0.2rem 0;
+  font-size: 0.8rem;
+  color: #555;
+}
+
+.event-id {
+  background-color: #f3f4f6;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.event-types {
+  margin-top: 1.5rem;
+}
+
+.event-types ul {
+  list-style: none;
+  padding: 0;
+}
+
+.event-types li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot.deadline { background: #ef4444; }
+.dot.review { background: #3b82f6; }
+.dot.visit { background: #10b981; }
+.dot.report { background: #f59e0b; }
+
+/* Modal */
+.modal-backdrop {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.4);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 20px;
+  width: 350px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal input, .modal select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.save-btn {
+  background:#2563eb;
+  color:white;
+  border:none;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.filter-dropdown {
+  padding:6px;
+  border-radius:6px;
+  border:1px solid #ddd;
+}
+
+/* ===== FIXED: Calendar Day Event Styling ===== */
+.calendar-day {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+.day-number {
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-bottom: 2px;
+}
+
+/* Scrollable event list inside each cell */
+.day-events {
+  flex-grow: 1;
+  overflow-y: auto;
+  max-height: 80px;
+  width: 100%;
+}
+
+.event-entry {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  background: #f9fafb;
+  border-radius: 4px;
+  padding: 2px 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.event-dot.deadline { background: #ef4444; }
+.event-dot.review { background: #3b82f6; }
+.event-dot.visit { background: #10b981; }
+.event-dot.report { background: #f59e0b; }
+
+.event-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 90px;
+}
+

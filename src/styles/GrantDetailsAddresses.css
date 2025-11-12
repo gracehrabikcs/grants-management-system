@@ -1,0 +1,92 @@
+.gms-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.gms-section-title {
+  font-weight: 600;
+  font-size: 15px;
+  color: #111827;
+}
+
+.gms-address-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.gms-address-card {
+  flex: 1 1 320px;
+  min-width: 280px;
+  position: relative;
+}
+
+.gms-address-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.gms-address-type {
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gms-tag {
+  background: #2563eb;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 8px;
+  margin-left: 4px;
+}
+
+.gms-address-actions i {
+  cursor: pointer;
+  color: #6b7280;
+  font-size: 16px;
+  margin-left: 8px;
+  transition: color 0.2s ease;
+}
+
+.gms-address-actions i:hover {
+  color: #111827;
+}
+
+.gms-address-meta {
+  color: #6b7280;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.gms-address-text {
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.gms-add-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.gms-add-btn:hover {
+  background: #1d4ed8;
+}

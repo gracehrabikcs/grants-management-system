@@ -1,0 +1,385 @@
+[
+  {
+    "id": 1,
+    "organization": "Future Learning Institute",
+    "title": "Education Innovation Fund",
+    "status": "Active",
+    "amount": "$50,000",
+    "deadline": "2024-03-15",
+    "lastUpdated": "2025-10-19",
+    "nextAction": "Submit quarterly report",
+    "applicationStatus": "Pending",
+    "applicationType": "Standard",
+    "donorInfo": {
+      "Donor ID": "D001",
+      "First Name": "Alice",
+      "Last Name": "Johnson",
+      "Organization": "Future Learning Institute",
+      "Email": "alice@fli.org",
+      "Phone": "555-123-4567"
+    },
+    "grantDetails": {
+      "Grant ID": "1",
+      "Grant Name": "Education Innovation Fund",
+      "Status": { "value": "Active", "options": ["Active", "Inactive"] },
+      "Priority": { "value": "High", "options": ["High", "Medium", "Low"] }
+    },
+    "financialInfo": {
+      "Requested Amount": "$50,000",
+      "Awarded Amount": "$50,000",
+      "Disbursed Amount": "$25,000",
+      "Remaining Balance": "$25,000",
+      "Currency": "USD",
+      "Payment Schedule": "Quarterly"
+    },
+    "timeline": {
+      "Application Date": "2024-01-01",
+      "Approval Date": "2024-02-01",
+      "Start Date": "2024-03-01",
+      "End Date": "2024-12-31",
+      "Next Deadline": "2024-06-30",
+      "Duration (months)": "12"
+    },
+    "contactAssignment": {
+      "Program Officer": "John Smith",
+      "Officer Email": "john@fli.org",
+      "Fiscal Sponsor": "N/A",
+      "Grant Manager": "Mary Brown"
+    },
+    "purposeDescription": {
+      "Grant Purpose": "Support educational innovation",
+      "Project Summary": "Funding new educational programs and technology",
+      "Project Objectives": "Improve student engagement",
+      "Expected Outcomes": "Higher graduation rates"
+    },
+    "additionalInfo": {
+      "Special Conditions": "None",
+      "Additional Notes": "Requires quarterly report submission"
+    },
+    "bio": {
+      "fundingPreferences": {
+        "focusAreas": "Education, Youth Development",
+        "geographicFocus": "United States, Latin America",
+        "fundingRange": "$10,000 - $100,000",
+        "grantTypes": "Program Support, General Operating, Capital",
+        "restrictions": "No grants to individuals",
+        "otherNotes": "Prefers long-term partnerships and measurable outcomes."
+      },
+      "contactInformation": {
+        "contactName": "Jane Smith",
+        "title": "Director of Philanthropy",
+        "email": "jane.smith@foundation.org",
+        "phone": "(555) 123-4567",
+        "address": "123 Foundation Ave, New York, NY 10001",
+        "website": "www.foundation.org"
+      },
+      "organizationDetails": {
+        "foundedYear": "1995",
+        "missionStatement": "To foster innovation in education through grantmaking.",
+        "staffSize": "25",
+        "annualBudget": "$5,000,000",
+        "taxStatus": "501(c)(3)",
+        "keyPrograms": "STEM Access Initiative, Teacher Leadership Fund"
+      },
+      "additionalInformation": {
+        "recentChanges": "Updated focus areas in 2025.",
+        "evaluationMethods": "Quarterly reports and annual impact assessments.",
+        "partnerships": "Collaborates with local nonprofits and schools.",
+        "notes": "Very responsive to follow-up communications."
+      }
+    },
+    "gifts": [
+    {
+      "id": "GFT-001",
+      "date": "2025-09-15",
+      "amount": 15000,
+      "spent": 12000,
+      "budgetCode": "EDU-101",
+      "type": "Restricted",
+      "status": "Received",
+      "purpose": "Teacher training",
+      "fiscalYear": "FY2025",
+      "compliance": "Compliant",
+      "acknowledged": true
+    },
+    {
+      "id": "GFT-002",
+      "date": "2025-06-01",
+      "amount": 10000,
+      "spent": 2500,
+      "budgetCode": "EDU-102",
+      "type": "Unrestricted",
+      "status": "Pending",
+      "purpose": "Curriculum development",
+      "fiscalYear": "FY2025",
+      "compliance": "Under Review",
+      "acknowledged": false
+    }
+  ],
+    "tracking": {
+      "Application Process": [
+        {
+          "id": 1,
+          "name": "Review grant application",
+          "status": "To Do",
+          "files": [],
+          "assignee": "Alice"
+        },
+        {
+          "id": 2,
+          "name": "Verify budget",
+          "status": "In Progress",
+          "files": [],
+          "assignee": "Bob"
+        }
+      ],
+      "Reporting Requirements": [
+        {
+          "id": 3,
+          "name": "Quarterly financial report",
+          "status": "Done",
+          "files": [],
+          "assignee": "Charlie"
+        }
+      ]
+    },
+
+    "links": {
+      "organizationalRelationships": [
+        { "name": "Global Education Alliance", "role": "Parent Organization", "since": "2021", "status": "Active" }
+      ],
+      "connectedGrants": [
+        { "title": "STEM Education Initiative", "id": "155789", "type": "Related Program", "amount": "$75,000", "status": "Active" }
+      ],
+      "keyContacts": [
+        { "initials": "MC", "name": "Dr. Michael Chen", "title": "Program Director", "tag": "Primary", "email": "m.chen@futurelearning.org", "phone": "(415) 555-0142" }
+      ]
+    },
+    "addresses": {
+      "currentAddresses": [
+        {
+          "type": "Business",
+          "tag": "Primary",
+          "verified": "2024-09-14",
+          "address": [
+            "123 Innovation Drive",
+            "Suite 400",
+            "San Francisco, CA 94103",
+            "United States"
+          ]
+        }
+      ],
+      "alternateAddresses": [
+        {
+          "type": "Mailing",
+          "verified": "2024-08-21",
+          "address": [
+            "P.O. Box 5678",
+            "San Francisco, CA 94104",
+            "United States"
+          ]
+        }
+      ],
+      "historicalAddresses": [
+        {
+          "type": "Business",
+          "range": "1/14/2020 - 12/30/2023",
+          "address": [
+            "789 Old Market Street",
+            "Floor 2",
+            "San Francisco, CA 94108",
+            "United States"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "organization": "Horizon Outreach Foundation",
+    "title": "Community Development Grant",
+    "status": "Under Review",
+    "amount": "$80,000",
+    "deadline": "2024-04-01",
+    "lastUpdated": "2025-10-10",
+    "nextAction": "Submit mid-term evaluation",
+    "applicationStatus": "Pending",
+    "applicationType": "Standard",
+    "donorInfo": {
+      "Donor ID": "D002",
+      "First Name": "Bob",
+      "Last Name": "Martin",
+      "Organization": "Horizon Outreach Foundation",
+      "Email": "bob@hof.org",
+      "Phone": "555-234-5678"
+    },
+    "grantDetails": {
+      "Grant ID": "2",
+      "Grant Name": "Community Development Grant",
+      "Status": { "value": "Under Review", "options": ["Active", "Inactive"] },
+      "Priority": { "value": "Medium", "options": ["High", "Medium", "Low"] }
+    },
+    "financialInfo": {
+      "Requested Amount": "$80,000",
+      "Awarded Amount": "$0",
+      "Disbursed Amount": "$0",
+      "Remaining Balance": "$80,000",
+      "Currency": "USD",
+      "Payment Schedule": "Quarterly"
+    },
+    "timeline": {
+      "Application Date": "2024-02-01",
+      "Approval Date": "2024-03-15",
+      "Start Date": "2024-04-01",
+      "End Date": "2025-03-31",
+      "Next Deadline": "2024-10-01",
+      "Duration (months)": "12"
+    },
+    "contactAssignment": {
+      "Program Officer": "Laura Green",
+      "Officer Email": "laura@hof.org",
+      "Fiscal Sponsor": "N/A",
+      "Grant Manager": "James White"
+    },
+    "purposeDescription": {
+      "Grant Purpose": "Community improvement",
+      "Project Summary": "Fund neighborhood programs",
+      "Project Objectives": "Increase community engagement",
+      "Expected Outcomes": "Safer neighborhoods"
+    },
+    "additionalInfo": {
+      "Special Conditions": "Annual review required",
+      "Additional Notes": "Priority given to urban areas"
+    },
+     "links": {
+      "organizationalRelationships": [
+        { "name": "National Community Network", "role": "Partner Organization", "since": "2019", "status": "Active" }
+      ],
+      "connectedGrants": [
+        { "title": "Neighborhood Revitalization Program", "id": "267890", "type": "Related Program", "amount": "$60,000", "status": "Under Review" }
+      ],
+      "keyContacts": [
+        { "initials": "LG", "name": "Laura Green", "title": "Program Officer", "tag": "Primary", "email": "laura@hof.org", "phone": "555-234-5678" },
+        { "initials": "JW", "name": "James White", "title": "Grant Manager", "tag": "Secondary", "email": "james@hof.org", "phone": "555-234-5679" }
+      ]
+    },
+    "addresses": {
+      "currentAddresses": [
+        {
+          "type": "Business",
+          "tag": "Primary",
+          "verified": "2025-01-10",
+          "address": ["456 Horizon Drive", "Suite 300", "Oakland, CA 94607", "United States"]
+        }
+      ],
+      "alternateAddresses": [
+        {
+          "type": "Mailing",
+          "verified": "2025-02-15",
+          "address": ["P.O. Box 8910", "Oakland, CA 94607", "United States"]
+        }
+      ],
+      "historicalAddresses": [
+        {
+          "type": "Business",
+          "range": "2022-01-01 - 2023-12-31",
+          "address": ["321 Health Street", "San Jose, CA 95112", "United States"]
+        }
+      ]
+    }
+  },
+  {
+    "id": 3,
+    "organization": "Wellness First Foundation",
+    "title": "Healthcare Access Initiative",
+    "status": "Approved",
+    "amount": "$120,000",
+    "deadline": "2024-02-20",
+    "lastUpdated": "2025-09-30",
+    "nextAction": "Finalize reporting documents",
+    "applicationStatus": "Approved",
+    "applicationType": "Standard",
+    "donorInfo": {
+      "Donor ID": "D003",
+      "First Name": "Carol",
+      "Last Name": "Lee",
+      "Organization": "Wellness First Foundation",
+      "Email": "carol@wff.org",
+      "Phone": "555-345-6789"
+    },
+    "grantDetails": {
+      "Grant ID": "3",
+      "Grant Name": "Healthcare Access Initiative",
+      "Status": { "value": "Approved", "options": ["Active", "Inactive"] },
+      "Priority": { "value": "High", "options": ["High", "Medium", "Low"] }
+    },
+    "financialInfo": {
+      "Requested Amount": "$120,000",
+      "Awarded Amount": "$120,000",
+      "Disbursed Amount": "$120,000",
+      "Remaining Balance": "$0",
+      "Currency": "USD",
+      "Payment Schedule": "Quarterly"
+    },
+    "timeline": {
+      "Application Date": "2023-11-01",
+      "Approval Date": "2024-01-15",
+      "Start Date": "2024-02-01",
+      "End Date": "2024-12-31",
+      "Next Deadline": "N/A",
+      "Duration (months)": "11"
+    },
+    "contactAssignment": {
+      "Program Officer": "David Kim",
+      "Officer Email": "david@wff.org",
+      "Fiscal Sponsor": "N/A",
+      "Grant Manager": "Emma Wilson"
+    },
+    "purposeDescription": {
+      "Grant Purpose": "Expand healthcare access",
+      "Project Summary": "Provide healthcare services in underserved areas",
+      "Project Objectives": "Increase patient reach and access",
+      "Expected Outcomes": "Improved community health metrics"
+    },
+    "additionalInfo": {
+      "Special Conditions": "Quarterly progress reports",
+      "Additional Notes": "Priority on rural communities"
+    },
+    "links": {
+      "organizationalRelationships": [
+        { "name": "Global Health Partnership", "role": "Parent Organization", "since": "2020", "status": "Active" }
+      ],
+      "connectedGrants": [
+        { "title": "Rural Health Outreach", "id": "378901", "type": "Related Program", "amount": "$90,000", "status": "Approved" }
+      ],
+      "keyContacts": [
+        { "initials": "DK", "name": "David Kim", "title": "Program Officer", "tag": "Primary", "email": "david@wff.org", "phone": "555-345-6789" },
+        { "initials": "EW", "name": "Emma Wilson", "title": "Grant Manager", "tag": "Secondary", "email": "emma@wff.org", "phone": "555-345-6790" }
+      ]
+    },
+    "addresses": {
+      "currentAddresses": [
+        {
+          "type": "Business",
+          "tag": "Primary",
+          "verified": "2025-03-05",
+          "address": ["789 Wellness Ave", "Suite 200", "San Jose, CA 95112", "United States"]
+        }
+      ],
+      "alternateAddresses": [
+        {
+          "type": "Mailing",
+          "verified": "2025-02-10",
+          "address": ["P.O. Box 1234", "San Jose, CA 95112", "United States"]
+        }
+      ],
+      "historicalAddresses": [
+        {
+          "type": "Home",
+          "range": "2022-01-01 - 2023-12-31",
+          "address": ["321 Health Street", "San Jose, CA 95112", "United States"]
+        }
+      ]
+    }
+  }
+]

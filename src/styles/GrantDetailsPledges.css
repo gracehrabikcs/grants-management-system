@@ -1,0 +1,36 @@
+
+.gms-wrap { display: grid; gap: 16px; padding: 16px; }
+.gms-grid { display: grid; gap: 16px; }
+.gms-grid-4 { grid-template-columns: 1fr; }
+@media (min-width: 768px){ .gms-grid-4 { grid-template-columns: repeat(4,1fr); } }
+.gms-grid-2 { grid-template-columns: 1fr; }
+@media (min-width: 1024px){ .gms-grid-2 { grid-template-columns: 1fr 1fr; } }
+
+
+.gms-card { background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:16px; box-shadow:0 1px 2px rgba(0,0,0,.03); }
+.gms-subtle { color:#6b7280; font-size:12px; }
+.gms-micro { color:#6b7280; font-size:12px; margin-top:6px; }
+.gms-head { font-weight:600; }
+.gms-stack { margin-top:4px; }
+
+
+.gms-kpi { font-size:28px; font-weight:600; }
+.gms-green { color:#16a34a; }
+.gms-red { color:#ef4444; }
+.gms-bar { margin-top:10px; height:8px; background:#e5e7eb; border-radius:9999px; overflow:hidden; }
+.gms-bar-fill { height:8px; background:#111827; }
+
+
+.gms-chart { height:280px; }  
+
+
+.gms-table-wrap { overflow-x:auto; }
+.gms-table { min-width: 760px; width:100%; border-collapse: collapse; font-size:14px; }
+.gms-table thead tr { background:#f9fafb; }
+.gms-table th, .gms-table td { text-align:left; padding:10px 12px; border-bottom:1px solid #e5e7eb; }
+.gms-strong { font-weight:600; }
+
+
+.gms-info { margin-bottom:12px; }
+.gms-info-title { font-weight:600; margin-bottom:4px; }
+.gms-info-text { color:#374151; font-size:14px; }
