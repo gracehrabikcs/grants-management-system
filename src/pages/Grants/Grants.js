@@ -26,7 +26,9 @@ const Grants = () => {
   };
 
   const filteredGrants = grants.filter((grant) => {
-    const matchesSearch = grant.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch =
+      grant.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      grant.organization.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "All" || grant.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -85,10 +87,9 @@ const Grants = () => {
               <p className="description">{grant.description}</p>
               <div className="grant-info">
                 <p><strong>Amount:</strong> {grant.amount}</p>
-                <p><strong>Category:</strong> {grant.category}</p>
               </div>
               <p className="location">{grant.location}</p>
-              <p className="deadline">{grant.deadline}</p>
+              <p className="deadline"><strong>Deadline:</strong> {grant.deadline}</p>
 
               {/* Progress Bar */}
               <div className="progress-bar">

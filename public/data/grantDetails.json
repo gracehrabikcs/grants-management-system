@@ -237,53 +237,101 @@
         }
       ]
     },
-    "contacts": {
-      "notes": "March 8, 2024: Discussed Q1 progress with Dr. Sarah Chen. All milestones on track. Need to schedule Q2 review meeting by end of month.",
-      "list": [
-        {
-          "id": "c1",
-          "name": "Dr. Sarah Chen",
-          "role": "Principal Investigator",
-          "email": "s.chen@university.edu",
-          "phone": "(555) 123-4567",
-          "department": "Computer Science & Education",
-          "institution": "Future Learning University",
-          "lastContact": "March 8, 2024",
-          "keyStakeholder": true
-        },
-        {
-          "id": "c2",
-          "name": "Michael Rodriguez",
-          "role": "Project Manager",
-          "email": "m.rodriguez@tech.org",
-          "phone": "(555) 555-9843",
-          "department": "Grants Admin",
-          "institution": "Tech Innovation Corp",
-          "lastContact": "March 5, 2024",
-          "keyStakeholder": false
-        }
-      ],
-      "interactions": [
-        {
-          "id": "i1",
-          "date": "Mar 8, 2024",
-          "contact": "Dr. Sarah Chen",
-          "type": "Email",
-          "subject": "Q1 Progress Review",
-          "outcome": "Report submitted on time",
-          "next": "Schedule Q2 review meeting"
-        },
-        {
-          "id": "i2",
-          "date": "Mar 5, 2024",
-          "contact": "Michael Rodriguez",
-          "type": "Phone",
-          "subject": "Budget adjustment discussion",
-          "outcome": "Approved 5% reallocation",
-          "next": "Update budget documents"
-        }
-      ]
-    },
+    "contacts": [
+      {
+        "id": "c1",
+        "name": "Dr. Sarah Chen",
+        "role": "Principal Investigator",
+        "email": "s.chen@university.edu",
+        "phone": "(555) 123-4567",
+        "department": "Computer Science & Education",
+        "institution": "Future Learning University",
+        "lastContact": "March 8, 2024",
+        "keyStakeholder": true
+      },
+      {
+        "id": "c2",
+        "name": "Michael Rodriguez",
+        "role": "Project Manager",
+        "email": "m.rodriguez@tech.org",
+        "phone": "(555) 555-9843",
+        "department": "Grants Admin",
+        "institution": "Tech Innovation Corp",
+        "lastContact": "March 5, 2024",
+        "keyStakeholder": false
+      },
+      {
+        "id": "c3",
+        "name": "Emily Johnson",
+        "role": "Research Coordinator",
+        "email": "emily.j@research.edu",
+        "phone": "(555) 201-8899",
+        "department": "Research",
+        "institution": "Education Trust",
+        "lastContact": "March 1, 2024",
+        "keyStakeholder": false
+      },
+      {
+        "id": "c4",
+        "name": "David Kim",
+        "role": "Financial Officer",
+        "email": "dkim@communitybank.com",
+        "phone": "(555) 220-0188",
+        "department": "Finance",
+        "institution": "Community Bank",
+        "lastContact": "Feb 28, 2024",
+        "keyStakeholder": false
+      },
+      {
+        "id": "c5",
+        "name": "Lisa Thompson",
+        "role": "External Evaluator",
+        "email": "lisa.t@eval.org",
+        "phone": "(555) 300-7781",
+        "department": "Evaluation",
+        "institution": "Evaluation Partners",
+        "lastContact": "Feb 28, 2024",
+        "keyStakeholder": false
+      }
+    ],
+    "interactions": [
+      {
+        "id": "i1",
+        "date": "Mar 8, 2024",
+        "contact": "Dr. Sarah Chen",
+        "type": "Email",
+        "subject": "Q1 Progress Review",
+        "outcome": "Report submitted on time",
+        "next": "Schedule Q2 review meeting"
+      },
+      {
+        "id": "i2",
+        "date": "Mar 5, 2024",
+        "contact": "Michael Rodriguez",
+        "type": "Phone",
+        "subject": "Budget adjustment discussion",
+        "outcome": "Approved 5% reallocation",
+        "next": "Update budget documents"
+      },
+      {
+        "id": "i3",
+        "date": "Mar 1, 2024",
+        "contact": "Emily Johnson",
+        "type": "Meeting",
+        "subject": "Data collection status",
+        "outcome": "75% completion achieved",
+        "next": "Plan final data collection phase"
+      },
+      {
+        "id": "i4",
+        "date": "Feb 28, 2024",
+        "contact": "Lisa Thompson",
+        "type": "Email",
+        "subject": "External evaluation timeline",
+        "outcome": "Timeline confirmed",
+        "next": "Send evaluation materials"
+      }
+    ],
     "other": {
       "budgetNotes": "Budget allocated for Year 1 includes personnel, equipment, and travel. Q1 expenses reviewed and on track. Remaining budget requires reallocation if additional equipment is purchased.",
       "internalNotes": "Team discussion notes: Ensure milestone reports are completed by the 15th of each month. Coordinate with finance for any invoice approvals. Follow up with Project Manager on pending deliverables.",
