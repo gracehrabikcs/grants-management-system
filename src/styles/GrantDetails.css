@@ -493,3 +493,37 @@
 .grant-bio-container .section {
   margin-bottom: 25px;
 }
+
+.contact-card {
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  background-color: #fafafa;
+}
+
+.contact-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.remove-btn {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.remove-btn:hover {
+  background-color: #e03e3e;
+}
+
+.grant-bio-container .section:first-of-type {
+  margin-top: 20px;
+}
+

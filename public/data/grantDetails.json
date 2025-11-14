@@ -71,7 +71,8 @@
         "email": "jane.smith@foundation.org",
         "phone": "(555) 123-4567",
         "address": "123 Foundation Ave, New York, NY 10001",
-        "website": "www.foundation.org"
+        "website": "www.foundation.org",
+        "notes": "Notes"
       },
       "organizationDetails": {
         "foundedYear": "1995",

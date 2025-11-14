@@ -6,8 +6,6 @@ const GrantDetailsBio = () => {
   const { id } = useParams();
   const [grant, setGrant] = useState(null);
   const [bioData, setBioData] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [saveMessage, setSaveMessage] = useState("");
 
   // Fetch grant details from JSON
   useEffect(() => {
@@ -33,13 +31,24 @@ const GrantDetailsBio = () => {
     }));
   };
 
-  const handleEditToggle = () => {
-    if (isEditing) {
-      // Simulate save (local only)
-      setSaveMessage("✅ Changes saved locally!");
-      setTimeout(() => setSaveMessage(""), 2500);
-    }
-    setIsEditing(!isEditing);
+  const handleAddContact = () => {
+    const newContactKey = `additionalContact${Object.keys(
+      bioData.contactInformation
+    ).length + 1}`;
+
+    setBioData((prev) => ({
+      ...prev,
+      contactInformation: {
+        ...prev.contactInformation,
+        [newContactKey]: {
+          name: "",
+          title: "",
+          email: "",
+          phone: "",
+          notes: "",
+        },
+      },
+    }));
   };
 
   if (!bioData) return <p>Loading bio details...</p>;
@@ -48,57 +57,98 @@ const GrantDetailsBio = () => {
     <div className="section" key={sectionKey}>
       <h3>{sectionTitle}</h3>
       {Object.entries(bioData[sectionKey]).map(([field, value]) => {
-        const formattedLabel = field
-          .replace(/([A-Z])/g, " $1")
-          .replace(/^./, (str) => str.toUpperCase());
+        // Handle special case for dynamically added contacts
+        const formattedLabel = field.startsWith("additionalContact")
+          ? "Additional Contact"
+          : field
+              .replace(/([A-Z])/g, " $1")
+              .replace(/^./, (str) => str.toUpperCase());
+
         const isTextArea = textAreaFields.includes(field);
+        const isNestedContact =
+          typeof value === "object" && value !== null && !Array.isArray(value);
+
+        if (isNestedContact) {
+          // Render nested contact info (like additional contacts)
+          return (
+            <div
+              key={field}
+              style={{
+                border: "1px solid #ddd",
+                borderRadius: "8px",
+                padding: "12px",
+                marginBottom: "12px",
+                backgroundColor: "#fafafa",
+              }}
+            >
+              <h4 style={{ marginBottom: "8px" }}>{formattedLabel}</h4>
+              {Object.entries(value).map(([subField, subValue]) => (
+                <div className="field-group" key={subField}>
+                  <label>
+                    {subField
+                      .replace(/([A-Z])/g, " $1")
+                      .replace(/^./, (str) => str.toUpperCase())}
+                  </label>
+                  <input
+                    type="text"
+                    value={subValue}
+                    onChange={(e) =>
+                      setBioData((prev) => ({
+                        ...prev,
+                        [sectionKey]: {
+                          ...prev[sectionKey],
+                          [field]: {
+                            ...prev[sectionKey][field],
+                            [subField]: e.target.value,
+                          },
+                        },
+                      }))
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+          );
+        }
+
+        // Render standard fields
         return (
           <div className="field-group" key={field}>
             <label>{formattedLabel}</label>
             {isTextArea ? (
               <textarea
                 value={value}
-                readOnly={!isEditing}
-                onChange={(e) => handleChange(sectionKey, field, e.target.value)}
+                onChange={(e) =>
+                  handleChange(sectionKey, field, e.target.value)
+                }
               />
             ) : (
               <input
                 type="text"
                 value={value}
-                readOnly={!isEditing}
-                onChange={(e) => handleChange(sectionKey, field, e.target.value)}
+                onChange={(e) =>
+                  handleChange(sectionKey, field, e.target.value)
+                }
               />
             )}
           </div>
         );
       })}
+      {/* Add Contact Button (only for contact section) */}
+      {sectionKey === "contactInformation" && (
+        <button
+          className="action-btn"
+          onClick={handleAddContact}
+          style={{ marginTop: "10px" }}
+        >
+          + Add Contact
+        </button>
+      )}
     </div>
   );
 
   return (
     <div className="grant-bio-container">
-      {/* Header and Edit Button */}
-      <div className="grant-actions" style={{ justifyContent: "flex-end" }}>
-        <button className="action-btn" onClick={handleEditToggle}>
-          {isEditing ? "Save" : "Edit"}
-        </button>
-      </div>
-
-      {/* Save Message */}
-      {saveMessage && (
-        <div
-          style={{
-            color: "green",
-            textAlign: "right",
-            marginBottom: "10px",
-            fontWeight: "500",
-          }}
-        >
-          {saveMessage}
-        </div>
-      )}
-
-      {/* Bio Sections */}
       {renderSection("Funding Preferences", "fundingPreferences")}
       {renderSection("Contact Information", "contactInformation")}
       {renderSection("Organization Details", "organizationDetails", [
