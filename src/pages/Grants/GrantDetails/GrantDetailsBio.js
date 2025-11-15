@@ -4,7 +4,6 @@ import "../../../styles/GrantDetails.css";
 
 const GrantDetailsBio = () => {
   const { id } = useParams();
-  const [grant, setGrant] = useState(null);
   const [bioData, setBioData] = useState(null);
 
   // Fetch grant details from JSON
@@ -14,147 +13,173 @@ const GrantDetailsBio = () => {
       .then((data) => {
         const selected = data.find((g) => g.id === parseInt(id));
         if (selected && selected.bio) {
-          setGrant(selected);
-          setBioData(selected.bio);
+          setBioData({
+            ...selected.bio,
+            additionalContacts:
+              selected.bio.additionalContacts || [] // Ensure array exists
+          });
         }
       })
       .catch((err) => console.error("Error loading grant bio:", err));
   }, [id]);
 
-  const handleChange = (section, field, value) => {
+  // Handles updates to fields
+  const handleChange = (section, fieldOrIndex, fieldOrValue, maybeValue) => {
+    // Case: normal section (not additionalContacts)
+    if (section !== "additionalContacts") {
+      setBioData((prev) => ({
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [fieldOrIndex]: fieldOrValue,
+        },
+      }));
+      return;
+    }
+
+    // Case: additionalContacts section
+    const index = fieldOrIndex;
+    const field = fieldOrValue;
+    const value = maybeValue;
+
+    setBioData((prev) => {
+      const updated = [...prev.additionalContacts];
+      updated[index] = { ...updated[index], [field]: value };
+      return { ...prev, additionalContacts: updated };
+    });
+  };
+
+  // Add a new additional contact
+  const addAdditionalContact = () => {
+    const newContact = {
+      contactName: "",
+      title: "",
+      email: "",
+      phone: "",
+      notes: ""
+    };
+
     setBioData((prev) => ({
       ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value,
-      },
+      additionalContacts: [...prev.additionalContacts, newContact],
     }));
   };
 
-  const handleAddContact = () => {
-    const newContactKey = `additionalContact${Object.keys(
-      bioData.contactInformation
-    ).length + 1}`;
-
-    setBioData((prev) => ({
-      ...prev,
-      contactInformation: {
-        ...prev.contactInformation,
-        [newContactKey]: {
-          name: "",
-          title: "",
-          email: "",
-          phone: "",
-          notes: "",
-        },
-      },
-    }));
+  // Remove an additional contact
+  const removeAdditionalContact = (index) => {
+    setBioData((prev) => {
+      const updated = [...prev.additionalContacts];
+      updated.splice(index, 1);
+      return { ...prev, additionalContacts: updated };
+    });
   };
 
   if (!bioData) return <p>Loading bio details...</p>;
 
-  const renderSection = (sectionTitle, sectionKey, textAreaFields = []) => (
-    <div className="section" key={sectionKey}>
-      <h3>{sectionTitle}</h3>
+  // Renders any standard section
+  const renderSection = (title, sectionKey, textAreaFields = []) => (
+    <div className="section" key={sectionKey} style={{ marginTop: title === "Funding Preferences" ? "20px" : "0" }}>
+      <h3>{title}</h3>
+
       {Object.entries(bioData[sectionKey]).map(([field, value]) => {
-        // Handle special case for dynamically added contacts
-        const formattedLabel = field.startsWith("additionalContact")
-          ? "Additional Contact"
-          : field
-              .replace(/([A-Z])/g, " $1")
-              .replace(/^./, (str) => str.toUpperCase());
+        const formattedLabel = field
+          .replace(/([A-Z])/g, " $1")
+          .replace(/^./, (str) => str.toUpperCase());
 
         const isTextArea = textAreaFields.includes(field);
-        const isNestedContact =
-          typeof value === "object" && value !== null && !Array.isArray(value);
 
-        if (isNestedContact) {
-          // Render nested contact info (like additional contacts)
-          return (
-            <div
-              key={field}
-              style={{
-                border: "1px solid #ddd",
-                borderRadius: "8px",
-                padding: "12px",
-                marginBottom: "12px",
-                backgroundColor: "#fafafa",
-              }}
-            >
-              <h4 style={{ marginBottom: "8px" }}>{formattedLabel}</h4>
-              {Object.entries(value).map(([subField, subValue]) => (
-                <div className="field-group" key={subField}>
-                  <label>
-                    {subField
-                      .replace(/([A-Z])/g, " $1")
-                      .replace(/^./, (str) => str.toUpperCase())}
-                  </label>
-                  <input
-                    type="text"
-                    value={subValue}
-                    onChange={(e) =>
-                      setBioData((prev) => ({
-                        ...prev,
-                        [sectionKey]: {
-                          ...prev[sectionKey],
-                          [field]: {
-                            ...prev[sectionKey][field],
-                            [subField]: e.target.value,
-                          },
-                        },
-                      }))
-                    }
-                  />
-                </div>
-              ))}
-            </div>
-          );
-        }
-
-        // Render standard fields
         return (
           <div className="field-group" key={field}>
             <label>{formattedLabel}</label>
+
             {isTextArea ? (
               <textarea
                 value={value}
-                onChange={(e) =>
-                  handleChange(sectionKey, field, e.target.value)
-                }
+                onChange={(e) => handleChange(sectionKey, field, e.target.value)}
               />
             ) : (
               <input
                 type="text"
                 value={value}
-                onChange={(e) =>
-                  handleChange(sectionKey, field, e.target.value)
-                }
+                onChange={(e) => handleChange(sectionKey, field, e.target.value)}
               />
             )}
           </div>
         );
       })}
-      {/* Add Contact Button (only for contact section) */}
-      {sectionKey === "contactInformation" && (
-        <button
-          className="action-btn"
-          onClick={handleAddContact}
-          style={{ marginTop: "10px" }}
-        >
-          + Add Contact
-        </button>
-      )}
     </div>
   );
 
   return (
     <div className="grant-bio-container">
+
+      {/* Funding Preferences */}
       {renderSection("Funding Preferences", "fundingPreferences")}
+
+      {/* Contact Information */}
       {renderSection("Contact Information", "contactInformation")}
+
+      {/* Additional Contacts */}
+      <div className="section">
+        <h3>Additional Contacts</h3>
+
+        {bioData.additionalContacts.map((contact, index) => (
+          <div className="contact-card" key={index}>
+            <div className="contact-header">
+              <h4>Additional Contact</h4>
+
+              {/* Remove Contact Button */}
+              <button
+                className="remove-btn"
+                onClick={() => removeAdditionalContact(index)}
+              >
+                Remove
+              </button>
+            </div>
+
+            {Object.entries(contact).map(([field, value]) => {
+              const formattedLabel = field
+                .replace(/([A-Z])/g, " $1")
+                .replace(/^./, (str) => str.toUpperCase());
+
+              return (
+                <div className="field-group" key={field}>
+                  <label>{formattedLabel}</label>
+                  <input
+                    type="text"
+                    value={value}
+                    onChange={(e) =>
+                      handleChange(
+                        "additionalContacts",
+                        index,
+                        field,
+                        e.target.value
+                      )
+                    }
+                  />
+                </div>
+              );
+            })}
+          </div>
+        ))}
+
+        {/* Add Additional Contact Button */}
+        <button
+          className="action-btn"
+          style={{ marginTop: "10px" }}
+          onClick={addAdditionalContact}
+        >
+          + Add Additional Contact
+        </button>
+      </div>
+
+      {/* Organization Details */}
       {renderSection("Organization Details", "organizationDetails", [
         "missionStatement",
         "keyPrograms",
       ])}
+
+      {/* Additional Information */}
       {renderSection("Additional Information", "additionalInformation")}
     </div>
   );
