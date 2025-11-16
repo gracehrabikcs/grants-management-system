@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import "../../../styles/GrantDetailsLinks.css";
 
+
 const GrantDetailsLinks = ({ grantId }) => {
   const [organizationalRelationships, setOrganizationalRelationships] = useState([]);
   const [connectedGrants, setConnectedGrants] = useState([]);
   const [keyContacts, setKeyContacts] = useState([]);
+
 
   const [modal, setModal] = useState({
     open: false,
@@ -13,12 +15,14 @@ const GrantDetailsLinks = ({ grantId }) => {
     data: {}, // form data
   });
 
+
   useEffect(() => {
     fetch("/data/grantDetails.json")
       .then((res) => res.json())
       .then((data) => {
         const grantData = data.find((g) => g.id === parseInt(grantId));
         if (!grantData || !grantData.links) return;
+
 
         const { organizationalRelationships, connectedGrants, keyContacts } = grantData.links;
         setOrganizationalRelationships(organizationalRelationships || []);
@@ -28,12 +32,15 @@ const GrantDetailsLinks = ({ grantId }) => {
       .catch(console.error);
   }, [grantId]);
 
+
   // --- Modal Handlers ---
   const openModal = (section, index = null, data = {}) => {
     setModal({ open: true, section, index, data });
   };
 
+
   const closeModal = () => setModal({ open: false, section: null, index: null, data: {} });
+
 
   const handleInputChange = (field, value) => {
     setModal((prev) => ({
@@ -42,8 +49,10 @@ const GrantDetailsLinks = ({ grantId }) => {
     }));
   };
 
+
   const handleSave = () => {
     const { section, index, data } = modal;
+
 
     if (section === "org") {
       const list = [...organizationalRelationships];
@@ -62,8 +71,10 @@ const GrantDetailsLinks = ({ grantId }) => {
       setKeyContacts(list);
     }
 
+
     closeModal();
   };
+
 
   // --- Delete Handlers ---
   const handleDelete = (section, index) => {
@@ -71,6 +82,7 @@ const GrantDetailsLinks = ({ grantId }) => {
     if (section === "grant") setConnectedGrants(connectedGrants.filter((_, i) => i !== index));
     if (section === "contact") setKeyContacts(keyContacts.filter((_, i) => i !== index));
   };
+
 
   return (
     <>
@@ -87,6 +99,7 @@ const GrantDetailsLinks = ({ grantId }) => {
             ))}
           </Section>
 
+
           <Section title="Connected Grants" actionLabel="+ Link Grant" onAdd={() => openModal("grant")}>
             {connectedGrants.map((grant, i) => (
               <ConnectedGrant
@@ -98,7 +111,8 @@ const GrantDetailsLinks = ({ grantId }) => {
             ))}
           </Section>
 
-          <Section title="Key Contacts" actionLabel="+ Add Contact" onAdd={() => openModal("contact")}>
+
+          {/* <Section title="Key Contacts" actionLabel="+ Add Contact" onAdd={() => openModal("contact")}>
             {keyContacts.map((contact, i) => (
               <KeyContact
                 key={i}
@@ -107,9 +121,10 @@ const GrantDetailsLinks = ({ grantId }) => {
                 onEdit={() => openModal("contact", i, contact)}
               />
             ))}
-          </Section>
+          </Section> */}
         </div>
       </div>
+
 
       {/* Modal */}
       {modal.open && (
@@ -129,6 +144,7 @@ const GrantDetailsLinks = ({ grantId }) => {
                 : "Edit Key Contact"}
             </h2>
 
+
             {modal.section === "org" && (
               <>
                 <input placeholder="Organization Name" value={modal.data.name || ""} onChange={(e) => handleInputChange("name", e.target.value)} />
@@ -137,6 +153,7 @@ const GrantDetailsLinks = ({ grantId }) => {
                 <input placeholder="Status" value={modal.data.status || ""} onChange={(e) => handleInputChange("status", e.target.value)} />
               </>
             )}
+
 
             {modal.section === "grant" && (
               <>
@@ -147,6 +164,7 @@ const GrantDetailsLinks = ({ grantId }) => {
                 <input placeholder="Status" value={modal.data.status || ""} onChange={(e) => handleInputChange("status", e.target.value)} />
               </>
             )}
+
 
             {modal.section === "contact" && (
               <>
@@ -159,6 +177,7 @@ const GrantDetailsLinks = ({ grantId }) => {
               </>
             )}
 
+
             <div className="gms-modal-buttons">
               <button className="gms-modal-cancel" onClick={closeModal}>Cancel</button>
               <button className="gms-modal-save" onClick={handleSave}>Save</button>
@@ -169,6 +188,7 @@ const GrantDetailsLinks = ({ grantId }) => {
     </>
   );
 };
+
 
 // Section Component
 function Section({ title, actionLabel, children, onAdd }) {
@@ -182,6 +202,7 @@ function Section({ title, actionLabel, children, onAdd }) {
     </div>
   );
 }
+
 
 // --- Cards ---
 function OrgRelationship({ name, role, since, status, onDelete, onEdit }) {
@@ -203,6 +224,7 @@ function OrgRelationship({ name, role, since, status, onDelete, onEdit }) {
   );
 }
 
+
 function ConnectedGrant({ title, id, status, type, amount, onDelete, onEdit }) {
   return (
     <div className="links-card links-grant-card">
@@ -220,6 +242,7 @@ function ConnectedGrant({ title, id, status, type, amount, onDelete, onEdit }) {
     </div>
   );
 }
+
 
 function KeyContact({ initials, name, title, tag, email, phone, onDelete, onEdit }) {
   return (
@@ -242,7 +265,9 @@ function KeyContact({ initials, name, title, tag, email, phone, onDelete, onEdit
   );
 }
 
+
 export default GrantDetailsLinks;
+
 
 
 
