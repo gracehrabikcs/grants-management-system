@@ -135,29 +135,25 @@
 
     "gifts": [
     {
-      "id": "GFT-001",
+      "id": "1",
       "date": "2025-09-15",
       "amount": 15000,
       "spent": 12000,
-      "budgetCode": "EDU-101",
-      "type": "Restricted",
       "status": "Received",
       "purpose": "Teacher training",
-      "fiscalYear": "FY2025",
-      "compliance": "Compliant",
+      "fiscalYear": "2025",
+      "compliance": "Pending",
       "acknowledged": true
     },
     {
-      "id": "GFT-002",
+      "id": "2",
       "date": "2025-06-01",
       "amount": 10000,
       "spent": 2500,
-      "budgetCode": "EDU-102",
-      "type": "Unrestricted",
       "status": "Pending",
       "purpose": "Curriculum development",
-      "fiscalYear": "FY2025",
-      "compliance": "Under Review",
+      "fiscalYear": "2025",
+      "compliance": "Yes",
       "acknowledged": false
     }
   ],
