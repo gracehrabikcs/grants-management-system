@@ -167,14 +167,18 @@
           "name": "Review grant application",
           "status": "To Do",
           "files": [],
-          "assignee": "Alice"
+          "notes": "Pay special attention to section IV.",
+          "assignee": "Alice",
+          "deadline": "2025-10-13"
         },
         {
           "id": 2,
           "name": "Verify budget",
           "status": "In Progress",
           "files": [],
-          "assignee": "Bob"
+          "notes": "Email accounting rep.",
+          "assignee": "Bob",
+          "deadline": "2025-10-25"
         }
       ],
       "Reporting Requirements": [
@@ -183,7 +187,9 @@
           "name": "Quarterly financial report",
           "status": "Done",
           "files": [],
-          "assignee": "Charlie"
+          "notes": "Schedule meeting with client to discuss report.",
+          "assignee": "Charlie",
+          "deadline": "2025-10-30"
         }
       ]
     },
