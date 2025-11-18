@@ -167,6 +167,7 @@
           "name": "Review grant application",
           "status": "To Do",
           "files": [],
+          "notes": "Pay special attention to section IV.",
           "assignee": "Alice"
         },
         {
@@ -174,6 +175,7 @@
           "name": "Verify budget",
           "status": "In Progress",
           "files": [],
+          "notes": "Email accounting rep.",
           "assignee": "Bob"
         }
       ],
@@ -183,6 +185,7 @@
           "name": "Quarterly financial report",
           "status": "Done",
           "files": [],
+          "notes": "Schedule meeting with client to discuss report.",
           "assignee": "Charlie"
         }
       ]

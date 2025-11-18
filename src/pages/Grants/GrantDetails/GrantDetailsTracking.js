@@ -12,15 +12,6 @@ const GrantDetailsTracking = () => {
   const [sortAsc, setSortAsc] = useState(true);
   const [hideDone, setHideDone] = useState(false);
 
-  // Helper: calculate progress from tasks
-  const calculateProgress = (tasksObj) => {
-    const allTasks = Object.values(tasksObj).flat();
-    if (allTasks.length === 0) return 0;
-    const doneTasks = allTasks.filter((t) => t.status === "Done").length;
-    return Math.round((doneTasks / allTasks.length) * 100);
-  };
-
-  // Load grant details from JSON
   useEffect(() => {
     fetch("/data/grantDetails.json")
       .then((res) => res.json())
@@ -29,27 +20,35 @@ const GrantDetailsTracking = () => {
         if (selected) {
           setGrant(selected);
 
-          // Use tasks from JSON if available, otherwise empty
           const grantTasks = selected.tracking || {};
+
+          // Ensure all tasks have emails/notes fields
+          Object.keys(grantTasks).forEach((section) => {
+            grantTasks[section] = grantTasks[section].map((task) => ({
+              ...task,
+              assigneeEmail: task.assigneeEmail || "",
+              notes: task.notes || "",
+            }));
+          });
+
           setTasks(grantTasks);
 
+          // Show all sections open initially
           setShowSections(
-            Object.keys(grantTasks).reduce((acc, key) => {
-              acc[key] = true;
-              return acc;
-            }, {})
+            Object.keys(grantTasks).reduce(
+              (acc, key) => ({ ...acc, [key]: true }),
+              {}
+            )
           );
         }
       })
       .catch((err) => console.error("Error loading grant:", err));
   }, [id]);
 
-  // Toggle section visibility
   const handleToggleSection = (section) => {
     setShowSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
-  // Section operations
   const handleAddSection = () => {
     const newSection = prompt("Enter new task category/section name:");
     if (newSection && !tasks[newSection]) {
@@ -66,19 +65,30 @@ const GrantDetailsTracking = () => {
     }
   };
 
-  // Task operations
   const handleAddTask = (section) => {
     const taskName = prompt("Enter new task name:");
     if (!taskName) return;
-    const newTask = { id: Date.now(), name: taskName, status: "To Do", files: [], assignee: "" };
-    setTasks((prev) => ({ ...prev, [section]: [...prev[section], newTask] }));
+
+    const newTask = {
+      id: Date.now(),
+      name: taskName,
+      status: "To Do",
+      files: [],
+      assigneeEmail: "",
+      notes: "",
+    };
+
+    setTasks((prev) => ({
+      ...prev,
+      [section]: [...prev[section], newTask],
+    }));
   };
 
   const handleDeleteTask = (section, taskId) => {
     if (window.confirm("Delete this task?")) {
       setTasks((prev) => ({
         ...prev,
-        [section]: prev[section].filter((task) => task.id !== taskId)
+        [section]: prev[section].filter((task) => task.id !== taskId),
       }));
     }
   };
@@ -89,7 +99,7 @@ const GrantDetailsTracking = () => {
       ...prev,
       [section]: prev[section].map((task) =>
         task.id === taskId ? { ...task, files: [...task.files, file] } : task
-      )
+      ),
     }));
   };
 
@@ -99,21 +109,46 @@ const GrantDetailsTracking = () => {
       ...prev,
       [section]: prev[section].map((task) =>
         task.id === taskId ? { ...task, status } : task
-      )
+      ),
     }));
   };
 
-  // Filter and sort tasks
+  const handleNotesChange = (section, taskId, newNotes) => {
+    setTasks((prev) => ({
+      ...prev,
+      [section]: prev[section].map((task) =>
+        task.id === taskId ? { ...task, notes: newNotes } : task
+      ),
+    }));
+  };
+
+  const handleAssigneeEmailChange = (section, task, newEmail) => {
+    setTasks((prev) => ({
+      ...prev,
+      [section]: prev[section].map((t) =>
+        t.id === task.id ? { ...t, assigneeEmail: newEmail } : t
+      ),
+    }));
+  };
+
   const filteredAndSortedTasks = (sectionTasks) => {
     let result = [...sectionTasks];
-    if (search) result = result.filter((task) => task.name.toLowerCase().includes(search.toLowerCase()));
+
+    if (search) {
+      result = result.filter((task) =>
+        task.name.toLowerCase().includes(search.toLowerCase())
+      );
+    }
     if (hideDone) result = result.filter((task) => task.status !== "Done");
 
     const statusOrder = ["To Do", "In Progress", "Done"];
     result.sort((a, b) => {
-      const statusDiff = statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
+      const statusDiff =
+        statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
       if (statusDiff !== 0) return sortAsc ? statusDiff : -statusDiff;
-      return sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+      return sortAsc
+        ? a.name.localeCompare(b.name)
+        : b.name.localeCompare(a.name);
     });
 
     return result;
@@ -126,21 +161,50 @@ const GrantDetailsTracking = () => {
       <h2>{grant.title} – Task Tracking</h2>
 
       <div className="tracking-controls">
-        <button className="action-btn" onClick={handleAddSection}>+ New Section</button>
-        <input type="text" placeholder="Search tasks..." value={search} onChange={(e) => setSearch(e.target.value)} />
-        <button className="action-btn" onClick={() => setSortAsc(!sortAsc)}>Sort {sortAsc ? "▲" : "▼"}</button>
-        <button className="action-btn" onClick={() => setHideDone(!hideDone)}>{hideDone ? "Show All" : "Hide Done"}</button>
+        <button className="action-btn" onClick={handleAddSection}>
+          + New Section
+        </button>
+
+        <input
+          type="text"
+          placeholder="Search tasks..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+
+        <button className="action-btn" onClick={() => setSortAsc(!sortAsc)}>
+          Sort {sortAsc ? "▲" : "▼"}
+        </button>
+
+        <button className="action-btn" onClick={() => setHideDone(!hideDone)}>
+          {hideDone ? "Show All" : "Hide Done"}
+        </button>
       </div>
 
       {Object.keys(tasks).map((section) => (
         <div className="task-section" key={section}>
           <div className="task-section-header">
-            <h3 className="task-section-title" onClick={() => handleToggleSection(section)} style={{ cursor: "pointer" }}>
+            <h3
+              className="task-section-title"
+              onClick={() => handleToggleSection(section)}
+              style={{ cursor: "pointer" }}
+            >
               {section} {showSections[section] ? "▼" : "▶"}
             </h3>
+
             <div className="section-actions">
-              <button className="action-btn small" onClick={() => handleAddTask(section)}>+ Add Task</button>
-              <button className="action-btn small delete" onClick={() => handleDeleteSection(section)}>✕ Delete Section</button>
+              <button
+                className="action-btn small"
+                onClick={() => handleAddTask(section)}
+              >
+                + Add Task
+              </button>
+              <button
+                className="action-btn small delete"
+                onClick={() => handleDeleteSection(section)}
+              >
+                ✕ Delete Section
+              </button>
             </div>
           </div>
 
@@ -151,41 +215,79 @@ const GrantDetailsTracking = () => {
                   <th>Task</th>
                   <th>Status</th>
                   <th>Files</th>
-                  <th>Assignee</th>
+                  <th>Assignee Email</th>
+                  <th>Notes</th>
                   <th>Actions</th>
                 </tr>
               </thead>
+
               <tbody>
                 {filteredAndSortedTasks(tasks[section]).map((task) => (
                   <tr key={task.id}>
                     <td>{task.name}</td>
+
                     <td>
-                      <select value={task.status} onChange={(e) => handleStatusChange(section, task.id, e)}>
+                      <select
+                        value={task.status}
+                        onChange={(e) =>
+                          handleStatusChange(section, task.id, e)
+                        }
+                      >
                         <option>To Do</option>
                         <option>In Progress</option>
                         <option>Done</option>
                       </select>
                     </td>
-                    <td>
-                      <input type="file" onChange={(e) => handleFileChange(section, task.id, e)} />
-                      {task.files.length > 0 && <ul>{task.files.map((file, idx) => <li key={idx}>{file.name}</li>)}</ul>}
-                    </td>
+
                     <td>
                       <input
-                        type="text"
-                        value={task.assignee}
+                        type="file"
                         onChange={(e) =>
-                          setTasks((prev) => ({
-                            ...prev,
-                            [section]: prev[section].map((t) =>
-                              t.id === task.id ? { ...t, assignee: e.target.value } : t
-                            )
-                          }))
+                          handleFileChange(section, task.id, e)
+                        }
+                      />
+                      {task.files.length > 0 && (
+                        <ul>
+                          {task.files.map((file, idx) => (
+                            <li key={idx}>{file.name}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </td>
+
+                    <td>
+                      <input
+                        type="email"
+                        placeholder="email@example.com"
+                        value={task.assigneeEmail}
+                        onChange={(e) =>
+                          handleAssigneeEmailChange(
+                            section,
+                            task,
+                            e.target.value
+                          )
                         }
                       />
                     </td>
+
                     <td>
-                      <button className="action-btn small delete" onClick={() => handleDeleteTask(section, task.id)}>Delete</button>
+                      <textarea
+                        value={task.notes}
+                        onChange={(e) =>
+                          handleNotesChange(section, task.id, e.target.value)
+                        }
+                        rows={2}
+                        className="notes-textarea"
+                      />
+                    </td>
+
+                    <td>
+                      <button
+                        className="action-btn small delete"
+                        onClick={() => handleDeleteTask(section, task.id)}
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))}
