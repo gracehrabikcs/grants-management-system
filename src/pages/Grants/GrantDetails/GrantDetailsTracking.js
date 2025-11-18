@@ -28,6 +28,7 @@ const GrantDetailsTracking = () => {
               ...task,
               assigneeEmail: task.assigneeEmail || "",
               notes: task.notes || "",
+              deadline: task.deadline || "",   
             }));
           });
 
@@ -122,6 +123,7 @@ const GrantDetailsTracking = () => {
     }));
   };
 
+
   const handleAssigneeEmailChange = (section, task, newEmail) => {
     setTasks((prev) => ({
       ...prev,
@@ -130,6 +132,18 @@ const GrantDetailsTracking = () => {
       ),
     }));
   };
+
+  const handleDeadlineChange = (section, taskId, event) => {
+    const deadline = event.target.value;
+
+    setTasks((prev) => ({
+      ...prev,
+      [section]: prev[section].map((task) =>
+        task.id === taskId ? { ...task, deadline } : task
+      ),
+    }));
+  };
+
 
   const filteredAndSortedTasks = (sectionTasks) => {
     let result = [...sectionTasks];
@@ -217,6 +231,7 @@ const GrantDetailsTracking = () => {
                   <th>Files</th>
                   <th>Assignee Email</th>
                   <th>Notes</th>
+                  <th>Deadline</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -280,6 +295,15 @@ const GrantDetailsTracking = () => {
                         className="notes-textarea"
                       />
                     </td>
+
+                    <td>
+                      <input
+                        type="datetime-local"
+                        value={task.deadline || ""}
+                        onChange={(e) => handleDeadlineChange(section, task.id, e)}
+                      />
+                    </td>
+
 
                     <td>
                       <button

@@ -1,0 +1,37 @@
+[
+  {
+    "id": "GR-001",
+    "title": "Education Innovation Fund - Application Deadline",
+    "org": "Future Learning Institute",
+    "date": "2025-10-15T23:59",
+    "type": "Deadline"
+  },
+  {
+    "id": "GR-002",
+    "title": "Healthcare Research Grant - Review Meeting",
+    "org": "Medical Research Center",
+    "date": "2025-11-17T14:00",
+    "type": "Review"
+  },
+  {
+    "id": "GR-003",
+    "title": "Environmental Conservation Project - Site Visit",
+    "org": "Green Earth Foundation",
+    "date": "2025-10-15T10:00",
+    "type": "Visit"
+  },
+  {
+    "id": "GR-004",
+    "title": "Technology Development Initiative - Progress Report Due",
+    "org": "Tech Innovators LLC",
+    "date": "2025-11-24T17:00",
+    "type": "Report"
+  },
+  {
+    "id": "GR-005",
+    "title": "Community Arts Program - Final Review",
+    "org": "Creative Community Hub",
+    "date": "2025-10-27T15:00",
+    "type": "Review"
+  }
+]

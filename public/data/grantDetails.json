@@ -168,7 +168,8 @@
           "status": "To Do",
           "files": [],
           "notes": "Pay special attention to section IV.",
-          "assignee": "Alice"
+          "assignee": "Alice",
+          "deadline": "2025-10-13"
         },
         {
           "id": 2,
@@ -176,7 +177,8 @@
           "status": "In Progress",
           "files": [],
           "notes": "Email accounting rep.",
-          "assignee": "Bob"
+          "assignee": "Bob",
+          "deadline": "2025-10-25"
         }
       ],
       "Reporting Requirements": [
@@ -186,7 +188,8 @@
           "status": "Done",
           "files": [],
           "notes": "Schedule meeting with client to discuss report.",
-          "assignee": "Charlie"
+          "assignee": "Charlie",
+          "deadline": "2025-10-30"
         }
       ]
     },
