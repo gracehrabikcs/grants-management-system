@@ -58,180 +58,6 @@ const MainTabContent = ({ grant, setGrant }) => (
           onChange={(e) => setGrant({ ...grant, lastUpdated: e.target.value })}
         />
       </div>
-
-      <div className="field-group">
-        <label>Next Action Required</label>
-        <input
-          type="text"
-          value={grant.nextAction}
-          onChange={(e) => setGrant({ ...grant, nextAction: e.target.value })}
-        />
-      </div>
-    </div>
-
-    {/* Donor Information */}
-    <div className="section">
-      <h3>Donor Information</h3>
-      {Object.entries(grant.donorInfo).map(([key, value]) => (
-        <div className="field-group" key={key}>
-          <label>{key}</label>
-          <input
-            type="text"
-            value={value}
-            onChange={(e) =>
-              setGrant({
-                ...grant,
-                donorInfo: { ...grant.donorInfo, [key]: e.target.value },
-              })
-            }
-          />
-        </div>
-      ))}
-    </div>
-
-    {/* Grant Details */}
-    <div className="section">
-      <h3>Grant Details</h3>
-      {Object.entries(grant.grantDetails).map(([key, value]) => (
-        <div className="field-group" key={key}>
-          <label>{key}</label>
-          {typeof value === "string" ? (
-            <input
-              type="text"
-              value={value}
-              onChange={(e) =>
-                setGrant({
-                  ...grant,
-                  grantDetails: { ...grant.grantDetails, [key]: e.target.value },
-                })
-              }
-            />
-          ) : (
-            <select
-              value={value.selected || ""}
-              onChange={(e) =>
-                setGrant({
-                  ...grant,
-                  grantDetails: {
-                    ...grant.grantDetails,
-                    [key]: { ...value, selected: e.target.value },
-                  },
-                })
-              }
-            >
-              {value.options &&
-                value.options.map((opt) => <option key={opt}>{opt}</option>)}
-            </select>
-          )}
-        </div>
-      ))}
-    </div>
-
-    {/* Financial Information */}
-    <div className="section">
-      <h3>Financial Information</h3>
-      {Object.entries(grant.financialInfo).map(([key, value]) => (
-        <div className="field-group" key={key}>
-          <label>{key}</label>
-          <input
-            type="text"
-            value={value}
-            onChange={(e) =>
-              setGrant({
-                ...grant,
-                financialInfo: { ...grant.financialInfo, [key]: e.target.value },
-              })
-            }
-          />
-        </div>
-      ))}
-    </div>
-
-    {/* Timeline */}
-    <div className="section">
-      <h3>Timeline</h3>
-      {Object.entries(grant.timeline).map(([key, value]) => (
-        <div className="field-group" key={key}>
-          <label>{key}</label>
-          <input
-            type="text"
-            value={value}
-            onChange={(e) =>
-              setGrant({
-                ...grant,
-                timeline: { ...grant.timeline, [key]: e.target.value },
-              })
-            }
-          />
-        </div>
-      ))}
-    </div>
-
-    {/* Contact and Assignment */}
-    <div className="section">
-      <h3>Contact and Assignment</h3>
-      {Object.entries(grant.contactAssignment).map(([key, value]) => (
-        <div className="field-group" key={key}>
-          <label>{key}</label>
-          <input
-            type="text"
-            value={value}
-            onChange={(e) =>
-              setGrant({
-                ...grant,
-                contactAssignment: {
-                  ...grant.contactAssignment,
-                  [key]: e.target.value,
-                },
-              })
-            }
-          />
-        </div>
-      ))}
-    </div>
-
-    {/* Grant Purpose and Description */}
-    <div className="section">
-      <h3>Grant Purpose and Description</h3>
-      {Object.entries(grant.purposeDescription).map(([key, value]) => (
-        <div className="field-group" key={key}>
-          <label>{key}</label>
-          <textarea
-            value={value}
-            onChange={(e) =>
-              setGrant({
-                ...grant,
-                purposeDescription: {
-                  ...grant.purposeDescription,
-                  [key]: e.target.value,
-                },
-              })
-            }
-          />
-        </div>
-      ))}
-    </div>
-
-    {/* Additional Information */}
-    <div className="section">
-      <h3>Additional Information</h3>
-      {Object.entries(grant.additionalInfo).map(([key, value]) => (
-        <div className="field-group" key={key}>
-          <label>{key}</label>
-          <textarea
-            value={value}
-            onChange={(e) =>
-              setGrant({
-                ...grant,
-                additionalInfo: {
-                  ...grant.additionalInfo,
-                  [key]: e.target.value,
-                },
-              })
-            }
-          />
-        </div>
-      ))}
     </div>
   </div>
 );
@@ -289,10 +115,8 @@ const GrantDetailsMain = () => {
       const newKey = prefix ? `${prefix}.${key}` : key;
 
       if (value && typeof value === 'object' && !Array.isArray(value)) {
-        // Recursively flatten nested objects
         flattenObject(value, newKey, result);
       } else if (Array.isArray(value)) {
-        // Convert arrays to JSON string
         result[newKey] = JSON.stringify(value).replace(/"/g, '""');
       } else {
         result[newKey] = value;
@@ -301,7 +125,6 @@ const GrantDetailsMain = () => {
     return result;
   };
 
-
   const exportAsCSV = () => {
     if (!grant) return;
 
@@ -309,7 +132,7 @@ const GrantDetailsMain = () => {
 
     const headers = Object.keys(flatGrant).join(",");
     const values = Object.values(flatGrant)
-      .map((v) => `"${v ?? ""}"`) // wrap in quotes for CSV
+      .map((v) => `"${v ?? ""}"`)
       .join(",");
 
     const csvContent = `${headers}\n${values}`;
@@ -321,8 +144,6 @@ const GrantDetailsMain = () => {
     link.click();
     URL.revokeObjectURL(url);
   };
-
-
 
   if (!grant) return <p>Loading grant details...</p>;
 
@@ -361,16 +182,10 @@ const GrantDetailsMain = () => {
         <button className="action-btn" onClick={handleSendEmail}>
           Send Email
         </button>
-        <button
-          onClick={exportAsJSON}
-          className="action-btn"
-        >
+        <button onClick={exportAsJSON} className="action-btn">
           Export JSON
         </button>
-        <button
-          onClick={exportAsCSV}
-          className="action-btn"
-        >
+        <button onClick={exportAsCSV} className="action-btn">
           Export CSV
         </button>
       </div>
