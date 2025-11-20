@@ -117,9 +117,14 @@ export default function GrantDetailsContacts() {
   const [interactions, setInteractions] = useState([]);
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState("");
-  const [notes, setNotes] = useState("");
-  const [notesTs, setNotesTs] = useState("");
-  
+  // per-contact notes: { [contactId]: "text" }
+  const [notesByContact, setNotesByContact] = useState({});
+// per-contact timestamps: { [contactId]: "saved at ..." }
+  const [notesTsByContact, setNotesTsByContact] = useState({});
+  // modal UI state
+  const [isNotesOpen, setIsNotesOpen] = useState(false);
+  const [notesDraft, setNotesDraft] = useState("");
+
 useEffect(() => {
   // contacts
   const savedContacts = localStorage.getItem(CONTACTS_KEY);
@@ -155,30 +160,29 @@ useEffect(() => {
 }, [interactions]);
 
 
-  // load notes from localStorage on mount
-  useEffect(() => {
-    const savedNotes = localStorage.getItem(NOTES_KEY);
-    const savedTs = localStorage.getItem(NOTES_TS_KEY);
-    if (savedNotes != null) {
-      setNotes(savedNotes);
-    } else {
-      // initial default if none saved yet
-      setNotes(
-        [
-          "March 8, 2024: Discussed Q1 progress with Dr. Sarah Chen. All milestones on track. Need to schedule Q2 review meeting by end of month.",
-          "March 5, 2024: Budget reallocation approved after discussion with Michael Rodriguez. 5% moved from equipment to personnel costs.",
-          "",
-          "Follow-up needed:",
-          "- Send evaluation materials to Lisa Thompson",
-          "- Update budget documentation",
-          "- Schedule team meeting for Q2 planning",
-        ].join("\n")
-      );
+ // load per-contact notes and timestamps on mount
+useEffect(() => {
+  const savedNotes = localStorage.getItem(NOTES_KEY);
+  const savedTs = localStorage.getItem(NOTES_TS_KEY);
+
+  if (savedNotes) {
+    try {
+      setNotesByContact(JSON.parse(savedNotes));
+    } catch {
+      // if it was an old plain string, ignore and start fresh
+      setNotesByContact({});
     }
-    if (savedTs != null) {
-      setNotesTs(savedTs);
+  }
+
+  if (savedTs) {
+    try {
+      setNotesTsByContact(JSON.parse(savedTs));
+    } catch {
+      setNotesTsByContact({});
     }
-  }, []);
+  }
+}, []);
+
 
   const selected = useMemo(
     () => contacts.find((c) => c.id === selectedId),
@@ -205,13 +209,38 @@ useEffect(() => {
 
   // --- handlers ---
 
-  function handleSaveNotes() {
-    const ts = new Date().toLocaleString();
-    localStorage.setItem(NOTES_KEY, notes);
-    localStorage.setItem(NOTES_TS_KEY, ts);
-    setNotesTs(ts);
-    alert("Notes saved.");
-  }
+function openNotesModal() {
+  if (!selected) return;
+  const existing = notesByContact[selected.id] || "";
+  setNotesDraft(existing);
+  setIsNotesOpen(true);
+}
+
+function closeNotesModal() {
+  setIsNotesOpen(false);
+}
+
+function handleSaveNotesForContact() {
+  if (!selected) return;
+  const ts = new Date().toLocaleString();
+
+  // update notes text
+  setNotesByContact((prev) => {
+    const updated = { ...prev, [selected.id]: notesDraft };
+    localStorage.setItem(NOTES_KEY, JSON.stringify(updated));
+    return updated;
+  });
+
+  // update timestamp
+  setNotesTsByContact((prev) => {
+    const updated = { ...prev, [selected.id]: ts };
+    localStorage.setItem(NOTES_TS_KEY, JSON.stringify(updated));
+    return updated;
+  });
+
+  setIsNotesOpen(false);
+}
+
 
   function handleExportContacts() {
     const header = [
@@ -417,26 +446,6 @@ function promptContactFields(existing = {}) {
           </div>
         </div>
 
-        {/* notes */}
-        <div className="gms-card">
-          <div className="gms-flex-between gms-mb8">
-            <div className="gms-head">
-              <span className="gms-ico">📄</span> Contact Notes
-            </div>
-            <button className="gms-btn primary" onClick={handleSaveNotes}>
-              Save Notes
-            </button>
-          </div>
-          <textarea
-            className="gms-notes"
-            rows={8}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
-          <div className="gms-micro gms-mt8">
-            Last updated: {notesTs ? notesTs : "Not saved yet"}
-          </div>
-        </div>
 
         {/* columns */}
         <div className="gms-columns">
@@ -486,47 +495,57 @@ function promptContactFields(existing = {}) {
             </div>
           </div>
 
-          {/* details */}
-          <div className="gms-card">
-            <div className="gms-flex-between gms-mb8">
-              <div className="gms-head">Contact Details</div>
-              <button className="gms-btn ghost" onClick={handleEditContact}>
-                ✏️ Edit
-              </button>
-            </div>
+         {/* details */}
+<div className="gms-card">
+  <div className="gms-flex-between gms-mb8">
+    <div className="gms-head">Contact Details</div>
+    <button className="gms-btn ghost" onClick={handleEditContact}>
+      ✏️ Edit
+    </button>
+  </div>
 
-            {selected && (
-              <>
-                <div className="gms-detail-header">
-                  <div className="gms-avatar lg">
-                    {initialsOf(selected.name)}
-                  </div>
-                  <div>
-                    <div className="gms-strong">{selected.name}</div>
-                    <div className="gms-subtle">{selected.role}</div>
-                    {selected.keyStakeholder && (
-                      <div className="gms-badge key">Key Stakeholder</div>
-                    )}
-                  </div>
-                </div>
+  {selected && (
+    <>
+      <div className="gms-detail-header">
+        <div className="gms-avatar lg">
+          {initialsOf(selected.name)}
+        </div>
+        <div>
+          <div className="gms-strong">{selected.name}</div>
+          <div className="gms-subtle">{selected.role}</div>
+          {selected.keyStakeholder && (
+            <div className="gms-badge key">Key Stakeholder</div>
+          )}
+        </div>
+      </div>
 
-                <hr className="gms-hr" />
+      <hr className="gms-hr" />
 
-                <Detail label="Email" value={selected.email} />
-                <Detail label="Phone" value={selected.phone} />
-                <Detail label="Department" value={selected.department} />
-                <Detail label="Institution" value={selected.institution} />
-                <Detail label="Last Contact" value={selected.lastContact} />
+      <Detail label="Email" value={selected.email} />
+      <Detail label="Phone" value={selected.phone} />
+      <Detail label="Department" value={selected.department} />
+      <Detail label="Institution" value={selected.institution} />
+      <Detail label="Last Contact" value={selected.lastContact} />
 
-                <div className="gms-actions">
-                  <button className="gms-btn ghost" onClick={handleEmail}>
-                    ✉️ Email
-                  </button>
-                  {/* removed Call / Message */}
-                </div>
-              </>
-            )}
-          </div>
+      {/* 👇 your new chunk lives HERE, still inside the fragment */}
+      <div className="gms-actions">
+        <button className="gms-btn ghost" onClick={handleEmail}>
+          ✉️ Email
+        </button>
+        <button className="gms-btn ghost" onClick={openNotesModal}>
+          📝 Contact Notes
+        </button>
+      </div>
+
+      <div className="gms-micro gms-mt8">
+        Notes last updated:{" "}
+        {notesTsByContact[selected.id] || "No notes yet"}
+      </div>
+    </>
+  )}
+</div>
+
+
         </div>
 
         {/* interactions */}
@@ -590,6 +609,56 @@ function promptContactFields(existing = {}) {
           </div>
         </div>
       </div>
+      {isNotesOpen && selected && (
+  <div
+    className="gms-notes-modal-overlay"
+    onClick={closeNotesModal}
+  >
+    <div
+      className="gms-notes-modal"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="gms-notes-modal-header">
+        <div className="gms-head">
+          Notes for {selected.name}
+        </div>
+        <button
+          className="gms-kebab gms-notes-close"
+          onClick={closeNotesModal}
+          aria-label="Close notes"
+        >
+          ✕
+        </button>
+      </div>
+
+      <textarea
+        className="gms-notes"
+        rows={8}
+        value={notesDraft}
+        onChange={(e) => setNotesDraft(e.target.value)}
+        placeholder="Type notes about this contact..."
+      />
+
+      <div className="gms-micro gms-mt8">
+        Last updated:{" "}
+        {notesTsByContact[selected.id] || "Not saved yet"}
+      </div>
+
+      <div className="gms-notes-modal-footer">
+        <button className="gms-btn" onClick={closeNotesModal}>
+          Cancel
+        </button>
+        <button
+          className="gms-btn primary"
+          onClick={handleSaveNotesForContact}
+        >
+          Save Notes
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }

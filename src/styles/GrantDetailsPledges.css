@@ -34,3 +34,54 @@
 .gms-info { margin-bottom:12px; }
 .gms-info-title { font-weight:600; margin-bottom:4px; }
 .gms-info-text { color:#374151; font-size:14px; }
+
+.gms-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 40;
+}
+
+.gms-modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px 24px;
+  max-width: 720px;
+  width: 90%;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.25);
+}
+
+.gms-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.gms-modal-title {
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.gms-modal-close {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.gms-modal-kpis {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 12px;
+}
+
+.gms-modal-footer {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+

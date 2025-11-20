@@ -68,3 +68,45 @@
 .gms-table { min-width: 900px; width:100%; border-collapse:collapse; font-size:14px; }
 .gms-table thead tr { background:#f9fafb; }
 .gms-table th, .gms-table td { padding:10px 12px; border-bottom:1px solid #e5e7eb; text-align:left; }
+
+/* Notes modal overlay */
+.gms-notes-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+/* Modal card */
+.gms-notes-modal {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.18);
+  padding: 16px;
+  max-width: 480px;
+  width: 100%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.gms-notes-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.gms-notes-close {
+  font-size: 20px;
+}
+
+.gms-notes-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}

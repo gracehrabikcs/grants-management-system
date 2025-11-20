@@ -15,8 +15,8 @@ import {
 
 const GrantDetailsPledges = () => {
   const [grantDetails, setGrantDetails] = useState([]);
+  const [selectedMonthKey, setSelectedMonthKey] = useState(null); // ← modal state
 
-  // load JSON from public/data
   useEffect(() => {
     fetch("/data/grantDetails.json")
       .then((res) => res.json())
@@ -24,17 +24,17 @@ const GrantDetailsPledges = () => {
       .catch((err) => console.error("Error loading grant data:", err));
   }, []);
 
-  // later you can get this from the route
+  // TODO later: read this from route / props
   const currentGrantId = 1;
   const grant = grantDetails.find((g) => g.id === currentGrantId);
 
-  // pledges for this grant
+  // pledges for current grant
   const pledgeRows = grant?.pledges || [];
 
-  // build monthly series from the pledge dates
+  // ---------- dynamic monthly series ----------
   const monthNames = [
-    "Jan","Feb","Mar","Apr","May","Jun",
-    "Jul","Aug","Sep","Oct","Nov","Dec",
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
   ];
   const monthBuckets = {};
 
@@ -44,6 +44,7 @@ const GrantDetailsPledges = () => {
     if (isNaN(d)) return;
 
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+
     if (!monthBuckets[key]) {
       monthBuckets[key] = {
         pledged: 0,
@@ -57,11 +58,13 @@ const GrantDetailsPledges = () => {
 
   const monthlySeries = Object.entries(monthBuckets)
     .sort(([a], [b]) => (a < b ? -1 : 1))
-    .map(([, v]) => ({
+    .map(([key, v]) => ({
+      key,
       month: v.monthLabel,
       pledged: v.pledged,
       received: v.received,
     }));
+  // --------------------------------------------
 
   const currency = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -82,6 +85,126 @@ const GrantDetailsPledges = () => {
   ];
   const donutColors = ["#22c55e", "#ef4444"];
 
+  // ---------- bar click handler / modal data ----------
+  function handleBarClick(data) {
+    // data.payload will be the row from monthlySeries
+    if (!data || !data.payload || !data.payload.key) return;
+    setSelectedMonthKey(data.payload.key);
+  }
+
+  let modal = null;
+  if (selectedMonthKey) {
+    const pledgesForMonth = pledgeRows.filter((p) => {
+      if (!p.pledgedDate) return false;
+      const d = new Date(p.pledgedDate);
+      if (isNaN(d)) return false;
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      return key === selectedMonthKey;
+    });
+
+    const monthTotalsPledged = sum(pledgesForMonth, "amount");
+    const monthTotalsReceived = sum(pledgesForMonth, "received");
+    const monthTotalsOutstanding = monthTotalsPledged - monthTotalsReceived;
+
+    const label =
+      monthlySeries.find((m) => m.key === selectedMonthKey)?.month ||
+      "Selected Month";
+
+    modal = (
+      <div className="gms-modal-backdrop" onClick={() => setSelectedMonthKey(null)}>
+        <div
+          className="gms-modal"
+          onClick={(e) => e.stopPropagation()} // prevent backdrop click
+        >
+          <div className="gms-modal-header">
+            <div className="gms-modal-title">Monthly Pledge Report – {label}</div>
+            <button
+              className="gms-modal-close"
+              onClick={() => setSelectedMonthKey(null)}
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="gms-modal-kpis">
+            <div>
+              <div className="gms-micro">Total Pledged</div>
+              <div className="gms-strong">
+                {currency.format(monthTotalsPledged || 0)}
+              </div>
+            </div>
+            <div>
+              <div className="gms-micro">Total Received</div>
+              <div className="gms-strong gms-green">
+                {currency.format(monthTotalsReceived || 0)}
+              </div>
+            </div>
+            <div>
+              <div className="gms-micro">Outstanding</div>
+              <div className="gms-strong gms-red">
+                {currency.format(monthTotalsOutstanding || 0)}
+              </div>
+            </div>
+          </div>
+
+          <div className="gms-table-wrap gms-mt8">
+            <table className="gms-table">
+              <thead>
+                <tr>
+                  <th>Pledge ID</th>
+                  <th>Donor</th>
+                  <th>Amount</th>
+                  <th>Pledged Date</th>
+                  <th>Schedule</th>
+                  <th>Received</th>
+                  <th>Outstanding</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pledgesForMonth.map((row) => {
+                  const rowOutstanding =
+                    (row.amount || 0) - (row.received || 0);
+                  return (
+                    <tr key={row.id}>
+                      <td className="gms-strong">{row.id}</td>
+                      <td>{row.donor}</td>
+                      <td>{currency.format(row.amount || 0)}</td>
+                      <td>{row.pledgedDate}</td>
+                      <td>{row.schedule}</td>
+                      <td className="gms-green">
+                        {currency.format(row.received || 0)}
+                      </td>
+                      <td className={rowOutstanding > 0 ? "gms-red" : ""}>
+                        {currency.format(rowOutstanding)}
+                      </td>
+                    </tr>
+                  );
+                })}
+                {pledgesForMonth.length === 0 && (
+                  <tr>
+                    <td colSpan="7" style={{ textAlign: "center" }}>
+                      No pledges recorded for this month.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="gms-modal-footer">
+            <button
+              className="gms-btn"
+              onClick={() => setSelectedMonthKey(null)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  // ----------------------------------------------------
+
   return (
     <div className="content">
       <div className="gms-wrap">
@@ -91,16 +214,15 @@ const GrantDetailsPledges = () => {
             title="Total Pledged"
             subtitle={`From ${pledgeRows.length} pledges`}
           >
-            <div className="gms-kpi">{currency.format(totalPledged || 0)}</div>
+            <div className="gms-kpi">
+              {currency.format(totalPledged || 0)}
+            </div>
           </KpiCard>
-
           <KpiCard
             title="Total Received"
             subtitle={
               totalPledged
-                ? `${Math.round(
-                    (totalReceived / totalPledged) * 100
-                  )}% of total pledged`
+                ? `${Math.round((totalReceived / totalPledged) * 100)}% of total pledged`
                 : "—"
             }
           >
@@ -108,14 +230,11 @@ const GrantDetailsPledges = () => {
               {currency.format(totalReceived || 0)}
             </div>
           </KpiCard>
-
           <KpiCard
             title="Outstanding"
             subtitle={
               totalPledged
-                ? `${
-                    100 - Math.round((totalReceived / totalPledged) * 100)
-                  }% remaining`
+                ? `${100 - Math.round((totalReceived / totalPledged) * 100)}% remaining`
                 : "—"
             }
           >
@@ -123,7 +242,6 @@ const GrantDetailsPledges = () => {
               {currency.format(outstanding || 0)}
             </div>
           </KpiCard>
-
           <KpiCard title="Fulfillment Rate">
             <div className="gms-kpi">{fulfillment}%</div>
             <div className="gms-bar">
@@ -176,8 +294,18 @@ const GrantDetailsPledges = () => {
                   <XAxis dataKey="month" />
                   <YAxis />
                   <Tooltip formatter={(v) => currency.format(v)} />
-                  <Bar dataKey="pledged" name="Pledged" fill="#3b82f6" />
-                  <Bar dataKey="received" name="Received" fill="#22c55e" />
+                  <Bar
+                    dataKey="pledged"
+                    name="Pledged"
+                    fill="#3b82f6"
+                    onClick={handleBarClick}
+                  />
+                  <Bar
+                    dataKey="received"
+                    name="Received"
+                    fill="#22c55e"
+                    onClick={handleBarClick}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -233,12 +361,14 @@ const GrantDetailsPledges = () => {
             </table>
           </div>
         </Panel>
+
+        {/* modal render */}
+        {modal}
       </div>
     </div>
   );
 };
 
-// helper components
 function KpiCard({ title, subtitle, children }) {
   return (
     <div className="gms-card">
@@ -264,6 +394,9 @@ function Panel({ title, subtitle, children }) {
 }
 
 export default GrantDetailsPledges;
+
+
+
 
 
 

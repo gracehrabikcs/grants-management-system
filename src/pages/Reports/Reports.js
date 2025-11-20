@@ -181,18 +181,18 @@ export default function ReportsPage() {
               <div className="gms-filter-label">Date Range</div>
               <div className="gms-date-row">
                 <input
-                    type="date"
-                    value={dateFrom}
-                    onChange={(e) => setDateFrom(e.target.value)}
-                    className="gms-input"
-                  />
-                  <span className="gms-date-sep">–</span>
-                  <input
-                    type="date"
-                    value={dateTo}
-                    onChange={(e) => setDateTo(e.target.value)}
-                    className="gms-input"
-                  />
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="gms-input"
+                />
+                <span className="gms-date-sep">–</span>
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="gms-input"
+                />
               </div>
             </div>
 
@@ -231,7 +231,9 @@ export default function ReportsPage() {
 
         <div className="gms-card gms-mt16">
           <div className="gms-head gms-mb8">Recent Reports</div>
-          <div className="gms-subtle gms-mb12">Your recently generated reports</div>
+          <div className="gms-subtle gms-mb12">
+            Your recently generated reports
+          </div>
 
           <ul className="gms-report-list">
             {reports.map((rep) => (
@@ -284,6 +286,8 @@ function escapeCsv(val) {
   }
   return v;
 }
+
+
 
 
 
