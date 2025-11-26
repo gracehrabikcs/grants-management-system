@@ -1,76 +1,76 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
+import { useParams } from "react-router-dom";
 import "../../../styles/GrantDetailsPledges.css";
 import {
   PieChart,
   Pie,
   Cell,
   ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
   Tooltip,
-  CartesianGrid,
 } from "recharts";
+import {
+  collection,
+  getDoc,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  serverTimestamp,
+} from "firebase/firestore";
+import { db } from "../../../firebase";
 
 const GrantDetailsPledges = () => {
-  const [grantDetails, setGrantDetails] = useState([]);
+  const { id } = useParams();
+  const grantId = id || "1"; // Firestore doc id for the grant, e.g. "1"
 
-  // load JSON from public/data
-  useEffect(() => {
-    fetch("/data/grantDetails.json")
-      .then((res) => res.json())
-      .then((data) => setGrantDetails(data))
-      .catch((err) => console.error("Error loading grant data:", err));
-  }, []);
+  const [pledges, setPledges] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // later you can get this from the route
-  const currentGrantId = 1;
-  const grant = grantDetails.find((g) => g.id === currentGrantId);
+  // Notes state (for the side Notes panel)
+  const [activePledge, setActivePledge] = useState(null);
+  const [notesText, setNotesText] = useState("");
+  const [notesTs, setNotesTs] = useState("");
 
-  // pledges for this grant
-  const pledgeRows = grant?.pledges || [];
-
-  // build monthly series from the pledge dates
-  const monthNames = [
-    "Jan","Feb","Mar","Apr","May","Jun",
-    "Jul","Aug","Sep","Oct","Nov","Dec",
-  ];
-  const monthBuckets = {};
-
-  pledgeRows.forEach((p) => {
-    if (!p.pledgedDate) return;
-    const d = new Date(p.pledgedDate);
-    if (isNaN(d)) return;
-
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-    if (!monthBuckets[key]) {
-      monthBuckets[key] = {
-        pledged: 0,
-        received: 0,
-        monthLabel: `${monthNames[d.getMonth()]} ${d.getFullYear()}`,
-      };
+  // ---------- Firestore load ----------
+  async function loadPledges() {
+    setLoading(true);
+    setError("");
+    try {
+      const snap = await getDocs(collection(db, "grants", grantId, "pledges"));
+      const rows = snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      }));
+      setPledges(rows);
+    } catch (err) {
+      console.error("Error loading pledges:", err);
+      setError("Could not load pledges.");
+    } finally {
+      setLoading(false);
     }
-    monthBuckets[key].pledged += p.amount || 0;
-    monthBuckets[key].received += p.received || 0;
-  });
+  }
 
-  const monthlySeries = Object.entries(monthBuckets)
-    .sort(([a], [b]) => (a < b ? -1 : 1))
-    .map(([, v]) => ({
-      month: v.monthLabel,
-      pledged: v.pledged,
-      received: v.received,
-    }));
+  useEffect(() => {
+    loadPledges();
+  }, [grantId]);
 
-  const currency = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  });
-  const sum = (arr, key) => arr.reduce((a, x) => a + (x[key] || 0), 0);
+  // ---------- Helpers ----------
+  const currency = useMemo(
+    () =>
+      new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }),
+    []
+  );
 
-  const totalPledged = sum(pledgeRows, "amount");
-  const totalReceived = sum(pledgeRows, "received");
+  const sum = (arr, key) =>
+    arr.reduce((a, x) => a + (Number(x[key]) || 0), 0);
+
+  const totalPledged = sum(pledges, "amount");
+  const totalReceived = sum(pledges, "received");
   const outstanding = totalPledged - totalReceived;
   const fulfillment = totalPledged
     ? Math.round((totalReceived / totalPledged) * 100)
@@ -82,6 +82,146 @@ const GrantDetailsPledges = () => {
   ];
   const donutColors = ["#22c55e", "#ef4444"];
 
+  function parseMoney(value) {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  // ---------- CRUD Handlers ----------
+  async function handleAddPledge() {
+    const donor = prompt("Donor name:");
+    if (!donor) return;
+
+    const amountStr = prompt("Total pledged amount:", "0");
+    const amount = parseMoney(amountStr);
+
+    const pledgedDate =
+      prompt(
+        "Pledged date (YYYY-MM-DD):",
+        new Date().toISOString().slice(0, 10)
+      ) || "";
+
+    const schedule =
+      prompt(
+        "Schedule (Annual / Quarterly / Semi-Annual / One-time):",
+        "Annual"
+      ) || "";
+
+    const receivedStr = prompt("Amount received so far:", "0");
+    const received = parseMoney(receivedStr);
+
+    try {
+      await addDoc(collection(db, "grants", grantId, "pledges"), {
+        donor,
+        amount,
+        pledgedDate,
+        schedule,
+        received,
+        createdAt: serverTimestamp(),
+      });
+      await loadPledges();
+    } catch (err) {
+      console.error("Error adding pledge:", err);
+      alert("Could not add pledge.");
+    }
+  }
+
+  async function handleEditPledge(row) {
+    const donor =
+      prompt("Donor name:", row.donor || "") ?? row.donor;
+
+    const amountStr =
+      prompt("Total pledged amount:", row.amount ?? "") ?? row.amount;
+    const amount = parseMoney(amountStr);
+
+    const pledgedDate =
+      prompt(
+        "Pledged date (YYYY-MM-DD):",
+        row.pledgedDate || ""
+      ) ?? row.pledgedDate;
+
+    const schedule =
+      prompt("Schedule:", row.schedule || "") ?? row.schedule;
+
+    const receivedStr =
+      prompt("Amount received so far:", row.received ?? "") ??
+      row.received;
+    const received = parseMoney(receivedStr);
+
+    try {
+      const ref = doc(db, "grants", grantId, "pledges", row.id);
+      await updateDoc(ref, {
+        donor,
+        amount,
+        pledgedDate,
+        schedule,
+        received,
+        updatedAt: serverTimestamp(),
+      });
+      await loadPledges();
+    } catch (err) {
+      console.error("Error updating pledge:", err);
+      alert("Could not update pledge.");
+    }
+  }
+
+  async function handleDeletePledge(row) {
+    if (!window.confirm(`Delete pledge from "${row.donor}"?`)) return;
+    try {
+      const ref = doc(db, "grants", grantId, "pledges", row.id);
+      await deleteDoc(ref);
+      await loadPledges();
+    } catch (err) {
+      console.error("Error deleting pledge:", err);
+      alert("Could not delete pledge.");
+    }
+  }
+
+  // ---------- Notes Handlers (side panel) ----------
+  async function openNotesPanel(row) {
+    setActivePledge(row);
+    setNotesText("");
+    setNotesTs("");
+
+    try {
+      const ref = doc(db, "grants", grantId, "pledges", row.id);
+      const snap = await getDoc(ref);
+
+      if (snap.exists()) {
+        const data = snap.data();
+        setNotesText(data.notes || "");
+        setNotesTs(
+          data.notesUpdatedAt
+            ? data.notesUpdatedAt.toDate().toLocaleString()
+            : "Not saved yet"
+        );
+      } else {
+        setNotesTs("Not saved yet");
+      }
+    } catch (err) {
+      console.error("Error loading pledge notes:", err);
+    }
+  }
+
+  async function saveNotes() {
+    if (!activePledge) return;
+
+    try {
+      const ref = doc(db, "grants", grantId, "pledges", activePledge.id);
+      await updateDoc(ref, {
+        notes: notesText,
+        notesUpdatedAt: serverTimestamp(),
+      });
+
+      setNotesTs(new Date().toLocaleString());
+      alert("Notes saved.");
+    } catch (err) {
+      console.error("Error saving pledge notes:", err);
+      alert("Could not save notes.");
+    }
+  }
+
+  // ---------- Render ----------
   return (
     <div className="content">
       <div className="gms-wrap">
@@ -89,9 +229,11 @@ const GrantDetailsPledges = () => {
         <div className="gms-grid gms-grid-4">
           <KpiCard
             title="Total Pledged"
-            subtitle={`From ${pledgeRows.length} pledges`}
+            subtitle={`From ${pledges.length} pledges`}
           >
-            <div className="gms-kpi">{currency.format(totalPledged || 0)}</div>
+            <div className="gms-kpi">
+              {currency.format(totalPledged || 0)}
+            </div>
           </KpiCard>
 
           <KpiCard
@@ -114,7 +256,10 @@ const GrantDetailsPledges = () => {
             subtitle={
               totalPledged
                 ? `${
-                    100 - Math.round((totalReceived / totalPledged) * 100)
+                    100 -
+                    Math.round(
+                      (totalReceived / totalPledged) * 100
+                    )
                   }% remaining`
                 : "—"
             }
@@ -135,7 +280,7 @@ const GrantDetailsPledges = () => {
           </KpiCard>
         </div>
 
-        {/* Charts */}
+        {/* Charts + Notes panel */}
         <div className="gms-grid gms-grid-2">
           <Panel
             title="Pledge Status Distribution"
@@ -159,56 +304,112 @@ const GrantDetailsPledges = () => {
                       />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(v) => currency.format(v)} />
+                  <Tooltip
+                    formatter={(v) =>
+                      currency.format(Number(v) || 0)
+                    }
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>
           </Panel>
 
           <Panel
-            title="Monthly Pledge Activity"
-            subtitle="Pledged vs received amounts by month"
+            title="Notes"
+            subtitle={
+              activePledge
+                ? `Pledge Notes — ${activePledge.donor}`
+                : "Select a pledge and click 📝 to view or edit notes."
+            }
           >
-            <div className="gms-chart">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlySeries}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip formatter={(v) => currency.format(v)} />
-                  <Bar dataKey="pledged" name="Pledged" fill="#3b82f6" />
-                  <Bar dataKey="received" name="Received" fill="#22c55e" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {!activePledge ? (
+              <div className="gms-subtle">
+                Choose a pledge from the table below and click the 📝
+                Notes button to view or edit its notes here.
+              </div>
+            ) : (
+              <>
+                <textarea
+                  className="gms-notes"
+                  rows={8}
+                  value={notesText}
+                  onChange={(e) => setNotesText(e.target.value)}
+                />
+
+                <div className="gms-micro gms-mt8">
+                  Last updated: {notesTs || "Not saved yet"}
+                </div>
+
+                <div
+                  className="gms-modal-footer"
+                  style={{ marginTop: 8 }}
+                >
+                  <button
+                    className="gms-btn primary"
+                    onClick={saveNotes}
+                  >
+                    Save Notes
+                  </button>
+                  <button
+                    className="gms-btn"
+                    onClick={() => {
+                      setActivePledge(null);
+                      setNotesText("");
+                      setNotesTs("");
+                    }}
+                  >
+                    Clear
+                  </button>
+                </div>
+              </>
+            )}
           </Panel>
         </div>
 
-        {/* Table */}
+        {/* Table + Add button */}
         <Panel
           title="Individual Pledge Records"
           subtitle="Detailed view of all pledges and payment tracking"
         >
+          <div className="gms-flex-between gms-mb8">
+            <div className="gms-subtle"></div>
+            <button className="gms-btn" onClick={handleAddPledge}>
+              + Add Pledge
+            </button>
+          </div>
+
+          {loading && (
+            <div className="gms-subtle">Loading pledges…</div>
+          )}
+          {error && (
+            <div
+              className="gms-subtle gms-red"
+              style={{ marginBottom: 8 }}
+            >
+              {error}
+            </div>
+          )}
+
           <div className="gms-table-wrap">
             <table className="gms-table">
               <thead>
                 <tr>
-                  <th>Pledge ID</th>
                   <th>Donor</th>
                   <th>Amount</th>
                   <th>Pledged Date</th>
                   <th>Schedule</th>
                   <th>Received</th>
                   <th>Outstanding</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
-                {pledgeRows.map((row) => {
+                {pledges.map((row) => {
                   const rowOutstanding =
-                    (row.amount || 0) - (row.received || 0);
+                    (Number(row.amount) || 0) -
+                    (Number(row.received) || 0);
                   return (
                     <tr key={row.id}>
-                      <td className="gms-strong">{row.id}</td>
                       <td>{row.donor}</td>
                       <td>{currency.format(row.amount || 0)}</td>
                       <td>{row.pledgedDate}</td>
@@ -216,13 +417,40 @@ const GrantDetailsPledges = () => {
                       <td className="gms-green">
                         {currency.format(row.received || 0)}
                       </td>
-                      <td className={rowOutstanding > 0 ? "gms-red" : ""}>
+                      <td
+                        className={
+                          rowOutstanding > 0 ? "gms-red" : ""
+                        }
+                      >
                         {currency.format(rowOutstanding)}
+                      </td>
+                      <td className="gms-flex gap8">
+                        <button
+                          className="gms-kebab"
+                          title="Edit pledge"
+                          onClick={() => handleEditPledge(row)}
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          className="gms-kebab"
+                          title="Delete pledge"
+                          onClick={() => handleDeletePledge(row)}
+                        >
+                          🗑️
+                        </button>
+                        <button
+                          className="gms-kebab"
+                          title="Pledge Notes"
+                          onClick={() => openNotesPanel(row)}
+                        >
+                          📝
+                        </button>
                       </td>
                     </tr>
                   );
                 })}
-                {pledgeRows.length === 0 && (
+                {!loading && pledges.length === 0 && (
                   <tr>
                     <td colSpan="7" style={{ textAlign: "center" }}>
                       No pledges for this grant.
@@ -264,6 +492,9 @@ function Panel({ title, subtitle, children }) {
 }
 
 export default GrantDetailsPledges;
+
+
+
 
 
 
