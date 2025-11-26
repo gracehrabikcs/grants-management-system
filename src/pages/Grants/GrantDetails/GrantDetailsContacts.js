@@ -1,10 +1,19 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import "../../../styles/GrantDetailsContacts.css";
 
-const NOTES_KEY = "gms_contacts_notes";
-const NOTES_TS_KEY = "gms_contacts_notes_ts";
-const CONTACTS_KEY = "gms_contacts_list";
-const INTERACTIONS_KEY = "gms_contacts_interactions";
+import {
+  collection,
+  doc,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+import { db } from "../../../firebase"; // adjust if your path is different
+
+/* -------------------- Helpers -------------------- */
 
 function initialsOf(name = "") {
   return name
@@ -15,170 +24,101 @@ function initialsOf(name = "") {
     .join("");
 }
 
-const INITIAL_CONTACTS = [
-  {
-    id: "c1",
-    name: "Dr. Sarah Chen",
-    role: "Principal Investigator",
-    email: "s.chen@university.edu",
-    phone: "(555) 123-4567",
-    department: "Computer Science & Education",
-    institution: "Future Learning University",
-    lastContact: "March 8, 2024",
-    keyStakeholder: true,
-  },
-  {
-    id: "c2",
-    name: "Michael Rodriguez",
-    role: "Project Manager",
-    email: "m.rodriguez@tech.org",
-    phone: "(555) 555-9843",
-    department: "Grants Admin",
-    institution: "Tech Innovation Corp",
-    lastContact: "March 5, 2024",
-    keyStakeholder: false,
-  },
-  {
-    id: "c3",
-    name: "Emily Johnson",
-    role: "Research Coordinator",
-    email: "emily.j@research.edu",
-    phone: "(555) 201-8899",
-    department: "Research",
-    institution: "Education Trust",
-    lastContact: "March 1, 2024",
-    keyStakeholder: false,
-  },
-  {
-    id: "c4",
-    name: "David Kim",
-    role: "Financial Officer",
-    email: "dkim@communitybank.com",
-    phone: "(555) 220-0188",
-    department: "Finance",
-    institution: "Community Bank",
-    lastContact: "Feb 28, 2024",
-    keyStakeholder: false,
-  },
-  {
-    id: "c5",
-    name: "Lisa Thompson",
-    role: "External Evaluator",
-    email: "lisa.t@eval.org",
-    phone: "(555) 300-7781",
-    department: "Evaluation",
-    institution: "Evaluation Partners",
-    lastContact: "Feb 28, 2024",
-    keyStakeholder: false,
-  },
-];
+function normalizeType(t = "") {
+  const v = t.trim().toLowerCase();
+  if (v === "email") return "Email";
+  if (v === "phone") return "Phone";
+  if (v === "meeting") return "Meeting";
+  return "Other";
+}
 
-const INITIAL_INTERACTIONS = [
-  {
-    id: "i1",
-    date: "Mar 8, 2024",
-    contact: "Dr. Sarah Chen",
-    type: "Email",
-    subject: "Q1 Progress Review",
-    outcome: "Report submitted on time",
-    next: "Schedule Q2 review meeting",
-  },
-  {
-    id: "i2",
-    date: "Mar 5, 2024",
-    contact: "Michael Rodriguez",
-    type: "Phone",
-    subject: "Budget adjustment discussion",
-    outcome: "Approved 5% reallocation",
-    next: "Update budget documents",
-  },
-  {
-    id: "i3",
-    date: "Mar 1, 2024",
-    contact: "Emily Johnson",
-    type: "Meeting",
-    subject: "Data collection status",
-    outcome: "75% completion achieved",
-    next: "Plan final data collection phase",
-  },
-  {
-    id: "i4",
-    date: "Feb 28, 2024",
-    contact: "Lisa Thompson",
-    type: "Email",
-    subject: "External evaluation timeline",
-    outcome: "Timeline confirmed",
-    next: "Send evaluation materials",
-  },
-];
+function downloadCsv(filename, rows) {
+  const processRow = (row) =>
+    row
+      .map((val) => `"${String(val ?? "").replace(/"/g, '""')}"`)
+      .join(",");
+  const csvContent = rows.map(processRow).join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", filename);
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+/* -------------------- Component -------------------- */
 
 export default function GrantDetailsContacts() {
+  const { id: grantId } = useParams(); // grant id from route
+
   const [contacts, setContacts] = useState([]);
   const [interactions, setInteractions] = useState([]);
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState("");
-  const [notes, setNotes] = useState("");
-  const [notesTs, setNotesTs] = useState("");
-  
-useEffect(() => {
-  // contacts
-  const savedContacts = localStorage.getItem(CONTACTS_KEY);
-  if (savedContacts) {
-    const parsed = JSON.parse(savedContacts);
-    setContacts(parsed);
-    if (parsed[0]) setSelectedId(parsed[0].id);
-  } else {
-    // first time: use initial mock data
-    setContacts(INITIAL_CONTACTS);
-    setSelectedId(INITIAL_CONTACTS[0].id);
-  }
 
-  // interactions
-  const savedInteractions = localStorage.getItem(INTERACTIONS_KEY);
-  if (savedInteractions) {
-    setInteractions(JSON.parse(savedInteractions));
-  } else {
-    setInteractions(INITIAL_INTERACTIONS);
-  }
-}, []);
+  // modal state for per-contact notes
+  const [isNotesOpen, setIsNotesOpen] = useState(false);
+  const [notesDraft, setNotesDraft] = useState("");
+  const [isSavingNotes, setIsSavingNotes] = useState(false);
 
-useEffect(() => {
-  if (contacts.length) {
-    localStorage.setItem(CONTACTS_KEY, JSON.stringify(contacts));
-  }
-}, [contacts]);
+  /* ---------- Load contacts + interactions from Firestore ---------- */
 
-useEffect(() => {
-  if (interactions.length) {
-    localStorage.setItem(INTERACTIONS_KEY, JSON.stringify(interactions));
-  }
-}, [interactions]);
-
-
-  // load notes from localStorage on mount
   useEffect(() => {
-    const savedNotes = localStorage.getItem(NOTES_KEY);
-    const savedTs = localStorage.getItem(NOTES_TS_KEY);
-    if (savedNotes != null) {
-      setNotes(savedNotes);
-    } else {
-      // initial default if none saved yet
-      setNotes(
-        [
-          "March 8, 2024: Discussed Q1 progress with Dr. Sarah Chen. All milestones on track. Need to schedule Q2 review meeting by end of month.",
-          "March 5, 2024: Budget reallocation approved after discussion with Michael Rodriguez. 5% moved from equipment to personnel costs.",
-          "",
-          "Follow-up needed:",
-          "- Send evaluation materials to Lisa Thompson",
-          "- Update budget documentation",
-          "- Schedule team meeting for Q2 planning",
-        ].join("\n")
-      );
+    if (!grantId) return;
+
+    const contactsRef = collection(db, "grants", String(grantId), "contacts");
+    const interactionsRef = collection(
+      db,
+      "grants",
+      String(grantId),
+      "interactions"
+    );
+
+    async function load() {
+      try {
+        // contacts
+        const snapContacts = await getDocs(contactsRef);
+        const loadedContacts = snapContacts.docs.map((d) => {
+          const data = d.data();
+          let notesUpdatedAt = "";
+          if (data.notesUpdatedAt?.toDate) {
+            notesUpdatedAt = data.notesUpdatedAt
+              .toDate()
+              .toLocaleString();
+          }
+          return {
+            id: d.id,
+            ...data,
+            notes: data.notes || "",
+            notesUpdatedAt,
+          };
+        });
+        setContacts(loadedContacts);
+        if (loadedContacts[0]) {
+          setSelectedId(loadedContacts[0].id);
+        }
+
+        // interactions
+        const snapInteractions = await getDocs(interactionsRef);
+        const loadedInteractions = snapInteractions.docs.map((d) => ({
+          id: d.id,
+          ...d.data(),
+        }));
+        // sort most recent first by whatever "date" string they have
+        loadedInteractions.sort((a, b) =>
+          (b.date || "").localeCompare(a.date || "")
+        );
+        setInteractions(loadedInteractions);
+      } catch (err) {
+        console.error("Error loading contacts/interactions:", err);
+      }
     }
-    if (savedTs != null) {
-      setNotesTs(savedTs);
-    }
-  }, []);
+
+    load();
+  }, [grantId]);
+
+  /* ---------- Derived values ---------- */
 
   const selected = useMemo(
     () => contacts.find((c) => c.id === selectedId),
@@ -190,28 +130,356 @@ useEffect(() => {
     if (!q) return contacts;
     return contacts.filter(
       (c) =>
-        c.name.toLowerCase().includes(q) ||
-        c.role.toLowerCase().includes(q) ||
-        c.email.toLowerCase().includes(q)
+        c.name?.toLowerCase().includes(q) ||
+        c.role?.toLowerCase().includes(q) ||
+        c.email?.toLowerCase().includes(q)
     );
   }, [query, contacts]);
 
   const metrics = {
     total: contacts.length,
-    // removed active contacts
     keyStakeholders: contacts.filter((c) => c.keyStakeholder).length,
     recentInteractions: interactions.length,
   };
 
-  // --- handlers ---
+  /* ---------- Notes modal handlers ---------- */
 
-  function handleSaveNotes() {
-    const ts = new Date().toLocaleString();
-    localStorage.setItem(NOTES_KEY, notes);
-    localStorage.setItem(NOTES_TS_KEY, ts);
-    setNotesTs(ts);
-    alert("Notes saved.");
+  function openNotesModal() {
+    if (!selected) return;
+    setNotesDraft(selected.notes || "");
+    setIsNotesOpen(true);
   }
+
+  function closeNotesModal() {
+    if (isSavingNotes) return;
+    setIsNotesOpen(false);
+  }
+
+  async function handleSaveNotesForContact() {
+    if (!selected || !grantId) return;
+    setIsSavingNotes(true);
+
+    try {
+      const ref = doc(
+        db,
+        "grants",
+        String(grantId),
+        "contacts",
+        selected.id
+      );
+
+      await updateDoc(ref, {
+        notes: notesDraft,
+        notesUpdatedAt: serverTimestamp(),
+      });
+
+      // update local state so UI shows latest without reload
+      const tsLocal = new Date().toLocaleString();
+      setContacts((prev) =>
+        prev.map((c) =>
+          c.id === selected.id
+            ? { ...c, notes: notesDraft, notesUpdatedAt: tsLocal }
+            : c
+        )
+      );
+
+      setIsNotesOpen(false);
+    } catch (err) {
+      console.error("Error saving contact notes:", err);
+      alert("Could not save notes. Check console for details.");
+    } finally {
+      setIsSavingNotes(false);
+    }
+  }
+
+  async function handleClearNotesForContact() {
+    if (!selected || !grantId) return;
+    const ok = window.confirm(
+      `Clear all notes for ${selected.name}?`
+    );
+    if (!ok) return;
+
+    setIsSavingNotes(true);
+    try {
+      const ref = doc(
+        db,
+        "grants",
+        String(grantId),
+        "contacts",
+        selected.id
+      );
+      await updateDoc(ref, {
+        notes: "",
+        notesUpdatedAt: serverTimestamp(),
+      });
+
+      const tsLocal = new Date().toLocaleString();
+      setContacts((prev) =>
+        prev.map((c) =>
+          c.id === selected.id
+            ? { ...c, notes: "", notesUpdatedAt: tsLocal }
+            : c
+        )
+      );
+      setNotesDraft("");
+    } catch (err) {
+      console.error("Error clearing notes:", err);
+      alert("Could not clear notes. Check console for details.");
+    } finally {
+      setIsSavingNotes(false);
+    }
+  }
+
+  /* ---------- Contact CRUD (still via prompts) ---------- */
+
+  function promptContactFields(existing = {}) {
+    const name = prompt("Name:", existing.name || "");
+    if (!name) return null;
+
+    const email = prompt("Email:", existing.email || "") || "";
+    const phone = prompt("Phone:", existing.phone || "") || "";
+    const department = prompt("Department:", existing.department || "") || "";
+    const institution =
+      prompt("Institution:", existing.institution || "") || "";
+    const role = prompt("Position / Job title:", existing.role || "") || "";
+    const lastContact =
+      prompt("Last contact date:", existing.lastContact || "") || "—";
+
+    const ksAnswer = prompt(
+      "Is this a key stakeholder? (yes/no)",
+      existing.keyStakeholder ? "yes" : "no"
+    );
+    const keyStakeholder = ksAnswer && ksAnswer.toLowerCase().startsWith("y");
+
+    return {
+      name,
+      email,
+      phone,
+      department,
+      institution,
+      role,
+      lastContact,
+      keyStakeholder,
+    };
+  }
+
+  async function handleAddContact() {
+    if (!grantId) return;
+    const data = promptContactFields();
+    if (!data) return;
+
+    try {
+      const contactsRef = collection(
+        db,
+        "grants",
+        String(grantId),
+        "contacts"
+      );
+      const docRef = await addDoc(contactsRef, {
+        ...data,
+        notes: "",
+        notesUpdatedAt: null,
+      });
+      const newContact = {
+        id: docRef.id,
+        ...data,
+        notes: "",
+        notesUpdatedAt: "",
+      };
+      setContacts((prev) => [...prev, newContact]);
+      setSelectedId(newContact.id);
+    } catch (err) {
+      console.error("Error adding contact:", err);
+      alert("Could not add contact. Check console for details.");
+    }
+  }
+
+  async function handleEditContact() {
+    if (!selected || !grantId) return;
+    const data = promptContactFields(selected);
+    if (!data) return;
+
+    try {
+      const ref = doc(
+        db,
+        "grants",
+        String(grantId),
+        "contacts",
+        selected.id
+      );
+      await updateDoc(ref, data);
+
+      setContacts((prev) =>
+        prev.map((c) =>
+          c.id === selected.id ? { ...c, ...data } : c
+        )
+      );
+    } catch (err) {
+      console.error("Error updating contact:", err);
+      alert("Could not update contact. Check console for details.");
+    }
+  }
+
+  async function handleContactDelete(e, contactId) {
+    e.stopPropagation();
+    if (!grantId) return;
+
+    const contact = contacts.find((c) => c.id === contactId);
+    if (!contact) return;
+    const ok = window.confirm(
+      `Are you sure you want to remove ${contact.name}?`
+    );
+    if (!ok) return;
+
+    try {
+      const ref = doc(
+        db,
+        "grants",
+        String(grantId),
+        "contacts",
+        contactId
+      );
+      await deleteDoc(ref);
+
+      const remaining = contacts.filter((c) => c.id !== contactId);
+      setContacts(remaining);
+      if (selectedId === contactId) {
+        setSelectedId(remaining[0] ? remaining[0].id : "");
+      }
+    } catch (err) {
+      console.error("Error deleting contact:", err);
+      alert("Could not delete contact. Check console for details.");
+    }
+  }
+
+  function handleEmail() {
+    if (!selected || !selected.email) {
+      alert("No email for this contact.");
+      return;
+    }
+    window.location.href = `mailto:${selected.email}`;
+  }
+
+  /* ---------- Interaction handlers (still prompt-based) ---------- */
+
+  async function handleLogInteraction() {
+    if (!grantId) return;
+
+    const date =
+      prompt(
+        "Date (e.g. Mar 10, 2024):",
+        new Date().toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        })
+      ) || "";
+    const contactName = prompt(
+      "Contact name:",
+      selected ? selected.name : ""
+    );
+    if (!contactName) return;
+    const typeRaw = prompt(
+      "Type (email, phone, meeting, other):",
+      "email"
+    );
+    const type = normalizeType(typeRaw);
+    const subject = prompt("Subject:", "") || "";
+    const outcome = prompt("Outcome:", "") || "";
+    const next = prompt("Next action:", "") || "";
+
+    const newInteraction = {
+      date,
+      contact: contactName,
+      type,
+      subject,
+      outcome,
+      next,
+    };
+
+    try {
+      const interactionsRef = collection(
+        db,
+        "grants",
+        String(grantId),
+        "interactions"
+      );
+      const docRef = await addDoc(interactionsRef, newInteraction);
+      setInteractions((prev) => [
+        { id: docRef.id, ...newInteraction },
+        ...prev,
+      ]);
+    } catch (err) {
+      console.error("Error logging interaction:", err);
+      alert("Could not log interaction. Check console for details.");
+    }
+  }
+
+  async function handleEditInteraction(id) {
+    if (!grantId) return;
+    const interaction = interactions.find((i) => i.id === id);
+    if (!interaction) return;
+
+    const date = prompt("Date:", interaction.date) || interaction.date;
+    const contact =
+      prompt("Contact:", interaction.contact) || interaction.contact;
+    const typeRaw =
+      prompt(
+        "Type (email, phone, meeting, other):",
+        interaction.type
+      ) || interaction.type;
+    const type = normalizeType(typeRaw);
+    const subject =
+      prompt("Subject:", interaction.subject) || interaction.subject;
+    const outcome =
+      prompt("Outcome:", interaction.outcome) || interaction.outcome;
+    const next =
+      prompt("Next action:", interaction.next) || interaction.next;
+
+    const updated = { date, contact, type, subject, outcome, next };
+
+    try {
+      const ref = doc(
+        db,
+        "grants",
+        String(grantId),
+        "interactions",
+        id
+      );
+      await updateDoc(ref, updated);
+      setInteractions((prev) =>
+        prev.map((i) => (i.id === id ? { ...i, ...updated } : i))
+      );
+    } catch (err) {
+      console.error("Error updating interaction:", err);
+      alert("Could not update interaction. Check console for details.");
+    }
+  }
+
+  async function handleDeleteInteraction(id) {
+    if (!grantId) return;
+    const it = interactions.find((i) => i.id === id);
+    if (!it) return;
+    const ok = window.confirm(`Delete interaction with ${it.contact}?`);
+    if (!ok) return;
+
+    try {
+      const ref = doc(
+        db,
+        "grants",
+        String(grantId),
+        "interactions",
+        id
+      );
+      await deleteDoc(ref);
+      setInteractions((prev) => prev.filter((i) => i.id !== id));
+    } catch (err) {
+      console.error("Error deleting interaction:", err);
+      alert("Could not delete interaction. Check console for details.");
+    }
+  }
+
+  /* ---------- Export handlers ---------- */
 
   function handleExportContacts() {
     const header = [
@@ -235,114 +503,6 @@ useEffect(() => {
     downloadCsv("contacts_export.csv", [header, ...rows]);
   }
 
-function promptContactFields(existing = {}) {
-  const name = prompt("Name:", existing.name || "");
-  if (!name) return null;
-
-  const email = prompt("Email:", existing.email || "") || "";
-  const phone = prompt("Phone:", existing.phone || "") || "";
-  const department = prompt("Department:", existing.department || "") || "";
-  const institution = prompt("Institution:", existing.institution || "") || "";
-  const role = prompt("Position / Job title:", existing.role || "") || "";
-  const lastContact =
-    prompt("Last contact date:", existing.lastContact || "") || "—";
-
-  // ask about key stakeholder
-  const ksAnswer = prompt(
-    "Is this a key stakeholder? (yes/no)",
-    existing.keyStakeholder ? "yes" : "no"
-  );
-  const keyStakeholder =
-    ksAnswer && ksAnswer.toLowerCase().startsWith("y");
-
-  return {
-    name,
-    email,
-    phone,
-    department,
-    institution,
-    role,
-    lastContact,
-    keyStakeholder,
-  };
-}
-
-
-  function handleAddContact() {
-    const data = promptContactFields();
-    if (!data) return;
-    const newContact = {
-      id: "c" + (contacts.length + 1),
-      ...data,
-    };
-    setContacts((prev) => [...prev, newContact]);
-    setSelectedId(newContact.id);
-  }
-
-  function handleEditContact() {
-    if (!selected) return;
-    const data = promptContactFields(selected);
-    if (!data) return;
-    setContacts((prev) =>
-      prev.map((c) => (c.id === selected.id ? { ...c, ...data } : c))
-    );
-  }
-
-  function handleContactDelete(e, contactId) {
-    e.stopPropagation();
-    const contact = contacts.find((c) => c.id === contactId);
-    if (!contact) return;
-    const ok = window.confirm(
-      `Are you sure you want to remove ${contact.name}?`
-    );
-    if (!ok) return;
-    const remaining = contacts.filter((c) => c.id !== contactId);
-    setContacts(remaining);
-    if (selectedId === contactId) {
-      setSelectedId(remaining[0] ? remaining[0].id : "");
-    }
-  }
-
-  function handleEmail() {
-    if (!selected || !selected.email) {
-      alert("No email for this contact.");
-      return;
-    }
-    window.location.href = `mailto:${selected.email}`;
-  }
-
-  function handleLogInteraction() {
-    const date =
-      prompt("Date (e.g. Mar 10, 2024):", new Date().toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })) || "";
-    const contactName = prompt(
-      "Contact name:",
-      selected ? selected.name : ""
-    );
-    if (!contactName) return;
-    const typeRaw = prompt(
-      "Type (email, phone, meeting, other):",
-      "email"
-    );
-    const type = normalizeType(typeRaw);
-    const subject = prompt("Subject:", "") || "";
-    const outcome = prompt("Outcome:", "") || "";
-    const next = prompt("Next action:", "") || "";
-    const newInteraction = {
-      id: "i" + (interactions.length + 1),
-      date,
-      contact: contactName,
-      type,
-      subject,
-      outcome,
-      next,
-    };
-    setInteractions((prev) => [newInteraction, ...prev]);
-  }
-
   function handleExportInteractions() {
     const header = [
       "Date",
@@ -363,37 +523,7 @@ function promptContactFields(existing = {}) {
     downloadCsv("interactions_export.csv", [header, ...rows]);
   }
 
-  function handleEditInteraction(id) {
-    const interaction = interactions.find((i) => i.id === id);
-    if (!interaction) return;
-    const date = prompt("Date:", interaction.date) || interaction.date;
-    const contact = prompt("Contact:", interaction.contact) || interaction.contact;
-    const typeRaw =
-      prompt(
-        "Type (email, phone, meeting, other):",
-        interaction.type
-      ) || interaction.type;
-    const type = normalizeType(typeRaw);
-    const subject = prompt("Subject:", interaction.subject) || interaction.subject;
-    const outcome = prompt("Outcome:", interaction.outcome) || interaction.outcome;
-    const next = prompt("Next action:", interaction.next) || interaction.next;
-
-    setInteractions((prev) =>
-      prev.map((i) =>
-        i.id === id
-          ? { ...i, date, contact, type, subject, outcome, next }
-          : i
-      )
-    );
-  }
-
-  function handleDeleteInteraction(id) {
-    const it = interactions.find((i) => i.id === id);
-    if (!it) return;
-    const ok = window.confirm(`Delete interaction with ${it.contact}?`);
-    if (!ok) return;
-    setInteractions((prev) => prev.filter((i) => i.id !== id));
-  }
+  /* ---------- Render ---------- */
 
   return (
     <div className="content">
@@ -408,33 +538,14 @@ function promptContactFields(existing = {}) {
           </div>
           <div className="gms-kpi-grid">
             <Metric label="Total Contacts" value={metrics.total} />
-            {/* removed Active Contacts */}
-            <Metric label="Key Stakeholders" value={metrics.keyStakeholders} />
+            <Metric
+              label="Key Stakeholders"
+              value={metrics.keyStakeholders}
+            />
             <Metric
               label="Recent Interactions"
               value={metrics.recentInteractions}
             />
-          </div>
-        </div>
-
-        {/* notes */}
-        <div className="gms-card">
-          <div className="gms-flex-between gms-mb8">
-            <div className="gms-head">
-              <span className="gms-ico">📄</span> Contact Notes
-            </div>
-            <button className="gms-btn primary" onClick={handleSaveNotes}>
-              Save Notes
-            </button>
-          </div>
-          <textarea
-            className="gms-notes"
-            rows={8}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
-          <div className="gms-micro gms-mt8">
-            Last updated: {notesTs ? notesTs : "Not saved yet"}
           </div>
         </div>
 
@@ -473,7 +584,6 @@ function promptContactFields(existing = {}) {
                     <div className="gms-subtle">{c.role}</div>
                   </div>
                   <div className="gms-spacer" />
-                  {/* removed status badge */}
                   <button
                     className="gms-kebab"
                     onClick={(e) => handleContactDelete(e, c.id)}
@@ -522,7 +632,15 @@ function promptContactFields(existing = {}) {
                   <button className="gms-btn ghost" onClick={handleEmail}>
                     ✉️ Email
                   </button>
-                  {/* removed Call / Message */}
+                  {/* 👉 New per-contact notes button */}
+                  <button className="gms-btn ghost" onClick={openNotesModal}>
+                    📝 Contact Notes
+                  </button>
+                </div>
+
+                <div className="gms-micro gms-mt8">
+                  Notes last updated:{" "}
+                  {selected.notesUpdatedAt || "No notes yet"}
                 </div>
               </>
             )}
@@ -537,7 +655,10 @@ function promptContactFields(existing = {}) {
               <button className="gms-btn" onClick={handleLogInteraction}>
                 + Log Interaction
               </button>
-              <button className="gms-btn ghost" onClick={handleExportInteractions}>
+              <button
+                className="gms-btn ghost"
+                onClick={handleExportInteractions}
+              >
                 Export
               </button>
             </div>
@@ -590,6 +711,70 @@ function promptContactFields(existing = {}) {
           </div>
         </div>
       </div>
+
+      {/* ---------- Notes Modal ---------- */}
+      {isNotesOpen && selected && (
+        <div
+          className="gms-notes-modal-overlay"
+          onClick={closeNotesModal}
+        >
+          <div
+            className="gms-notes-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="gms-notes-modal-header">
+              <div className="gms-head">
+                Notes for {selected.name}
+              </div>
+              <button
+                className="gms-kebab gms-notes-close"
+                onClick={closeNotesModal}
+                aria-label="Close notes"
+              >
+                ✕
+              </button>
+            </div>
+
+            <textarea
+              className="gms-notes"
+              rows={8}
+              value={notesDraft}
+              onChange={(e) => setNotesDraft(e.target.value)}
+              placeholder="Type notes about this contact..."
+            />
+
+            <div className="gms-micro gms-mt8">
+              Last updated:{" "}
+              {selected.notesUpdatedAt || "Not saved yet"}
+            </div>
+
+            <div className="gms-notes-modal-footer">
+              <button
+                className="gms-btn"
+                onClick={handleClearNotesForContact}
+                disabled={isSavingNotes}
+              >
+                Clear
+              </button>
+              <div className="gms-spacer" />
+              <button
+                className="gms-btn"
+                onClick={closeNotesModal}
+                disabled={isSavingNotes}
+              >
+                Cancel
+              </button>
+              <button
+                className="gms-btn primary"
+                onClick={handleSaveNotesForContact}
+                disabled={isSavingNotes}
+              >
+                {isSavingNotes ? "Saving..." : "Save Notes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -603,6 +788,7 @@ function Metric({ label, value }) {
     </div>
   );
 }
+
 function Detail({ label, value }) {
   return (
     <div className="gms-detail-row">
@@ -612,28 +798,5 @@ function Detail({ label, value }) {
   );
 }
 
-/* helpers */
-function downloadCsv(filename, rows) {
-  const processRow = (row) =>
-    row
-      .map((val) => `"${String(val ?? "").replace(/"/g, '""')}"`)
-      .join(",");
-  const csvContent = rows.map(processRow).join("\n");
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.setAttribute("href", url);
-  link.setAttribute("download", filename);
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
-function normalizeType(t = "") {
-  const v = t.trim().toLowerCase();
-  if (v === "email") return "Email";
-  if (v === "phone") return "Phone";
-  if (v === "meeting") return "Meeting";
-  return "Other";
-}
 
 
