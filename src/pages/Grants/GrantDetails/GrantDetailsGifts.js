@@ -1,7 +1,18 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import "../../../styles/GrantDetailsGifts.css";
-
+import {
+  collection,
+  doc,
+  getDocs,
+  addDoc,
+  setDoc,
+  deleteDoc,
+  query,
+  orderBy,
+  serverTimestamp,
+} from "firebase/firestore";
+import { db } from "../../../firebase";
 
 /* ------------------ Helpers ------------------ */
 const currencyFormat = (value) =>
@@ -13,7 +24,6 @@ const currencyFormat = (value) =>
       })
     : "";
 
-
 const parseCurrencyInput = (str) => {
   if (str === "" || str == null) return 0;
   const cleaned = String(str).replace(/[^0-9.-]+/g, "");
@@ -21,67 +31,57 @@ const parseCurrencyInput = (str) => {
   return isNaN(n) ? 0 : n;
 };
 
-
 /* ------------------ Row Component ------------------ */
-const GiftRow = ({ gift, onToggleAcknowledge, onEdit, onDelete }) => {
-  return (
-    <tr>
-      <td className="col-id">{gift.id}</td>
-      <td className="col-date">{gift.date}</td>
-      <td className="col-purpose">{gift.purpose}</td>
+const GiftRow = ({ gift, onToggleAcknowledge, onEdit, onDelete }) => (
+  <tr>
+    <td className="col-id">{gift.id}</td>
+    <td className="col-date">{gift.date}</td>
+    <td className="col-purpose">{gift.purpose}</td>
+    <td className="col-spent" style={{ textAlign: "left" }}>
+      {currencyFormat(Number(gift.spent) || 0)}
+    </td>
+    <td className="col-acknowledge">
+      <button
+        className={`btn-ack ${gift.acknowledged ? "ack-true" : "ack-false"}`}
+        onClick={() => onToggleAcknowledge(gift.id)}
+      >
+        {gift.acknowledged ? "Sent" : "Pending"}
+      </button>
+    </td>
+    <td className="col-actions" style={{ whiteSpace: "nowrap" }}>
+      <button className="gms-small-btn" onClick={() => onEdit(gift)}>
+        Edit
+      </button>
+      <button
+        className="gms-small-btn gms-delete"
+        onClick={() => onDelete(gift.id)}
+        style={{ marginLeft: 8 }}
+      >
+        Delete
+      </button>
+    </td>
+  </tr>
+);
 
-      <td className="col-spent" style={{ textAlign: "left" }}>
-        {currencyFormat(Number(gift.spent) || 0)}
-      </td>
-
-      <td className="col-acknowledge">
-        <button
-          className={`btn-ack ${gift.acknowledged ? "ack-true" : "ack-false"}`}
-          onClick={() => onToggleAcknowledge(gift.id)}
-        >
-          {gift.acknowledged ? "Sent" : "Pending"}
-        </button>
-      </td>
-
-      {/* FILES COLUMN REMOVED */}
-
-      <td className="col-actions" style={{ whiteSpace: "nowrap" }}>
-        <button className="gms-small-btn" onClick={() => onEdit(gift)}>
-          Edit
-        </button>
-        <button
-          className="gms-small-btn gms-delete"
-          onClick={() => onDelete(gift.id)}
-          style={{ marginLeft: 8 }}
-        >
-          Delete
-        </button>
-        {/* ADD FILES BUTTON REMOVED */}
-      </td>
-    </tr>
-  );
-};
-
-
-/* ------------------ Empty Invoice Factory ------------------ */
+/* ------------------ Empty Gift Factory ------------------ */
 const emptyGift = () => ({
   date: "",
   spent: 0,
   purpose: "",
   acknowledged: false,
-  // files removed
 });
-
 
 /* ------------------ Main Component ------------------ */
 export default function GrantDetailsGifts() {
   const { id } = useParams();
-  const grantId = Number(id);
+  const grantId = id;
 
   const [gifts, setGifts] = useState([]);
-  const [query, setQuery] = useState("");
+  const [queryText, setQueryText] = useState("");
   const [sortBy, setSortBy] = useState("date");
   const [sortDir, setSortDir] = useState("desc");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   // Modal state
   const [modal, setModal] = useState({
@@ -92,47 +92,45 @@ export default function GrantDetailsGifts() {
     modalIdPreview: "",
   });
 
+  /* ------------------ Load Gifts from Firestore ------------------ */
+  const loadGifts = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const giftsCol = collection(db, "grants", grantId, "gifts");
+      const q = query(giftsCol, orderBy("date", "desc"));
+      const snapshot = await getDocs(q);
+      const giftsData = snapshot.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      }));
+      setGifts(giftsData);
+    } catch (err) {
+      console.error("Error loading gifts:", err);
+      setError("Could not load gifts.");
+      setGifts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  /* ------------------ Load Gifts ------------------ */
   useEffect(() => {
-    fetch("/data/grantDetails.json")
-      .then((res) => res.json())
-      .then((data) => {
-        const selected = data.find((g) => g.id === grantId);
-        if (selected && selected.gifts) {
-          const normalized = selected.gifts.map((x) => ({
-            ...x,
-            spent: Number(x.spent) || 0,
-            acknowledged: !!x.acknowledged,
-            purpose: x.purpose || "",
-            // files removed
-          }));
-          setGifts(normalized);
-        } else {
-          setGifts([]);
-        }
-      })
-      .catch((err) => {
-        console.error("Error loading gifts:", err);
-        setGifts([]);
-      });
+    loadGifts();
   }, [grantId]);
 
-
-  /* ------------------ Summary Totals ------------------ */
+  /* ------------------ Totals ------------------ */
   const totals = useMemo(() => {
-    const totalReceived = 0; // external source
+    const totalReceived = 0; // Placeholder if you calculate externally
     const totalSpent = gifts.reduce((sum, g) => sum + Number(g.spent || 0), 0);
     const remaining = totalReceived - totalSpent;
     return { totalReceived, totalSpent, remaining };
   }, [gifts]);
 
-
   /* ------------------ Search + Sort ------------------ */
   const displayed = useMemo(() => {
     let filtered = gifts.filter((g) => {
-      if (!query) return true;
-      const q = query.toLowerCase();
+      if (!queryText) return true;
+      const q = queryText.toLowerCase();
       return (
         String(g.id).toLowerCase().includes(q) ||
         (g.purpose || "").toLowerCase().includes(q)
@@ -151,8 +149,7 @@ export default function GrantDetailsGifts() {
     });
 
     return filtered;
-  }, [gifts, query, sortBy, sortDir]);
-
+  }, [gifts, queryText, sortBy, sortDir]);
 
   const toggleSort = (field) => {
     if (sortBy === field) {
@@ -163,25 +160,32 @@ export default function GrantDetailsGifts() {
     }
   };
 
-
-  /* ------------------ Acknowledge ------------------ */
-  const handleToggleAcknowledge = (giftId) => {
-    setGifts((prev) =>
-      prev.map((g) =>
-        g.id === giftId ? { ...g, acknowledged: !g.acknowledged } : g
-      )
-    );
+  /* ------------------ Acknowledge Toggle ------------------ */
+  const handleToggleAcknowledge = async (giftId) => {
+    const gift = gifts.find((g) => g.id === giftId);
+    if (!gift) return;
+    try {
+      await setDoc(
+        doc(db, "grants", grantId, "gifts", giftId),
+        { acknowledged: !gift.acknowledged, updatedAt: serverTimestamp() },
+        { merge: true }
+      );
+      setGifts((prev) =>
+        prev.map((g) =>
+          g.id === giftId ? { ...g, acknowledged: !g.acknowledged } : g
+        )
+      );
+    } catch (err) {
+      console.error("Error toggling acknowledge:", err);
+    }
   };
 
-
-  /* ------------------ ID Generator ------------------ */
+  /* ------------------ Modal Controls ------------------ */
   const generateNextId = (list) =>
     !list || list.length === 0
-      ? 1
-      : Math.max(...list.map((it) => Number(it.id || 0))) + 1;
+      ? "1"
+      : String(Math.max(...list.map((it) => Number(it.id || 0))) + 1);
 
-
-  /* ------------------ Modal Controls ------------------ */
   const openAddModal = () => {
     const previewId = generateNextId(gifts);
     setModal({
@@ -189,10 +193,9 @@ export default function GrantDetailsGifts() {
       mode: "add",
       gift: emptyGift(),
       editId: null,
-      modalIdPreview: String(previewId),
+      modalIdPreview: previewId,
     });
   };
-
 
   const openEditModal = (gift) => {
     setModal({
@@ -200,21 +203,13 @@ export default function GrantDetailsGifts() {
       mode: "edit",
       gift: { ...gift },
       editId: gift.id,
-      modalIdPreview: String(gift.id),
+      modalIdPreview: gift.id,
     });
   };
-
 
   const closeModal = () => {
-    setModal({
-      open: false,
-      mode: "add",
-      gift: emptyGift(),
-      editId: null,
-      modalIdPreview: "",
-    });
+    setModal({ open: false, mode: "add", gift: emptyGift(), editId: null, modalIdPreview: "" });
   };
-
 
   const handleModalChange = (field, value) => {
     if (field === "spent") {
@@ -225,53 +220,60 @@ export default function GrantDetailsGifts() {
     }
   };
 
-
-  const handleSaveModal = () => {
+  /* ------------------ Save Gift ------------------ */
+  const handleSaveModal = async () => {
     const g = { ...modal.gift, spent: Number(modal.gift.spent) || 0 };
-    if (modal.mode === "add") {
-      const newId = generateNextId(gifts);
-      const newGift = { id: newId, ...g };
-      setGifts((prev) => [newGift, ...prev]);
-    } else {
-      setGifts((prev) =>
-        prev.map((it) => (it.id === modal.editId ? { ...it, ...g } : it))
-      );
+    try {
+      const giftsCol = collection(db, "grants", grantId, "gifts");
+
+      if (modal.mode === "add") {
+        const newId = generateNextId(gifts);
+        const newGift = { id: newId, ...g, createdAt: serverTimestamp() };
+        await setDoc(doc(giftsCol, newId), newGift);
+        setGifts((prev) => [newGift, ...prev]);
+      } else {
+        await setDoc(
+          doc(giftsCol, modal.editId),
+          { ...g, updatedAt: serverTimestamp() },
+          { merge: true }
+        );
+        setGifts((prev) =>
+          prev.map((it) => (it.id === modal.editId ? { ...it, ...g } : it))
+        );
+      }
+    } catch (err) {
+      console.error("Error saving gift:", err);
     }
     closeModal();
   };
 
-
-  const handleDelete = (giftId) => {
+  /* ------------------ Delete Gift ------------------ */
+  const handleDelete = async (giftId) => {
     if (!window.confirm("Delete this invoice?")) return;
-    setGifts((prev) => prev.filter((g) => g.id !== giftId));
+    try {
+      await deleteDoc(doc(db, "grants", grantId, "gifts", giftId));
+      setGifts((prev) => prev.filter((g) => g.id !== giftId));
+    } catch (err) {
+      console.error("Error deleting gift:", err);
+    }
   };
-
 
   /* ------------------ Render ------------------ */
   return (
     <div className="gifts-container">
-
       {/* Summary */}
       <div className="gifts-summary-container">
         <div className="summary-card">
           <label>Total Received</label>
-          <div className="summary-value">
-            {currencyFormat(totals.totalReceived)}
-          </div>
+          <div className="summary-value">{currencyFormat(totals.totalReceived)}</div>
         </div>
-
         <div className="summary-card">
           <label>Total Spent</label>
-          <div className="summary-value">
-            {currencyFormat(totals.totalSpent)}
-          </div>
+          <div className="summary-value">{currencyFormat(totals.totalSpent)}</div>
         </div>
-
         <div className="summary-card">
           <label>Remaining Balance</label>
-          <div className="summary-value">
-            {currencyFormat(totals.remaining)}
-          </div>
+          <div className="summary-value">{currencyFormat(totals.remaining)}</div>
         </div>
       </div>
 
@@ -282,35 +284,25 @@ export default function GrantDetailsGifts() {
             + New Invoice
           </button>
         </div>
-
         <div className="center">
           <input
             className="gifts-search"
             placeholder="Search invoices by ID or purpose"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            value={queryText}
+            onChange={(e) => setQueryText(e.target.value)}
           />
-          {query && (
-            <button className="btn-clear" onClick={() => setQuery("")}>
+          {queryText && (
+            <button className="btn-clear" onClick={() => setQueryText("")}>
               Clear
             </button>
           )}
         </div>
-
         <div className="right">
           <div className="sort-controls" style={{ display: "inline-flex", marginLeft: 8 }}>
-            <button
-              className={`btn-sort ${sortBy === "date" ? "active" : ""}`}
-              onClick={() => toggleSort("date")}
-            >
+            <button className={`btn-sort ${sortBy === "date" ? "active" : ""}`} onClick={() => toggleSort("date")}>
               Sort by Date {sortBy === "date" ? (sortDir === "asc" ? "↑" : "↓") : ""}
             </button>
-
-            <button
-              className={`btn-sort ${sortBy === "spent" ? "active" : ""}`}
-              onClick={() => toggleSort("spent")}
-              style={{ marginLeft: 8 }}
-            >
+            <button className={`btn-sort ${sortBy === "spent" ? "active" : ""}`} onClick={() => toggleSort("spent")} style={{ marginLeft: 8 }}>
               Sort by Spent {sortBy === "spent" ? (sortDir === "asc" ? "↑" : "↓") : ""}
             </button>
           </div>
@@ -319,6 +311,9 @@ export default function GrantDetailsGifts() {
 
       {/* Table */}
       <div className="gifts-table-wrapper">
+        {loading && <div style={{ marginBottom: 8 }}>Loading gifts…</div>}
+        {error && <div style={{ marginBottom: 8, color: "red" }}>{error}</div>}
+
         <table className="gifts-table">
           <thead>
             <tr>
@@ -330,11 +325,10 @@ export default function GrantDetailsGifts() {
               <th>Actions</th>
             </tr>
           </thead>
-
           <tbody>
             {displayed.length === 0 ? (
-              <tr className="no-results">
-                <td colSpan="6">No invoices match your search.</td>
+              <tr>
+                <td colSpan="6" style={{ textAlign: "center" }}>No invoices found.</td>
               </tr>
             ) : (
               displayed.map((g) => (
@@ -355,76 +349,36 @@ export default function GrantDetailsGifts() {
       {modal.open && (
         <div className="gifts-modal-backdrop">
           <div className="gifts-modal" style={{ maxWidth: 620, width: "92%" }}>
-            <h2>
-              {modal.mode === "add"
-                ? "Add Invoice"
-                : `Edit Invoice #${modal.modalIdPreview}`}
-            </h2>
-
+            <h2>{modal.mode === "add" ? "Add Invoice" : `Edit Invoice #${modal.modalIdPreview}`}</h2>
             <div className="modal-row">
               <label>Invoice ID</label>
               <input value={modal.modalIdPreview} disabled />
             </div>
-
             <div className="modal-row">
               <label>Date</label>
-              <input
-                type="date"
-                value={modal.gift.date || ""}
-                onChange={(e) =>
-                  handleModalChange("date", e.target.value)
-                }
-              />
+              <input type="date" value={modal.gift.date || ""} onChange={(e) => handleModalChange("date", e.target.value)} />
             </div>
-
             <div className="modal-row">
               <label>Spent</label>
               <input
                 type="text"
                 placeholder="$0"
                 value={currencyFormat(Number(modal.gift.spent || 0))}
-                onChange={(e) =>
-                  handleModalChange("spent", e.target.value)
-                }
+                onChange={(e) => handleModalChange("spent", e.target.value)}
                 onFocus={(e) => {
                   const raw = Number(modal.gift.spent) || 0;
-                  e.target.value =
-                    raw === 0 ? "" : String(raw);
+                  e.target.value = raw === 0 ? "" : String(raw);
                 }}
-                onBlur={(e) =>
-                  handleModalChange(
-                    "spent",
-                    parseCurrencyInput(e.target.value)
-                  )
-                }
+                onBlur={(e) => handleModalChange("spent", parseCurrencyInput(e.target.value))}
               />
             </div>
-
             <div className="modal-row">
               <label>Purpose</label>
-              <textarea
-                rows={3}
-                value={modal.gift.purpose}
-                onChange={(e) =>
-                  handleModalChange("purpose", e.target.value)
-                }
-              />
+              <textarea rows={3} value={modal.gift.purpose} onChange={(e) => handleModalChange("purpose", e.target.value)} />
             </div>
-
-            <div
-              className="modal-actions"
-              style={{ justifyContent: "flex-end", marginTop: 16 }}
-            >
-              <button
-                className="btn-cancel"
-                onClick={closeModal}
-                style={{ marginRight: 12 }}
-              >
-                Cancel
-              </button>
-              <button className="btn-save" onClick={handleSaveModal}>
-                Save
-              </button>
+            <div className="modal-actions" style={{ justifyContent: "flex-end", marginTop: 16 }}>
+              <button className="btn-cancel" onClick={closeModal} style={{ marginRight: 12 }}>Cancel</button>
+              <button className="btn-save" onClick={handleSaveModal}>Save</button>
             </div>
           </div>
         </div>
