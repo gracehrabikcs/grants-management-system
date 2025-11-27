@@ -31,22 +31,33 @@ const MainTabContent = ({ grant, setGrant, progress, id }) => {
         ...grant.Main,
         [section]: {
           ...grant.Main[section],
-          [field]: value
-        }
-      }
+          [field]: value,
+        },
+      },
     };
+
     setGrant(updatedGrant);
 
     const grantRef = doc(db, "grants", id);
     await updateDoc(grantRef, {
-      [`Main.${section}`]: updatedGrant.Main[section]
+      Main: updatedGrant.Main,
     });
   };
+
 
   return (
     <div className="grant-main-content">
       <div className="section">
         <h3>Application Management</h3>
+
+        <div className="field-group">
+          <label>Application Date</label>
+          <input
+            type="date"
+            value={appManagement["Application Date"] || ""}
+            onChange={(e) => handleChange("Application Management", "Application Date", e.target.value)}
+          />
+        </div>
 
         <div className="field-group">
           <label>Application Status</label>
