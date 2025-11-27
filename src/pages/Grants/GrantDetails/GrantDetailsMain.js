@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, NavLink, Routes, Route } from "react-router-dom";
 import { doc, getDoc, collection, getDocs, updateDoc } from "firebase/firestore";
-import { db } from "../../../firebase"; // your Firestore instance
+import { db } from "../../../firebase";
 import "../../../styles/GrantDetails.css";
 
 import GrantDetailsTracking from "./GrantDetailsTracking";
@@ -13,17 +13,29 @@ import GrantDetailsLinks from "./GrantDetailsLinks";
 import GrantDetailsAddresses from "./GrantDetailsAddresses";
 import GrantDetailsOther from "./GrantDetailsOther";
 
-// =======================
-// Main Tab Content
-// =======================
-// =======================
-// Main Tab Content
-// =======================
+/* ===========================================
+    🔧 FIX: Timestamp Converter
+   =========================================== */
+const formatTimestamp = (ts) => {
+  if (!ts) return "N/A";
+  if (typeof ts === "string") return ts; // string dates already safe
+  if (ts.seconds === undefined) return "N/A";
+
+  const date = new Date(ts.seconds * 1000);
+  return date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
+/* ===========================================
+    Main Tab Content
+   =========================================== */
 const MainTabContent = ({ grant, setGrant, progress, id }) => {
   const appManagement = grant?.Main?.["Application Management"] || {};
   const grantPurposeDescription = grant?.Main?.["Grant Purpose and Description"] || {};
 
-  // Update Firestore for any section
   const handleChange = async (section, field, value) => {
     const updatedGrant = {
       ...grant,
@@ -43,7 +55,6 @@ const MainTabContent = ({ grant, setGrant, progress, id }) => {
       Main: updatedGrant.Main,
     });
   };
-
 
   return (
     <div className="grant-main-content">
@@ -168,16 +179,15 @@ const MainTabContent = ({ grant, setGrant, progress, id }) => {
   );
 };
 
-// =======================
-// Main Component
-// =======================
+/* ===========================================
+    Main Component
+   =========================================== */
 const GrantDetailsMain = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [grant, setGrant] = useState(null);
   const [trackingSections, setTrackingSections] = useState([]);
 
-  // Fetch grant and tracking tasks from Firestore
   useEffect(() => {
     const fetchGrantData = async () => {
       try {
@@ -188,12 +198,18 @@ const GrantDetailsMain = () => {
         const grantData = { id: grantSnap.id, ...grantSnap.data() };
         setGrant(grantData);
 
-        // Fetch tracking sections and tasks
         const sectionsCol = collection(db, "grants", id, "trackingSections");
         const sectionsSnap = await getDocs(sectionsCol);
         const sectionsData = await Promise.all(
           sectionsSnap.docs.map(async (sectionDoc) => {
-            const tasksCol = collection(db, "grants", id, "trackingSections", sectionDoc.id, "trackingTasks");
+            const tasksCol = collection(
+              db,
+              "grants",
+              id,
+              "trackingSections",
+              sectionDoc.id,
+              "trackingTasks"
+            );
             const tasksSnap = await getDocs(tasksCol);
             const tasksData = tasksSnap.docs.map((t) => ({ id: t.id, ...t.data() }));
             return { id: sectionDoc.id, ...sectionDoc.data(), tasks: tasksData };
@@ -209,9 +225,9 @@ const GrantDetailsMain = () => {
     fetchGrantData();
   }, [id]);
 
-  // Calculate overall progress
   const calculateProgress = (sections) => {
     if (!sections || sections.length === 0) return 0;
+
     let totalTasks = 0;
     let completedValue = 0;
     const statusWeight = { "To Do": 0, "In Progress": 0.5, "Done": 1 };
@@ -224,6 +240,7 @@ const GrantDetailsMain = () => {
     });
 
     if (totalTasks === 0) return 0;
+
     return Math.round((completedValue / totalTasks) * 100);
   };
 
@@ -240,45 +257,61 @@ const GrantDetailsMain = () => {
           <h2>{grant.Organization} - {grant.Title}</h2>
           <span className={`status ${grant.status?.toLowerCase()}`}>{grant.status}</span>
         </div>
+
         <div className="grant-right">
           <p>
             <strong>Application Status:</strong>{" "}
             {grant?.Main?.["Application Management"]?.["Application Status"] || "N/A"}
           </p>
+
+          {/* FIX APPLIED HERE */}
           <p>
             <strong>Report Deadline:</strong>{" "}
-            {grant?.Main?.["Application Management"]?.["Report Deadline"] || "N/A"}
+            {formatTimestamp(grant?.Main?.["Application Management"]?.["Report Deadline"])}
           </p>
+
           <p><strong>Progress:</strong> {calculateProgress(trackingSections)}%</p>
         </div>
       </div>
 
       <div className="grant-nav-bar">
-        {["", "invoices", "pledges", "contacts", "bio", "other", "links", "addresses", "tracking"].map(tab => (
-          <NavLink
-            key={tab}
-            to={tab === "" ? `/grants/${id}` : `/grants/${id}/${tab}`}
-            end={tab === ""}
-            className={({ isActive }) => (isActive ? "active-tab" : "")}
-          >
-            {tab === "" ? "Main" : tab.charAt(0).toUpperCase() + tab.slice(1)}
-          </NavLink>
-        ))}
+        {["", "gifts", "pledges", "contacts", "bio", "other", "links", "addresses", "tracking"].map(
+          (tab) => (
+            <NavLink
+              key={tab}
+              to={tab === "" ? `/grants/${id}` : `/grants/${id}/${tab}`}
+              end={tab === ""}
+              className={({ isActive }) => (isActive ? "active-tab" : "")}
+            >
+              {tab === "" ? "Main" : tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </NavLink>
+          )
+        )}
       </div>
 
       <Routes>
         <Route
           path="/"
-          element={<MainTabContent grant={grant} setGrant={setGrant} progress={calculateProgress(trackingSections)} id={id} />}
+          element={
+            <MainTabContent
+              grant={grant}
+              setGrant={setGrant}
+              progress={calculateProgress(trackingSections)}
+              id={id}
+            />
+          }
         />
-        <Route path="invoices" element={<GrantDetailsGifts />} />
+        <Route path="gifts" element={<GrantDetailsGifts />} />
         <Route path="pledges" element={<GrantDetailsPledges />} />
         <Route path="contacts" element={<GrantDetailsContacts />} />
         <Route path="bio" element={<GrantDetailsBio />} />
         <Route path="other" element={<GrantDetailsOther />} />
         <Route path="links" element={<GrantDetailsLinks grantId={id} />} />
         <Route path="addresses" element={<GrantDetailsAddresses grantId={id} />} />
-        <Route path="tracking" element={<GrantDetailsTracking grantId={id} setTasks={setTrackingSections} />} />
+        <Route
+          path="tracking"
+          element={<GrantDetailsTracking grantId={id} setTasks={setTrackingSections} />}
+        />
       </Routes>
     </div>
   );
