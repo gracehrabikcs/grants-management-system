@@ -176,11 +176,8 @@ const Grants = () => {
         </div>
       </header>
 
-<<<<<<< HEAD
 
       {/* Search & Filter Section */}
-=======
->>>>>>> origin/main-firebase
       <div className="filter-bar">
         <input
           type="text"
