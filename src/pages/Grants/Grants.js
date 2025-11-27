@@ -39,10 +39,21 @@ const Grants = () => {
 
   return (
     <div className="grants-container">
+      
+      {/*just added the section below for new button*/ }
       <header className="grants-header">
-        <h1>All Grants</h1>
-        <p>Comprehensive view of all grant applications and their current status</p>
+        <div className="header-top">
+          <div>
+            <h1>All Grants</h1>
+            <p>Comprehensive view of all grant applications and their current status</p>
+          </div>
+
+          <button className="new-grant-btn" onClick={() => navigate("/grants/new")}>
+            + New Grant
+          </button>
+        </div>
       </header>
+
 
       {/* Search & Filter Section */}
       <div className="filter-bar">
