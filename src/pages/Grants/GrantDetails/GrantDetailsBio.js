@@ -1,113 +1,114 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import "../../../styles/GrantDetails.css";
+import "../../../styles/GrantDetailsBio.css";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "../../../firebase";
 
-const GrantDetailsBio = () => {
+export default function GrantDetailsBio() {
   const { id } = useParams();
-  const [grant, setGrant] = useState(null);
-  const [bioData, setBioData] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [saveMessage, setSaveMessage] = useState("");
+  const [organizationNotes, setOrganizationNotes] = useState("");
+  const [fundingNotes, setFundingNotes] = useState("");
+  const [organizationTs, setOrganizationTs] = useState("");
+  const [fundingTs, setFundingTs] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  // Fetch grant details from JSON
+  // Load notes from Firebase
   useEffect(() => {
-    fetch("/data/grantDetails.json")
-      .then((res) => res.json())
-      .then((data) => {
-        const selected = data.find((g) => g.id === parseInt(id));
-        if (selected && selected.bio) {
-          setGrant(selected);
-          setBioData(selected.bio);
+    const loadBio = async () => {
+      try {
+        const ref = doc(db, "grants", id, "bio", "details");
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          const data = snap.data();
+          setOrganizationNotes(data.organizationDetails || "");
+          setFundingNotes(data.fundingPreferences || "");
+          setOrganizationTs(data.organizationTs || "");
+          setFundingTs(data.fundingTs || "");
         }
-      })
-      .catch((err) => console.error("Error loading grant bio:", err));
+      } catch (err) {
+        console.error("Error loading bio:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadBio();
   }, [id]);
 
-  const handleChange = (section, field, value) => {
-    setBioData((prev) => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value,
-      },
-    }));
-  };
+  if (loading) return <p>Loading bio details…</p>;
 
-  const handleEditToggle = () => {
-    if (isEditing) {
-      // Simulate save (local only)
-      setSaveMessage("✅ Changes saved locally!");
-      setTimeout(() => setSaveMessage(""), 2500);
+  // Save organization notes
+  const handleSaveOrganization = async () => {
+    const ts = new Date().toLocaleString();
+    try {
+      const ref = doc(db, "grants", id, "bio", "details");
+      await setDoc(
+        ref,
+        { organizationDetails: organizationNotes, organizationTs: ts, updatedAt: serverTimestamp() },
+        { merge: true }
+      );
+      setOrganizationTs(ts);
+      alert("Organization Details saved.");
+    } catch (err) {
+      console.error("Error saving organization notes:", err);
+      alert("Could not save Organization Details.");
     }
-    setIsEditing(!isEditing);
   };
 
-  if (!bioData) return <p>Loading bio details...</p>;
-
-  const renderSection = (sectionTitle, sectionKey, textAreaFields = []) => (
-    <div className="section" key={sectionKey}>
-      <h3>{sectionTitle}</h3>
-      {Object.entries(bioData[sectionKey]).map(([field, value]) => {
-        const formattedLabel = field
-          .replace(/([A-Z])/g, " $1")
-          .replace(/^./, (str) => str.toUpperCase());
-        const isTextArea = textAreaFields.includes(field);
-        return (
-          <div className="field-group" key={field}>
-            <label>{formattedLabel}</label>
-            {isTextArea ? (
-              <textarea
-                value={value}
-                readOnly={!isEditing}
-                onChange={(e) => handleChange(sectionKey, field, e.target.value)}
-              />
-            ) : (
-              <input
-                type="text"
-                value={value}
-                readOnly={!isEditing}
-                onChange={(e) => handleChange(sectionKey, field, e.target.value)}
-              />
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
+  // Save funding preferences notes
+  const handleSaveFunding = async () => {
+    const ts = new Date().toLocaleString();
+    try {
+      const ref = doc(db, "grants", id, "bio", "details");
+      await setDoc(
+        ref,
+        { fundingPreferences: fundingNotes, fundingTs: ts, updatedAt: serverTimestamp() },
+        { merge: true }
+      );
+      setFundingTs(ts);
+      alert("Funding Preferences saved.");
+    } catch (err) {
+      console.error("Error saving funding notes:", err);
+      alert("Could not save Funding Preferences.");
+    }
+  };
 
   return (
     <div className="grant-bio-container">
-      {/* Header and Edit Button */}
-      <div className="grant-actions" style={{ justifyContent: "flex-end" }}>
-        <button className="action-btn" onClick={handleEditToggle}>
-          {isEditing ? "Save" : "Edit"}
-        </button>
-      </div>
-
-      {/* Save Message */}
-      {saveMessage && (
-        <div
-          style={{
-            color: "green",
-            textAlign: "right",
-            marginBottom: "10px",
-            fontWeight: "500",
-          }}
-        >
-          {saveMessage}
+      {/* Organization Details */}
+      <section className="gms-card">
+        <div className="gms-flex-between gms-mb8">
+          <div>
+            <div className="gms-head">Organization Details</div>
+            <div className="gms-subtle">Notes about the organization for this grant</div>
+          </div>
+          <button className="gms-btn primary" onClick={handleSaveOrganization}>Save</button>
         </div>
-      )}
+        <textarea
+          className="gms-notes"
+          rows={6}
+          value={organizationNotes}
+          onChange={(e) => setOrganizationNotes(e.target.value)}
+        />
+        <div className="gms-micro gms-mt8">Last updated: {organizationTs || "Not saved yet"}</div>
+      </section>
 
-      {/* Bio Sections */}
-      {renderSection("Funding Preferences", "fundingPreferences")}
-      {renderSection("Contact Information", "contactInformation")}
-      {renderSection("Organization Details", "organizationDetails", [
-        "missionStatement",
-        "keyPrograms",
-      ])}
-      {renderSection("Additional Information", "additionalInformation")}
+      {/* Funding Preferences */}
+      <section className="gms-card" style={{ marginTop: 20 }}>
+        <div className="gms-flex-between gms-mb8">
+          <div>
+            <div className="gms-head">Funding Preferences</div>
+            <div className="gms-subtle">Notes about funding preferences for this grant</div>
+          </div>
+          <button className="gms-btn primary" onClick={handleSaveFunding}>Save</button>
+        </div>
+        <textarea
+          className="gms-notes"
+          rows={6}
+          value={fundingNotes}
+          onChange={(e) => setFundingNotes(e.target.value)}
+        />
+        <div className="gms-micro gms-mt8">Last updated: {fundingTs || "Not saved yet"}</div>
+      </section>
     </div>
   );
-};
-
-export default GrantDetailsBio;
+}
