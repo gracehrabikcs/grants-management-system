@@ -1,83 +1,144 @@
+/* GrantDetailsTracking.css - Namespaced version */
 
-.tracking-controls {
+.tracking-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+}
+
+.tracking-container h2 {
+  margin-bottom: 15px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Controls */
+.tracking-container .tracking-controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 20px;
-  align-items: center;
 }
 
-.tracking-controls input[type="text"] {
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 0.95rem;
-  transition: border-color 0.2s ease;
-}
-
-.tracking-controls input[type="text"]:focus {
-  border-color: #3b7a57;
-  outline: none;
-}
-/* Base Action Button */
-.action-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background-color: #3b7a57; /* calm green */
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 14px;
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 0.95rem;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
-  transition: all 0.25s ease;
-}
-
-.action-btn:hover {
-  background-color: #326a4c;
-  transform: translateY(-2px);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-}
-
-.action-btn.small {
+.tracking-container .tracking-controls input[type="text"] {
   padding: 5px 10px;
-  font-size: 0.85rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  min-width: 200px;
+}
+
+.tracking-container .tracking-controls .tracking-action-btn {
+  background-color: #007bff;
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.tracking-container .tracking-controls .tracking-action-btn:hover {
+  background-color: #0056b3;
+}
+
+.tracking-container .tracking-controls .tracking-action-btn.small {
+  padding: 3px 6px;
+  font-size: 12px;
+}
+
+.tracking-container .tracking-controls .tracking-action-btn.delete {
+  background-color: #dc3545;
+}
+
+.tracking-container .tracking-controls .tracking-action-btn.delete:hover {
+  background-color: #a71d2a;
+}
+
+/* Task Section */
+.tracking-container .task-section {
+  margin-bottom: 20px;
+  background-color: #fff;
   border-radius: 6px;
+  border: 1px solid #ddd;
+  padding: 10px;
 }
 
-
-.action-btn.delete {
-  background-color: #b85c5c; /* muted rose */
-}
-
-.action-btn.delete:hover {
-  background-color: #a24d4d; /* slightly darker on hover */
-}
-
-.action-btn.delete {
-  background-color: #e6c8c8;
-  color: #742a2a;
-  font-weight: 500;
-  box-shadow: none;
-}
-
-.action-btn.delete:hover {
-  background-color: #d8b0b0;
-  transform: none;
-}
-
-
-.section-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.task-section-header {
+.tracking-container .task-section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.tracking-container .task-section-title {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* Section action buttons */
+.tracking-container .section-actions {
+  display: flex;
+  gap: 5px;
+}
+
+/* Table */
+.tracking-container .task-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 5px;
+}
+
+.tracking-container .task-table th,
+.tracking-container .task-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.tracking-container .task-table th {
+  background-color: #f1f1f1;
+  font-weight: bold;
+}
+
+.tracking-container .task-table input,
+.tracking-container .task-table select,
+.tracking-container .task-table textarea {
+  width: 100%;
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.tracking-container .task-table textarea {
+  resize: vertical;
+}
+
+/* Hover for rows */
+.tracking-container .task-table tbody tr:hover {
+  background-color: #f5f5f5;
+}
+
+/* Notes textarea */
+.tracking-container .notes-textarea {
+  min-height: 40px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tracking-container .tracking-controls {
+    flex-direction: column;
+  }
+
+  .tracking-container .task-table th,
+  .tracking-container .task-table td {
+    font-size: 12px;
+    padding: 6px;
+  }
+
+  .tracking-container .tracking-controls .tracking-action-btn {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
 }
