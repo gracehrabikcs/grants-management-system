@@ -15,12 +15,18 @@ const Dashboard = () => {
       try {
         const grantSnap = await getDocs(collection(db, "grants"));
         const grantList = [];
-
         let globalFunding = 0;
 
         // Loop through all grant documents
         for (const grantDoc of grantSnap.docs) {
-          const grantData = { id: grantDoc.id, ...grantDoc.data() };
+          const data = grantDoc.data();
+
+          const grantData = {
+            id: grantDoc.id,
+            title: data.Title || data.title || "No title",
+            organization: data.Organization || data.organization || "N/A",
+            ...data,
+          };
 
           // Fetch pledges inside each grant
           const pledgesRef = collection(db, "grants", grantDoc.id, "pledges");
@@ -29,24 +35,19 @@ const Dashboard = () => {
           let grantFunding = 0;
 
           pledgeSnap.forEach((p) => {
-            // Pull "received" instead of "amount"
             const received = Number(p.data().received);
-
             if (!isNaN(received)) {
               grantFunding += received;
               globalFunding += received;
             }
           });
 
-          // attach calculated totalFunding to the grant
           grantData.totalFunding = grantFunding;
-
           grantList.push(grantData);
         }
 
         setGrants(grantList);
         setTotalFunding(globalFunding);
-
       } catch (err) {
         console.error("Error loading grants:", err);
       } finally {
@@ -77,12 +78,6 @@ const Dashboard = () => {
             currency: "USD",
           })}
         />
-
-        <StatCard title= "Pending Applications" value="––" />
-
-        <StatCard title= "Approved Applications" value="––" />
-
-        
       </div>
 
       {/* Grant List Table */}
@@ -102,15 +97,14 @@ const Dashboard = () => {
             {grants.map((g) => (
               <tr key={g.id}>
                 <td>{g.id}</td>
-                <td>{g.title || "No title"}</td>
-                <td>{g.organization || "N/A"}</td>
+                <td>{g.title}</td>
+                <td>{g.organization}</td>
                 <td>
                   {g.totalFunding.toLocaleString("en-US", {
                     style: "currency",
                     currency: "USD",
                   })}
                 </td>
-
                 <td>
                   {g.deadline
                     ? new Date(g.deadline.seconds * 1000)
