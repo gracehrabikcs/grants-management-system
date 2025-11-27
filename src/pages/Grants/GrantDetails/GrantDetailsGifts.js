@@ -5,7 +5,6 @@ import {
   collection,
   doc,
   getDocs,
-  addDoc,
   setDoc,
   deleteDoc,
   query,
@@ -77,6 +76,7 @@ export default function GrantDetailsGifts() {
   const grantId = id;
 
   const [gifts, setGifts] = useState([]);
+  const [totalReceivedFromPledges, setTotalReceivedFromPledges] = useState(0);
   const [queryText, setQueryText] = useState("");
   const [sortBy, setSortBy] = useState("date");
   const [sortDir, setSortDir] = useState("desc");
@@ -114,17 +114,36 @@ export default function GrantDetailsGifts() {
     }
   };
 
+  /* ------------------ Load Total Received from Pledges ------------------ */
+  const loadTotalReceivedFromPledges = async () => {
+    try {
+      const pledgesSnap = await getDocs(
+        collection(db, "grants", grantId, "pledges")
+      );
+      const pledgesData = pledgesSnap.docs.map((d) => d.data());
+      const total = pledgesData.reduce(
+        (sum, p) => sum + (Number(p.received) || 0),
+        0
+      );
+      setTotalReceivedFromPledges(total);
+    } catch (err) {
+      console.error("Error loading total received from pledges:", err);
+      setTotalReceivedFromPledges(0);
+    }
+  };
+
   useEffect(() => {
     loadGifts();
+    loadTotalReceivedFromPledges();
   }, [grantId]);
 
   /* ------------------ Totals ------------------ */
   const totals = useMemo(() => {
-    const totalReceived = 0; // Placeholder if you calculate externally
+    const totalReceived = totalReceivedFromPledges;
     const totalSpent = gifts.reduce((sum, g) => sum + Number(g.spent || 0), 0);
     const remaining = totalReceived - totalSpent;
     return { totalReceived, totalSpent, remaining };
-  }, [gifts]);
+  }, [gifts, totalReceivedFromPledges]);
 
   /* ------------------ Search + Sort ------------------ */
   const displayed = useMemo(() => {
@@ -208,7 +227,13 @@ export default function GrantDetailsGifts() {
   };
 
   const closeModal = () => {
-    setModal({ open: false, mode: "add", gift: emptyGift(), editId: null, modalIdPreview: "" });
+    setModal({
+      open: false,
+      mode: "add",
+      gift: emptyGift(),
+      editId: null,
+      modalIdPreview: "",
+    });
   };
 
   const handleModalChange = (field, value) => {
@@ -265,7 +290,9 @@ export default function GrantDetailsGifts() {
       <div className="gifts-summary-container">
         <div className="summary-card">
           <label>Total Received</label>
-          <div className="summary-value">{currencyFormat(totals.totalReceived)}</div>
+          <div className="summary-value">
+            {currencyFormat(totals.totalReceived)}
+          </div>
         </div>
         <div className="summary-card">
           <label>Total Spent</label>
@@ -298,11 +325,21 @@ export default function GrantDetailsGifts() {
           )}
         </div>
         <div className="right">
-          <div className="sort-controls" style={{ display: "inline-flex", marginLeft: 8 }}>
-            <button className={`btn-sort ${sortBy === "date" ? "active" : ""}`} onClick={() => toggleSort("date")}>
+          <div
+            className="sort-controls"
+            style={{ display: "inline-flex", marginLeft: 8 }}
+          >
+            <button
+              className={`btn-sort ${sortBy === "date" ? "active" : ""}`}
+              onClick={() => toggleSort("date")}
+            >
               Sort by Date {sortBy === "date" ? (sortDir === "asc" ? "↑" : "↓") : ""}
             </button>
-            <button className={`btn-sort ${sortBy === "spent" ? "active" : ""}`} onClick={() => toggleSort("spent")} style={{ marginLeft: 8 }}>
+            <button
+              className={`btn-sort ${sortBy === "spent" ? "active" : ""}`}
+              onClick={() => toggleSort("spent")}
+              style={{ marginLeft: 8 }}
+            >
               Sort by Spent {sortBy === "spent" ? (sortDir === "asc" ? "↑" : "↓") : ""}
             </button>
           </div>
@@ -328,7 +365,9 @@ export default function GrantDetailsGifts() {
           <tbody>
             {displayed.length === 0 ? (
               <tr>
-                <td colSpan="6" style={{ textAlign: "center" }}>No invoices found.</td>
+                <td colSpan="6" style={{ textAlign: "center" }}>
+                  No invoices found.
+                </td>
               </tr>
             ) : (
               displayed.map((g) => (
@@ -349,14 +388,22 @@ export default function GrantDetailsGifts() {
       {modal.open && (
         <div className="gifts-modal-backdrop">
           <div className="gifts-modal" style={{ maxWidth: 620, width: "92%" }}>
-            <h2>{modal.mode === "add" ? "Add Invoice" : `Edit Invoice #${modal.modalIdPreview}`}</h2>
+            <h2>
+              {modal.mode === "add"
+                ? "Add Invoice"
+                : `Edit Invoice #${modal.modalIdPreview}`}
+            </h2>
             <div className="modal-row">
               <label>Invoice ID</label>
               <input value={modal.modalIdPreview} disabled />
             </div>
             <div className="modal-row">
               <label>Date</label>
-              <input type="date" value={modal.gift.date || ""} onChange={(e) => handleModalChange("date", e.target.value)} />
+              <input
+                type="date"
+                value={modal.gift.date || ""}
+                onChange={(e) => handleModalChange("date", e.target.value)}
+              />
             </div>
             <div className="modal-row">
               <label>Spent</label>
@@ -369,16 +416,33 @@ export default function GrantDetailsGifts() {
                   const raw = Number(modal.gift.spent) || 0;
                   e.target.value = raw === 0 ? "" : String(raw);
                 }}
-                onBlur={(e) => handleModalChange("spent", parseCurrencyInput(e.target.value))}
+                onBlur={(e) =>
+                  handleModalChange("spent", parseCurrencyInput(e.target.value))
+                }
               />
             </div>
             <div className="modal-row">
               <label>Purpose</label>
-              <textarea rows={3} value={modal.gift.purpose} onChange={(e) => handleModalChange("purpose", e.target.value)} />
+              <textarea
+                rows={3}
+                value={modal.gift.purpose}
+                onChange={(e) => handleModalChange("purpose", e.target.value)}
+              />
             </div>
-            <div className="modal-actions" style={{ justifyContent: "flex-end", marginTop: 16 }}>
-              <button className="btn-cancel" onClick={closeModal} style={{ marginRight: 12 }}>Cancel</button>
-              <button className="btn-save" onClick={handleSaveModal}>Save</button>
+            <div
+              className="modal-actions"
+              style={{ justifyContent: "flex-end", marginTop: 16 }}
+            >
+              <button
+                className="btn-cancel"
+                onClick={closeModal}
+                style={{ marginRight: 12 }}
+              >
+                Cancel
+              </button>
+              <button className="btn-save" onClick={handleSaveModal}>
+                Save
+              </button>
             </div>
           </div>
         </div>
