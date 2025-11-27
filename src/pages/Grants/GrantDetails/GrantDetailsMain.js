@@ -165,7 +165,6 @@ const GrantDetailsMain = () => {
   const { id } = useParams();
   const [grant, setGrant] = useState(null);
   const [trackingSections, setTrackingSections] = useState([]);
-  const [selectedFile, setSelectedFile] = useState(null);
 
   // Fetch grant and tracking tasks from Firestore
   useEffect(() => {
@@ -217,14 +216,6 @@ const GrantDetailsMain = () => {
     return Math.round((completedValue / totalTasks) * 100);
   };
 
-  const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
-  const handleSendEmail = () => {
-    const email = "example@domain.com";
-    const subject = encodeURIComponent(`Regarding Grant ID: ${id}`);
-    const body = encodeURIComponent("Hello,\n\nI am reaching out regarding the grant.");
-    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-  };
-
   if (!grant) return <p>Loading grant details...</p>;
 
   return (
@@ -249,15 +240,6 @@ const GrantDetailsMain = () => {
           </p>
           <p><strong>Progress:</strong> {calculateProgress(trackingSections)}%</p>
         </div>
-      </div>
-
-      <div className="grant-actions">
-        <label className="action-btn">
-          Attach a File
-          <input type="file" style={{ display: "none" }} onChange={handleFileChange} />
-        </label>
-        {selectedFile && <span className="file-name">{selectedFile.name}</span>}
-        <button className="action-btn" onClick={handleSendEmail}>Send Email</button>
       </div>
 
       <div className="grant-nav-bar">
