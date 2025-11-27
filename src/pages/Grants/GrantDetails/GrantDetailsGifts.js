@@ -97,8 +97,8 @@ export default function GrantDetailsGifts() {
     setLoading(true);
     setError("");
     try {
-      const giftsCol = collection(db, "grants", grantId, "gifts");
-      const q = query(giftsCol, orderBy("date", "desc"));
+      const invoicesCol = collection(db, "grants", grantId, "invoices");
+      const q = query(invoicesCol, orderBy("date", "desc"));
       const snapshot = await getDocs(q);
       const giftsData = snapshot.docs.map((d) => ({
         id: d.id,
@@ -249,16 +249,16 @@ export default function GrantDetailsGifts() {
   const handleSaveModal = async () => {
     const g = { ...modal.gift, spent: Number(modal.gift.spent) || 0 };
     try {
-      const giftsCol = collection(db, "grants", grantId, "gifts");
+      const invoicesCol = collection(db, "grants", grantId, "invoices");
 
       if (modal.mode === "add") {
         const newId = generateNextId(gifts);
         const newGift = { id: newId, ...g, createdAt: serverTimestamp() };
-        await setDoc(doc(giftsCol, newId), newGift);
+        await setDoc(doc(invoicesCol, newId), newGift);
         setGifts((prev) => [newGift, ...prev]);
       } else {
         await setDoc(
-          doc(giftsCol, modal.editId),
+          doc(invoicesCol, modal.editId),
           { ...g, updatedAt: serverTimestamp() },
           { merge: true }
         );
