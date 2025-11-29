@@ -275,7 +275,7 @@ const GrantDetailsMain = () => {
       </div>
 
       <div className="grant-nav-bar">
-        {["", "gifts", "pledges", "contacts", "bio", "other", "links", "addresses", "tracking"].map(
+        {["", "invoices", "pledges", "contacts", "bio", "other", "links", "addresses", "tracking"].map(
           (tab) => (
             <NavLink
               key={tab}
@@ -301,7 +301,7 @@ const GrantDetailsMain = () => {
             />
           }
         />
-        <Route path="gifts" element={<GrantDetailsGifts />} />
+        <Route path="invoices" element={<GrantDetailsGifts />} />
         <Route path="pledges" element={<GrantDetailsPledges />} />
         <Route path="contacts" element={<GrantDetailsContacts />} />
         <Route path="bio" element={<GrantDetailsBio />} />
