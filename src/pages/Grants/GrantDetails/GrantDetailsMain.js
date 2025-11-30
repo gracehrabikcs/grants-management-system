@@ -90,6 +90,14 @@ const MainTabContent = ({ grant, setGrant, progress, id }) => {
             onChange={(e) => handleChange("Application Management", "Application Type", e.target.value)}
           />
         </div>
+        <div className="field-group">
+          <label>Date Awarded</label>
+          <input
+            type="date"
+            value={appManagement["Date Awarded"] || ""}
+            onChange={(e) => handleChange("Application Management", "Date Awarded", e.target.value)}
+          />
+        </div>
 
         <div className="field-group">
           <label>Grant Period</label>
