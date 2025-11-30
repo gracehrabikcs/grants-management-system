@@ -188,6 +188,7 @@ const GrantDetailsMain = () => {
   const [grant, setGrant] = useState(null);
   const [trackingSections, setTrackingSections] = useState([]);
 
+  // Fetch grant and tracking tasks from Firestore
   useEffect(() => {
     const fetchGrantData = async () => {
       try {
