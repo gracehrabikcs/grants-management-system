@@ -1,5 +1,4 @@
-/* NewGrant.css - Styling for New Grant Multi-Step Wizard */
-
+/* NewGrant.css - Fully Scoped Styling for New Grant Multi-Step Wizard */
 
 .wizard-container {
   max-width: 700px;
@@ -11,8 +10,8 @@
   font-family: Arial, sans-serif;
 }
 
-
-h1 {
+/* Headings */
+.wizard-container h1 {
   text-align: center;
   margin-bottom: 30px;
   font-size: 28px;
@@ -20,28 +19,27 @@ h1 {
   color: #333;
 }
 
-
-.step {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-
-.step h2 {
+.wizard-container .step h2 {
   margin-bottom: 10px;
   font-size: 22px;
   font-weight: 600;
   color: #444;
 }
 
+/* Step content layout */
+.wizard-container .step {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  animation: fadeIn 0.3s ease-in-out;
+}
 
-input,
-textarea,
-select {
+/* Form controls */
+.wizard-container input,
+.wizard-container textarea,
+.wizard-container select {
   width: 100%;
-  padding: 12px;    /*, 14px, 12px, 12px*/
+  padding: 12px;
   padding-right: 2px;
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -49,23 +47,21 @@ select {
   transition: 0.2s ease-in-out;
 }
 
-
-input:focus,
-textarea:focus,
-select:focus {
+.wizard-container input:focus,
+.wizard-container textarea:focus,
+.wizard-container select:focus {
   outline: none;
   border-color: #4a90e2;
   box-shadow: 0 0 4px rgba(74, 144, 226, 0.4);
 }
 
-
-textarea {
+.wizard-container textarea {
   min-height: 100px;
   resize: vertical;
 }
 
-
-button {
+/* Buttons */
+.wizard-container button {
   padding: 12px 18px;
   font-size: 16px;
   border: none;
@@ -74,48 +70,41 @@ button {
   transition: 0.2s;
 }
 
-
-button[type="button"] {
+.wizard-container button[type="button"] {
   background: #e0e0e0;
   margin-right: 10px;
 }
 
-
-button[type="button"]:hover {
+.wizard-container button[type="button"]:hover {
   background: #d5d5d5;
 }
 
-
-button[type="submit"],
-button.next-button {
+.wizard-container button[type="submit"],
+.wizard-container .next-button {
   background: #4a90e2;
   color: white;
 }
 
-
-button[type="submit"]:hover,
-button.next-button:hover {
+.wizard-container button[type="submit"]:hover,
+.wizard-container .next-button:hover {
   background: #357ac9;
 }
 
-
-/* Layout for navigation buttons */
-.nav-buttons {
+/* Navigation buttons (Back / Next / Submit) */
+.wizard-container .nav-buttons {
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
 }
 
+/* Checkbox styling */
+.wizard-container input[type="checkbox"] {
+  width: auto;
+  margin-right: 8px;
+}
 
 /* Fade animation */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-
-/* Checkbox styling */
-input[type="checkbox"] {
-  width: auto;
-  margin-right: 8px;
 }
