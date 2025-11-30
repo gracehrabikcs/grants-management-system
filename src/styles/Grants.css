@@ -129,24 +129,3 @@
   font-size: 14px;
 }
 
-.header-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.new-grant-btn {
-  padding: 10px 18px;
-  background-color: #3b7a57;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.new-grant-btn:hover {
-  background-color: #326a4c;
-  transform: translateY(-1px);
-}
