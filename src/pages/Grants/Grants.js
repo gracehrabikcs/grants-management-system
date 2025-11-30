@@ -162,9 +162,23 @@ const Grants = () => {
   return (
     <div className="grants-container">
       <header className="grants-header">
-        <h1>All Grants</h1>
-        <p>Comprehensive view of all grant applications and their current status</p>
+        <div className="grants-header-top">
+          <div className="grants-title">
+            <h1>All Grants</h1>
+            <p>Comprehensive view of all grant applications and their current status</p>
+          </div>
+
+          <button
+            className="add-grant-btn"
+            onClick={() => navigate("/grants/new")}
+          >
+            + Add New Grant
+          </button>
+        </div>
       </header>
+
+
+
 
       <div className="filter-bar">
         <input
