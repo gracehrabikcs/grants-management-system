@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../../styles/Grants.css";
 import { useNavigate } from "react-router-dom";
+import { deleteDoc } from "firebase/firestore";
 import {
   collection,
   getDocs,
@@ -118,8 +119,8 @@ const Grants = () => {
 
           // Report deadline reading from several possible locations
           const reportDeadline =
+            raw.Main?.["Application Management"]?.["reportDeadline"] ||
             raw.Main?.["Application Management"]?.["Report Deadline"] ||
-            raw.main?.["Application Management"]?.["Report Deadline"] ||
             raw.reportDeadline ||
             raw.ReportDeadline ||
             null;
@@ -158,6 +159,40 @@ const Grants = () => {
   });
 
   const handleCardClick = (id) => navigate(`/grants/${id}`);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this grant permanently?")) return;
+
+    try {
+      // Delete subcollections: pledges, trackingSections → trackingTasks
+      const pledgesSnap = await getDocs(collection(db, "grants", id, "pledges"));
+      for (const p of pledgesSnap.docs) {
+        await deleteDoc(doc(db, "grants", id, "pledges", p.id));
+      }
+
+      const sectionsSnap = await getDocs(collection(db, "grants", id, "trackingSections"));
+      for (const s of sectionsSnap.docs) {
+        const tasksSnap = await getDocs(
+          collection(db, "grants", id, "trackingSections", s.id, "trackingTasks")
+        );
+        for (const t of tasksSnap.docs) {
+          await deleteDoc(
+            doc(db, "grants", id, "trackingSections", s.id, "trackingTasks", t.id)
+          );
+        }
+        await deleteDoc(doc(db, "grants", id, "trackingSections", s.id));
+      }
+
+      // Delete main grant
+      await deleteDoc(doc(db, "grants", id));
+
+      // Remove from UI
+      setGrants((prev) => prev.filter((g) => g.id !== id));
+    } catch (err) {
+      console.error("Delete failed:", err);
+    }
+  };
+
 
   return (
     <div className="grants-container">
@@ -230,6 +265,16 @@ const Grants = () => {
               <div className="progress-fill" style={{ width: `${g.progress}%` }} />
             </div>
             <p className="progress-text">{g.progress}%</p>
+            
+            <button
+              className="grant-delete-btn"
+              onClick={(e) => {
+                e.stopPropagation(); // so clicking delete doesn't open the card
+                handleDelete(g.id);
+              }}
+            >
+              Delete
+            </button>
           </div>
         ))}
       </div>

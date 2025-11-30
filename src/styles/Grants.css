@@ -156,8 +156,20 @@
   background-color: #1b5e20; /* slightly darker on hover */
 }
 
+.grant-delete-btn {
+  background: #ff5555;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  float: right;
+}
 
-
+.grant-delete-btn:hover {
+  background: #d94444;
+}
 
 
 
