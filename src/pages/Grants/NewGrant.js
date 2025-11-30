@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import "../../styles/NewGrant.css";
 import { collection, doc, setDoc, getDocs, serverTimestamp } from "firebase/firestore";
 import { db } from "../../firebase";
+import { useNavigate } from "react-router-dom";
+
 
 const initialFormData = {
   // --- MAIN ---
@@ -80,6 +82,8 @@ const initialFormData = {
 export default function NewGrant() {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState(initialFormData);
+  const navigate = useNavigate();
+
 
   const updateField = (field, value) =>
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -261,6 +265,17 @@ export default function NewGrant() {
             <input placeholder="Organization" value={formData.organization} onChange={(e) => updateField("organization", e.target.value)} />
             <input placeholder="Title" value={formData.title} onChange={(e) => updateField("title", e.target.value)} />
             <button type="button" onClick={next}>Next</button>
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm("Cancel creating this grant? All progress will be lost.")) {
+                  navigate("/grants"); // <-- goes back to main grant list
+                }
+              }}
+            >
+              Cancel
+            </button>
+
           </div>
         )}
 
@@ -282,6 +297,17 @@ export default function NewGrant() {
             <input placeholder="Type" value={formData.type} onChange={(e) => updateField("type", e.target.value)} />
             <button type="button" onClick={back}>Back</button>
             <button type="button" onClick={next}>Next</button>
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm("Cancel creating this grant? All progress will be lost.")) {
+                  navigate("/grants"); // <-- goes back to main grant list
+                }
+              }}
+            >
+              Cancel
+            </button>
+
           </div>
         )}
 
@@ -293,6 +319,17 @@ export default function NewGrant() {
             <textarea placeholder="Organization Details" value={formData.organizationDetails} onChange={(e) => updateField("organizationDetails", e.target.value)} />
             <button type="button" onClick={back}>Back</button>
             <button type="button" onClick={next}>Next</button>
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm("Cancel creating this grant? All progress will be lost.")) {
+                  navigate("/grants"); // <-- goes back to main grant list
+                }
+              }}
+            >
+              Cancel
+            </button>
+
           </div>
         )}
 
@@ -307,6 +344,17 @@ export default function NewGrant() {
             <input placeholder="Staff Size" value={formData.staffSize} onChange={(e) => updateField("staffSize", e.target.value)} />
             <button type="button" onClick={back}>Back</button>
             <button type="button" onClick={next}>Next</button>
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm("Cancel creating this grant? All progress will be lost.")) {
+                  navigate("/grants"); // <-- goes back to main grant list
+                }
+              }}
+            >
+              Cancel
+            </button>
+
           </div>
         )}
 
@@ -321,6 +369,17 @@ export default function NewGrant() {
             <textarea placeholder="Notes" value={formData.contactsNotes} onChange={(e) => updateField("contactsNotes", e.target.value)} />
             <button type="button" onClick={back}>Back</button>
             <button type="button" onClick={next}>Next</button>
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm("Cancel creating this grant? All progress will be lost.")) {
+                  navigate("/grants"); // <-- goes back to main grant list
+                }
+              }}
+            >
+              Cancel
+            </button>
+
           </div>
         )}
 
@@ -336,6 +395,17 @@ export default function NewGrant() {
             <textarea placeholder="Notes" value={formData.pledgeNotes} onChange={(e) => updateField("pledgeNotes", e.target.value)} />
             <button type="button" onClick={back}>Back</button>
             <button type="button" onClick={next}>Next</button>
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm("Cancel creating this grant? All progress will be lost.")) {
+                  navigate("/grants"); // <-- goes back to main grant list
+                }
+              }}
+            >
+              Cancel
+            </button>
+
           </div>
         )}
 
@@ -350,6 +420,17 @@ export default function NewGrant() {
             </label>
             <button type="button" onClick={back}>Back</button>
             <button type="button" onClick={next}>Next</button>
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm("Cancel creating this grant? All progress will be lost.")) {
+                  navigate("/grants"); // <-- goes back to main grant list
+                }
+              }}
+            >
+              Cancel
+            </button>
+
           </div>
         )}
 
@@ -362,6 +443,17 @@ export default function NewGrant() {
             <textarea placeholder="Internal Notes" value={formData.otherInternalNotes} onChange={(e) => updateField("otherInternalNotes", e.target.value)} />
             <button type="button" onClick={back}>Back</button>
             <button type="button" onClick={next}>Next</button>
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm("Cancel creating this grant? All progress will be lost.")) {
+                  navigate("/grants"); // <-- goes back to main grant list
+                }
+              }}
+            >
+              Cancel
+            </button>
+
           </div>
         )}
 
@@ -376,6 +468,16 @@ export default function NewGrant() {
             <input placeholder="Subject" value={formData.interactionSubject} onChange={(e) => updateField("interactionSubject", e.target.value)} />
             <input placeholder="Type" value={formData.interactionType} onChange={(e) => updateField("interactionType", e.target.value)} />
             <button type="button" onClick={back}>Back</button>
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm("Cancel creating this grant? All progress will be lost.")) {
+                  navigate("/grants"); // <-- goes back to main grant list
+                }
+              }}
+            >
+              Cancel
+            </button>
             <button type="submit">Submit Grant</button>
           </div>
         )}
