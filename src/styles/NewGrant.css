@@ -1,0 +1,108 @@
+/* NewGrant.css - Styling for New Grant Multi-Step Wizard */
+
+.wizard-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 30px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  font-family: Arial, sans-serif;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.step h2 {
+  margin-bottom: 10px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #444;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 12px;    /*, 14px, 12px, 12px*/
+  padding-right: 2px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: 0.2s ease-in-out;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 4px rgba(74, 144, 226, 0.4);
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+button {
+  padding: 12px 18px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button[type="button"] {
+  background: #e0e0e0;
+  margin-right: 10px;
+}
+
+button[type="button"]:hover {
+  background: #d5d5d5;
+}
+
+button[type="submit"],
+button.next-button {
+  background: #4a90e2;
+  color: white;
+}
+
+button[type="submit"]:hover,
+button.next-button:hover {
+  background: #357ac9;
+}
+
+/* Layout for navigation buttons */
+.nav-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+/* Fade animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Checkbox styling */
+input[type="checkbox"] {
+  width: auto;
+  margin-right: 8px;
+}
+
+

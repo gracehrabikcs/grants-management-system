@@ -9,7 +9,6 @@ import GrantDetailsGifts from "./GrantDetailsGifts";
 import GrantDetailsBio from "./GrantDetailsBio";
 import GrantDetailsContacts from "./GrantDetailsContacts";
 import GrantDetailsPledges from "./GrantDetailsPledges";
-import GrantDetailsLinks from "./GrantDetailsLinks";
 import GrantDetailsAddresses from "./GrantDetailsAddresses";
 import GrantDetailsOther from "./GrantDetailsOther";
 
@@ -284,18 +283,16 @@ const GrantDetailsMain = () => {
       </div>
 
       <div className="grant-nav-bar">
-        {["", "invoices", "pledges", "contacts", "bio", "other", "links", "addresses", "tracking"].map(
-          (tab) => (
-            <NavLink
-              key={tab}
-              to={tab === "" ? `/grants/${id}` : `/grants/${id}/${tab}`}
-              end={tab === ""}
-              className={({ isActive }) => (isActive ? "active-tab" : "")}
-            >
-              {tab === "" ? "Main" : tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </NavLink>
-          )
-        )}
+        {["", "gifts", "pledges", "contacts", "bio", "other", "addresses", "tracking"].map(tab => (
+          <NavLink
+            key={tab}
+            to={tab === "" ? `/grants/${id}` : `/grants/${id}/${tab}`}
+            end={tab === ""}
+            className={({ isActive }) => (isActive ? "active-tab" : "")}
+          >
+            {tab === "" ? "Main" : tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </NavLink>
+        ))}
       </div>
 
       <Routes>
@@ -315,7 +312,6 @@ const GrantDetailsMain = () => {
         <Route path="contacts" element={<GrantDetailsContacts />} />
         <Route path="bio" element={<GrantDetailsBio />} />
         <Route path="other" element={<GrantDetailsOther />} />
-        <Route path="links" element={<GrantDetailsLinks grantId={id} />} />
         <Route path="addresses" element={<GrantDetailsAddresses grantId={id} />} />
         <Route
           path="tracking"
