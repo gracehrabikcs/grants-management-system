@@ -129,3 +129,27 @@
   font-size: 14px;
 }
 
+.grants-header-top {
+  display: flex;
+  justify-content: space-between; /* title left, button right */
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.add-grant-btn {
+  background-color: #2e7d32; /* darker green */
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.add-grant-btn:hover {
+  background-color: #1b5e20; /* slightly darker on hover */
+}
+
+
+

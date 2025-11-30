@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import "../../../styles/GrantDetailsAddress.css";
+import { collection, getDocs, doc, setDoc, deleteDoc } from "firebase/firestore";
+import { db } from "../../../firebase";
 
 const GrantDetailsAddresses = () => {
   const { id } = useParams();
-  const grantId = Number(id);
+  const grantId = id;
 
   const [addresses, setAddresses] = useState({
     currentAddresses: [],
@@ -14,83 +16,147 @@ const GrantDetailsAddresses = () => {
 
   const [modal, setModal] = useState({
     open: false,
-    mode: "add", // "add" or "edit"
+    mode: "add",
     section: null,
     index: null,
-    addr: { type: "", tag: "", verified: "", range: "", address: [] }
+    addr: { type: "", tag: "", verified: "", range: "", address: [], primary: false, docId: null }
   });
 
-  // Load addresses
+  // Load addresses from addresses subcollection
   useEffect(() => {
-    fetch("/data/grantDetails.json")
-      .then((res) => res.json())
-      .then((data) => {
-        const grantData = data.find((g) => g.id === grantId)?.addresses || {
-          currentAddresses: [],
+    const loadAddresses = async () => {
+      try {
+        const addressesCol = collection(db, "grants", grantId, "addresses");
+        const snapshot = await getDocs(addressesCol);
+
+        const current = snapshot.docs.map(docSnap => {
+          const a = docSnap.data().address || {};
+          return {
+            type: a.type || a.addressType || "",
+            tag: a.apt || "",
+            verified: a.dateVerified || "",
+            range: "",
+            address: [
+              a.street || "",
+              a.city || "",
+              a.state || "",
+              a.zipCode || "",
+              a.country || ""
+            ].filter(Boolean),
+            primary: a.primary || false,
+            docId: docSnap.id
+          };
+        });
+
+        setAddresses({
+          currentAddresses: current,
           alternateAddresses: [],
           historicalAddresses: []
-        };
-        setAddresses(grantData);
-      })
-      .catch((err) => console.error("Error loading addresses:", err));
+        });
+      } catch (err) {
+        console.error("Error loading addresses:", err);
+      }
+    };
+
+    loadAddresses();
   }, [grantId]);
 
-  // Open Add Modal
+  // Modal handlers
   const openAddModal = (section) => {
     setModal({
       open: true,
       mode: "add",
       section,
       index: null,
-      addr: { type: "", tag: "", verified: "", range: "", address: [] }
+      addr: { type: "", tag: "", verified: "", range: "", address: [], primary: false, docId: null }
     });
   };
 
-  // Open Edit Modal
   const openEditModal = (section, index, addr) => {
     setModal({
       open: true,
       mode: "edit",
       section,
       index,
-      addr: { ...addr, address: addr.address || [] }
+      addr: { ...addr, address: addr.address || [], docId: addr.docId }
     });
   };
 
   const closeModal = () => {
-    setModal({ open: false, mode: "add", section: null, index: null, addr: { type: "", tag: "", verified: "", range: "", address: [] } });
+    setModal({
+      open: false,
+      mode: "add",
+      section: null,
+      index: null,
+      addr: { type: "", tag: "", verified: "", range: "", address: [], primary: false, docId: null }
+    });
   };
 
   const handleInputChange = (field, value) => {
-    setModal((prev) => ({
+    setModal(prev => ({
       ...prev,
       addr: { ...prev.addr, [field]: value }
     }));
   };
 
-  const handleSave = () => {
+  // Save addresses to subcollection
+  const handleSave = async () => {
     const section = modal.section;
     const updatedAddr = { ...modal.addr };
-    updatedAddr.address = updatedAddr.address || [];
 
-    setAddresses((prev) => {
-      const list = [...prev[section]];
-      if (modal.mode === "add") {
-        list.push(updatedAddr);
-      } else {
-        list[modal.index] = updatedAddr;
-      }
-      return { ...prev, [section]: list };
-    });
+    const updatedAddresses = { ...addresses };
 
+    if (modal.mode === "add") {
+      // Generate a new doc ID
+      const newDocRef = doc(collection(db, "grants", grantId, "addresses"));
+      await setDoc(newDocRef, { address: {
+        apt: updatedAddr.tag,
+        street: updatedAddr.address[0] || "",
+        city: updatedAddr.address[1] || "",
+        state: updatedAddr.address[2] || "",
+        zipCode: updatedAddr.address[3] || "",
+        country: updatedAddr.address[4] || "",
+        type: updatedAddr.type,
+        addressType: updatedAddr.type,
+        dateVerified: updatedAddr.verified,
+        primary: updatedAddr.primary
+      }});
+      updatedAddr.docId = newDocRef.id;
+      updatedAddresses[section] = [...updatedAddresses[section], updatedAddr];
+    } else {
+      // Update existing doc
+      const docRef = doc(db, "grants", grantId, "addresses", updatedAddr.docId);
+      await setDoc(docRef, { address: {
+        apt: updatedAddr.tag,
+        street: updatedAddr.address[0] || "",
+        city: updatedAddr.address[1] || "",
+        state: updatedAddr.address[2] || "",
+        zipCode: updatedAddr.address[3] || "",
+        country: updatedAddr.address[4] || "",
+        type: updatedAddr.type,
+        addressType: updatedAddr.type,
+        dateVerified: updatedAddr.verified,
+        primary: updatedAddr.primary
+      }});
+      updatedAddresses[section][modal.index] = updatedAddr;
+    }
+
+    setAddresses(updatedAddresses);
     closeModal();
   };
 
-  const handleDelete = (section, index) => {
-    setAddresses((prev) => ({
-      ...prev,
-      [section]: prev[section].filter((_, i) => i !== index)
-    }));
+  const handleDelete = async (section, index) => {
+    const addr = addresses[section][index];
+    if (!addr.docId) return;
+
+    await deleteDoc(doc(db, "grants", grantId, "addresses", addr.docId));
+
+    const updatedAddresses = {
+      ...addresses,
+      [section]: addresses[section].filter((_, i) => i !== index)
+    };
+
+    setAddresses(updatedAddresses);
   };
 
   const { currentAddresses, alternateAddresses, historicalAddresses } = addresses;
@@ -146,33 +212,27 @@ const GrantDetailsAddresses = () => {
               onChange={(e) => handleInputChange("type", e.target.value)}
             />
             <input
-              placeholder="Tag (optional)"
+              placeholder="Tag / Apt"
               value={modal.addr.tag || ""}
               onChange={(e) => handleInputChange("tag", e.target.value)}
             />
             <input
-              placeholder="Last Verified Date (YYYY-MM-DD)"
+              placeholder="Last Verified Date"
               value={modal.addr.verified || ""}
               onChange={(e) => handleInputChange("verified", e.target.value)}
             />
-            <input
-              placeholder="Date Range (for historical)"
-              value={modal.addr.range || ""}
-              onChange={(e) => handleInputChange("range", e.target.value)}
-            />
             <textarea
-              placeholder="Address lines separated by |"
+              placeholder="Address lines: Street|City|State|Zip|Country"
               value={(modal.addr.address || []).join("|")}
               onChange={(e) => handleInputChange("address", e.target.value ? e.target.value.split("|") : [])}
             />
+            <label>
+              <input type="checkbox" checked={modal.addr.primary} onChange={(e) => handleInputChange("primary", e.target.checked)} /> Primary
+            </label>
 
             <div className="gms-modal-buttons">
-              <button className="gms-modal-cancel" onClick={closeModal}>
-                Cancel
-              </button>
-              <button className="gms-modal-save" onClick={handleSave}>
-                Save
-              </button>
+              <button className="gms-modal-cancel" onClick={closeModal}>Cancel</button>
+              <button className="gms-modal-save" onClick={handleSave}>Save</button>
             </div>
           </div>
         </div>
@@ -181,7 +241,7 @@ const GrantDetailsAddresses = () => {
   );
 };
 
-// Section
+// Section component
 function Section({ title, children, onAdd }) {
   return (
     <div className="gms-section">
@@ -196,13 +256,13 @@ function Section({ title, children, onAdd }) {
   );
 }
 
-// AddressCard
-function AddressCard({ type, tag, verified, range, address, onEdit, onDelete }) {
+// AddressCard component
+function AddressCard({ type, tag, verified, range, address, onEdit, onDelete, primary }) {
   return (
     <div className="gms-card gms-address-card">
       <div className="gms-address-header">
         <div className="gms-address-type">
-          <i className="ri-map-pin-line" /> {type} {tag && <span className="gms-tag">{tag}</span>}
+          <i className="ri-map-pin-line" /> {type} {tag && <span className="gms-tag">{tag}</span>} {primary && <strong>(Primary)</strong>}
         </div>
         <div className="gms-address-actions">
           <i className="ri-edit-line" title="Edit" onClick={onEdit}></i>
@@ -225,8 +285,3 @@ function AddressCard({ type, tag, verified, range, address, onEdit, onDelete }) 
 }
 
 export default GrantDetailsAddresses;
-
-
-
-
-
