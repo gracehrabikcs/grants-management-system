@@ -29,9 +29,9 @@ const Calendar = () => {
           const data = doc.data();
           const id = doc.id;
 
-          const title = data.title || "Untitled Grant";
-          const org = data.organization || "Unknown Org";
-          const app = data.main?.applicationManagement || {};
+          const title = data.Title || "Untitled Grant";
+          const org = data.Organization || "Unknown Org";
+          const app = data.Main?.["Application Management"] || {};
 
           // Helper to add standardized event objects
           const addEvent = (date, name, type = "Deadline") => {
@@ -47,10 +47,11 @@ const Calendar = () => {
           };
 
           // ADD DEADLINE EVENTS
-          addEvent(app.applicationDate, "Application Date");
-          addEvent(app.anticipatedNotificationDate, "Notification Date");
-          addEvent(app.reportDeadline, "Report Deadline");
-          addEvent(app.dateAwarded, "Award Date");
+          addEvent(app["Application Date"], "Application Date");
+          addEvent(app["Anticipated Notification Date"], "Notification Date");
+          addEvent(app["Report Deadline"], "Report Deadline");
+          addEvent(app["Date Awarded"], "Award Date");
+          addEvent(app["Report Submitted"], "Report Submitted");
         });
 
         setEvents(grantEvents);
@@ -72,8 +73,6 @@ const Calendar = () => {
     };
     setEvents([...events, event]);
     setShowModal(false);
-
-    // reset form
     setNewEvent({ title: "", org: "", date: "", type: "Deadline" });
   };
 
@@ -130,9 +129,7 @@ const Calendar = () => {
       <div className="calendar-container">
         <div className="calendar-card">
           <div className="calendar-header">
-            <h3>
-              {monthNames[month]} {year}
-            </h3>
+            <h3>{monthNames[month]} {year}</h3>
 
             <div className="calendar-controls">
               <button onClick={prevMonth}>←</button>
@@ -144,9 +141,7 @@ const Calendar = () => {
                 onChange={(e) => setFilterType(e.target.value)}
               >
                 {eventTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
+                  <option key={type} value={type}>{type}</option>
                 ))}
               </select>
 
@@ -174,40 +169,32 @@ const Calendar = () => {
               </thead>
 
               <tbody>
-                {Array.from({
-                  length: Math.ceil(days.length / 7),
-                }).map((_, rowIndex) => (
+                {Array.from({ length: Math.ceil(days.length / 7) }).map((_, rowIndex) => (
                   <tr key={rowIndex}>
-                    {days
-                      .slice(rowIndex * 7, rowIndex * 7 + 7)
-                      .map((day, i) => (
-                        <td key={i} className={day ? "" : "empty"}>
-                          {day && (
-                            <div className="calendar-day">
-                              <span className="day-number">{day}</span>
+                    {days.slice(rowIndex * 7, rowIndex * 7 + 7).map((day, i) => (
+                      <td key={i} className={day ? "" : "empty"}>
+                        {day && (
+                          <div className="calendar-day">
+                            <span className="day-number">{day}</span>
 
-                              <div className="day-events">
-                                {getEventsForDay(day).map((ev) => (
-                                  <div
-                                    key={ev.id}
-                                    className={`event-entry ${ev.type.toLowerCase()}`}
-                                    title={ev.title}
-                                  >
-                                    <span
-                                      className={`event-dot ${ev.type.toLowerCase()}`}
-                                    ></span>
-                                    <span className="event-title">
-                                      {ev.title.length > 20
-                                        ? ev.title.slice(0, 20) + "..."
-                                        : ev.title}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
+                            <div className="day-events">
+                              {getEventsForDay(day).map((ev) => (
+                                <div
+                                  key={ev.id}
+                                  className={`event-entry ${ev.type.toLowerCase()}`}
+                                  title={ev.title}
+                                >
+                                  <span className={`event-dot ${ev.type.toLowerCase()}`}></span>
+                                  <span className="event-title">
+                                    {ev.title.length > 20 ? ev.title.slice(0, 20) + "..." : ev.title}
+                                  </span>
+                                </div>
+                              ))}
                             </div>
-                          )}
-                        </td>
-                      ))}
+                          </div>
+                        )}
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
@@ -218,7 +205,6 @@ const Calendar = () => {
         {/* UPCOMING EVENTS */}
         <div className="upcoming-events">
           <h3>Upcoming Events</h3>
-
           {filteredEvents.map((event) => (
             <div key={event.id} className="event-card">
               <div className={`event-icon ${event.type?.toLowerCase()}`}></div>
@@ -226,9 +212,7 @@ const Calendar = () => {
               <div className="event-details">
                 <h4>{event.title}</h4>
                 <p>{event.org}</p>
-                <p className="event-date">
-                  {new Date(event.date).toLocaleString()}
-                </p>
+                <p className="event-date">{new Date(event.date).toLocaleString()}</p>
                 <span className="event-id">{event.id}</span>
               </div>
             </div>
@@ -245,47 +229,33 @@ const Calendar = () => {
             <input
               placeholder="Event Title"
               value={newEvent.title}
-              onChange={(e) =>
-                setNewEvent({ ...newEvent, title: e.target.value })
-              }
+              onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
             />
 
             <input
               placeholder="Organization"
               value={newEvent.org}
-              onChange={(e) =>
-                setNewEvent({ ...newEvent, org: e.target.value })
-              }
+              onChange={(e) => setNewEvent({ ...newEvent, org: e.target.value })}
             />
 
             <input
               type="datetime-local"
               value={newEvent.date}
-              onChange={(e) =>
-                setNewEvent({ ...newEvent, date: e.target.value })
-              }
+              onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })}
             />
 
             <select
               value={newEvent.type}
-              onChange={(e) =>
-                setNewEvent({ ...newEvent, type: e.target.value })
-              }
+              onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })}
             >
-              {eventTypes
-                .filter((t) => t !== "All")
-                .map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
+              {eventTypes.filter((t) => t !== "All").map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
             </select>
 
             <div className="modal-actions">
               <button onClick={() => setShowModal(false)}>Cancel</button>
-              <button className="save-btn" onClick={handleAddEvent}>
-                Save
-              </button>
+              <button className="save-btn" onClick={handleAddEvent}>Save</button>
             </div>
           </div>
         </div>
@@ -295,3 +265,4 @@ const Calendar = () => {
 };
 
 export default Calendar;
+

@@ -136,6 +136,11 @@
   margin-bottom: 1rem;
 }
 
+.grants-title {
+  flex: 1; /* take all available space to push button right */
+  text-align: left; /* ensure text is left-aligned within this space */
+}
+
 .add-grant-btn {
   background-color: #2e7d32; /* darker green */
   color: white;
@@ -150,6 +155,9 @@
 .add-grant-btn:hover {
   background-color: #1b5e20; /* slightly darker on hover */
 }
+
+
+
 
 
 
