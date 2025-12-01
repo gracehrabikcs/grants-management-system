@@ -134,126 +134,11 @@ export default function NewGrant() {
             "Application Status": formData.applicationStatus,
             "Application Type": formData.applicationType,
             "Grant Period": formData.grantPeriod,
-            "Report Deadline": formData.reportDeadline,
+            "reportDeadline": formData.reportDeadline,
             "Report Submitted": formData.reportSubmitted,
-          },
-          "Grant Purpose and Description": {
-            "Expected Outcomes": formData.expectedOutcomes,
-            "Grant Purpose": formData.grantPurpose,
-            "Project Objectives": formData.projectObjectives,
-            "Project Summary": formData.projectSummary,
-          },
+          }
         },
       });
-      // ADDRESSES
-      const addressRef = doc(collection(grantRef, "addresses"), "A1");
-      await setDoc(addressRef, {
-        address: {
-          apt: formData.apt,
-          city: formData.city,
-          country: formData.country,
-          state: formData.state,
-          street: formData.street,
-          zipCode: formData.zipCode,
-          addressType: formData.addressType,
-          dateVerified: formData.dateVerified || serverTimestamp(),
-          primary: formData.primary,
-          type: formData.type,
-        },
-      });
-
-      // BIO
-      const bioRef = doc(grantRef, "bio/details"); // fixed path
-      await setDoc(bioRef, {
-        fundingPreferences: formData.fundingPreferences || "",
-        fundingTs: new Date().toLocaleString(),
-        organizationDetails: formData.organizationDetails || "",
-        organizationTs: new Date().toLocaleString(),
-        updatedAt: serverTimestamp(),
-      });
-
-
-      // CONTACTS
-      const contactsRef = doc(collection(grantRef, "contacts"));
-      await setDoc(contactsRef, {
-        id: contactsRef.id,
-        phone: formData.phone || "",
-        email: formData.email || "",
-        primaryContact: formData.primaryContact || "",
-        secondaryContact: formData.secondaryContact || "",
-        notes: formData.contactsNotes || "",
-        updatedAt: serverTimestamp(),
-      });
-
-      // ORGANIZATION DETAILS
-      const orgRef = doc(collection(grantRef, "organizationDetails"), "O1");
-      await setDoc(orgRef, {
-        annualBudget: formData.annualBudget,
-        foundedYear: formData.foundedYear,
-        keyPrograms: formData.keyPrograms,
-        missionStatement: formData.missionStatement,
-        staffSize: formData.staffSize,
-        createdAt: serverTimestamp(),
-      });
-
-      // PLEDGES
-      const pledgeRef = doc(collection(grantRef, "pledges"));
-      await setDoc(pledgeRef, {
-        amount: formData.pledgeAmount ? Number(formData.pledgeAmount) : 0,
-        donor: formData.pledgeDonor || "",
-        received: formData.pledgeReceived ? Number(formData.pledgeReceived) : 0,
-        schedule: formData.pledgeSchedule || "",
-        pledgedDate: formData.pledgedDate || "",
-        notes: formData.pledgeNotes || "",
-        notesUpdatedAt: formData.pledgeNotes ? serverTimestamp() : null,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-
-      // INVOICES
-      const invoiceRef = doc(collection(grantRef, "invoices"));
-      await setDoc(invoiceRef, {
-        id: invoiceRef.id,
-        date: formData.invoiceDate || "",
-        purpose: formData.invoicePurpose || "",
-        spent: formData.invoiceSpent ? Number(formData.invoiceSpent) : 0,
-        acknowledged: formData.invoiceAcknowledged || false,
-        createdAt: serverTimestamp(),
-      });
-
-      // OTHER / TRACKING / INTERACTIONS
-      const otherRef = doc(grantRef, "other/notes"); // fixed path
-      await setDoc(otherRef, {
-        notes: formData.otherNotes || "",
-        budgetNotes: formData.otherBudgetNotes || "",
-        budgetUpdatedAt: serverTimestamp(),
-        internalNotes: formData.otherInternalNotes || "",
-        internalUpdatedAt: serverTimestamp(),
-      });
-
-
-      const trackingSectionRef = doc(collection(grantRef, "trackingSections"), "S1");
-      await setDoc(trackingSectionRef, { "Section Name": "Application Process" });
-
-      const taskRef = doc(collection(trackingSectionRef, "trackingTasks"), "T1");
-      await setDoc(taskRef, {
-        "Assignee Email": "",
-        Task: "",
-        "Task Deadline": "",
-        "Task Notes": "",
-        "Task Status": "To Do",
-      });
-
-      const interactionRef = doc(collection(grantRef, "interactions"), "I1");
-      await setDoc(interactionRef, {
-        contact: formData.interactionContact || "",
-        date: formData.interactionDate || "",
-        next: formData.interactionNext || "",
-        outcome: formData.interactionOutcome || "",
-        subject: formData.interactionSubject || "",
-        type: formData.interactionType || "",
-      });
-
       // Other Firestore writes remain unchanged...
       alert(`Grant saved with ID: ${nextId}`);
       setFormData(initialFormData);
@@ -297,171 +182,30 @@ export default function NewGrant() {
         {step === 1 && (
           <div className="step">
             <h2>Main Grant Info</h2>
+            {renderInput("Organization", "organization")}
+            {renderInput("Title", "title")}
             {renderInput("Anticipated Notification Date", "anticipatedNotificationDate", "date")}
             {renderInput("Application Date", "applicationDate", "date")}
-            {renderInput("Application Status", "applicationStatus")}
+            <div className="form-group">
+              <label>Application Status</label>
+              <select
+                value={formData.applicationStatus}
+                onChange={(e) => updateField("applicationStatus", e.target.value)}
+              >
+                <option value="">Select status...</option>
+                <option value="Active">Active</option>
+                <option value="Under Review">Under Review</option>
+                <option value="Approved">Approved</option>
+              </select>
+            </div>
             {renderInput("Application Type", "applicationType")}
             {renderInput("Grant Period", "grantPeriod")}
             {renderInput("Fiscal Year", "fiscalYear")}
             {renderInput("Report Deadline", "reportDeadline", "date")}
-            {renderInput("Report Submitted", "reportSubmitted")}
-            {renderTextarea("Expected Outcomes", "expectedOutcomes")}
-            {renderTextarea("Grant Purpose", "grantPurpose")}
-            {renderTextarea("Project Objectives", "projectObjectives")}
-            {renderTextarea("Project Summary", "projectSummary")}
-            {renderInput("Organization", "organization")}
-            {renderInput("Title", "title")}
+            {renderInput("Report Submitted", "reportSubmitted", "date")}
+            
 
             <div className="wizard-buttons">
-              <button type="button" onClick={() => { if (window.confirm("Cancel creating this grant? All progress will be lost.")) navigate("/grants"); }}>Cancel</button>
-              <button type="button" onClick={next}>Next</button>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 2: Address */}
-        {step === 2 && (
-          <div className="step">
-            <h2>Address</h2>
-            {renderInput("Apt", "apt")}
-            {renderInput("City", "city")}
-            {renderInput("Country", "country")}
-            {renderInput("State", "state")}
-            {renderInput("Street", "street")}
-            {renderInput("Zip Code", "zipCode")}
-            {renderInput("Address Type", "addressType")}
-            {renderInput("Date Verified", "dateVerified", "date")}
-            <div className="form-group">
-              <label>
-                <input type="checkbox" checked={formData.primary} onChange={(e) => updateField("primary", e.target.checked)} /> Primary
-              </label>
-            </div>
-            {renderInput("Type", "type")}
-
-            <div className="wizard-buttons">
-              <button type="button" onClick={back}>Back</button>
-              <button type="button" onClick={() => { if (window.confirm("Cancel creating this grant? All progress will be lost.")) navigate("/grants"); }}>Cancel</button>
-              <button type="button" onClick={next}>Next</button>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 3: Bio */}
-        {step === 3 && (
-          <div className="step">
-            <h2>Bio</h2>
-            {renderTextarea("Funding Preferences", "fundingPreferences")}
-            {renderTextarea("Organization Details", "organizationDetails")}
-            <div className="wizard-buttons">
-              <button type="button" onClick={back}>Back</button>
-              <button type="button" onClick={() => { if (window.confirm("Cancel creating this grant? All progress will be lost.")) navigate("/grants"); }}>Cancel</button>
-              <button type="button" onClick={next}>Next</button>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 4: Organization Details */}
-        {step === 4 && (
-          <div className="step">
-            <h2>Organization Details</h2>
-            {renderInput("Annual Budget", "annualBudget")}
-            {renderInput("Founded Year", "foundedYear")}
-            {renderTextarea("Key Programs", "keyPrograms")}
-            {renderTextarea("Mission Statement", "missionStatement")}
-            {renderInput("Staff Size", "staffSize")}
-            <div className="wizard-buttons">
-              <button type="button" onClick={back}>Back</button>
-              <button type="button" onClick={() => { if (window.confirm("Cancel creating this grant? All progress will be lost.")) navigate("/grants"); }}>Cancel</button>
-              <button type="button" onClick={next}>Next</button>
-            </div>
-          </div>
-        )}
-        {/* STEP 5: Contacts */}
-        {step === 5 && (
-          <div className="step">
-            <h2>Contacts</h2>
-            {renderInput("Phone", "phone")}
-            {renderInput("Email", "email")}
-            {renderInput("Primary Contact", "primaryContact")}
-            {renderInput("Secondary Contact", "secondaryContact")}
-            {renderTextarea("Notes", "contactsNotes")}
-
-            <div className="wizard-buttons">
-              <button type="button" onClick={back}>Back</button>
-              <button type="button" onClick={() => { if (window.confirm("Cancel creating this grant? All progress will be lost.")) navigate("/grants"); }}>Cancel</button>
-              <button type="button" onClick={next}>Next</button>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 6: Pledges */}
-        {step === 6 && (
-          <div className="step">
-            <h2>Pledges</h2>
-            {renderInput("Pledge Amount", "pledgeAmount")}
-            {renderInput("Donor", "pledgeDonor")}
-            {renderInput("Schedule", "pledgeSchedule")}
-            {renderInput("Amount Received", "pledgeReceived")}
-            {renderInput("Pledged Date", "pledgedDate", "date")}
-            {renderTextarea("Notes", "pledgeNotes")}
-
-            <div className="wizard-buttons">
-              <button type="button" onClick={back}>Back</button>
-              <button type="button" onClick={() => { if (window.confirm("Cancel creating this grant? All progress will be lost.")) navigate("/grants"); }}>Cancel</button>
-              <button type="button" onClick={next}>Next</button>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 7: Invoices */}
-        {step === 7 && (
-          <div className="step">
-            <h2>Gifts / Invoices</h2>
-            {renderInput("Gift Amount", "invoiceSpent")}
-            {renderInput("Purpose", "invoicePurpose")}
-            <div className="form-group">
-              <label>
-                <input type="checkbox" checked={formData.invoiceAcknowledged} onChange={(e) => updateField("invoiceAcknowledged", e.target.checked)} /> Acknowledged
-              </label>
-            </div>
-
-            <div className="wizard-buttons">
-              <button type="button" onClick={back}>Back</button>
-              <button type="button" onClick={() => { if (window.confirm("Cancel creating this grant? All progress will be lost.")) navigate("/grants"); }}>Cancel</button>
-              <button type="button" onClick={next}>Next</button>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 8: Other */}
-        {step === 8 && (
-          <div className="step">
-            <h2>Other</h2>
-            {renderTextarea("General Notes", "otherNotes")}
-            {renderTextarea("Budget Notes", "otherBudgetNotes")}
-            {renderTextarea("Internal Notes", "otherInternalNotes")}
-
-            <div className="wizard-buttons">
-              <button type="button" onClick={back}>Back</button>
-              <button type="button" onClick={() => { if (window.confirm("Cancel creating this grant? All progress will be lost.")) navigate("/grants"); }}>Cancel</button>
-              <button type="button" onClick={next}>Next</button>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 9: Interactions */}
-        {step === 9 && (
-          <div className="step">
-            <h2>Interactions</h2>
-            {renderInput("Contact", "interactionContact")}
-            {renderInput("Date", "interactionDate", "date")}
-            {renderInput("Next Step", "interactionNext")}
-            {renderInput("Outcome", "interactionOutcome")}
-            {renderInput("Subject", "interactionSubject")}
-            {renderInput("Type", "interactionType")}
-
-            <div className="wizard-buttons">
-              <button type="button" onClick={back}>Back</button>
               <button type="button" onClick={() => { if (window.confirm("Cancel creating this grant? All progress will be lost.")) navigate("/grants"); }}>Cancel</button>
               <button type="submit">Submit Grant</button>
             </div>
