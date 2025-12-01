@@ -137,6 +137,7 @@ const MainTabContent = ({ grant, setGrant, progress, id }) => {
             <option value="Active">Active</option>
             <option value="Under Review">Under Review</option>
             <option value="Approved">Approved</option>
+            <option value="Completed">Completed</option>
           </select>
         </div>
 
