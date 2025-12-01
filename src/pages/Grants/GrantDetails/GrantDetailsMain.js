@@ -31,17 +31,43 @@ const formatTimestamp = (ts) => {
 /* ===========================================
     Main Tab Content
    =========================================== */
+
 const MainTabContent = ({ grant, setGrant, progress, id }) => {
   const appManagement = grant?.Main?.["Application Management"] || {};
   const grantPurposeDescription = grant?.Main?.["Grant Purpose and Description"] || {};
 
+  /**
+   * Handles updating BOTH:
+   * - top-level fields (Title, Organization)
+   * - nested fields inside Main → sections
+   */
   const handleChange = async (section, field, value) => {
-    const updatedGrant = {
+    let updatedGrant;
+
+    if (section === "top") {
+      // Update TOP LEVEL fields like Title, Organization
+      updatedGrant = {
+        ...grant,
+        [field]: value,
+      };
+
+      setGrant(updatedGrant);
+
+      const grantRef = doc(db, "grants", id);
+      await updateDoc(grantRef, {
+        [field]: value, // top-level write
+      });
+
+      return;
+    }
+
+    // Otherwise update nested Main fields
+    updatedGrant = {
       ...grant,
       Main: {
         ...grant.Main,
         [section]: {
-          ...grant.Main[section],
+          ...grant.Main?.[section],
           [field]: value,
         },
       },
@@ -57,6 +83,35 @@ const MainTabContent = ({ grant, setGrant, progress, id }) => {
 
   return (
     <div className="grant-main-content">
+
+      {/* ============================
+          TOP LEVEL FIELDS
+      ============================ */}
+      <div className="section">
+        <h3>Basic Information</h3>
+
+        <div className="field-group">
+          <label>Title</label>
+          <input
+            type="text"
+            value={grant.Title || ""}
+            onChange={(e) => handleChange("top", "Title", e.target.value)}
+          />
+        </div>
+
+        <div className="field-group">
+          <label>Organization</label>
+          <input
+            type="text"
+            value={grant.Organization || ""}
+            onChange={(e) => handleChange("top", "Organization", e.target.value)}
+          />
+        </div>
+      </div>
+
+      {/* ============================
+          APPLICATION MANAGEMENT
+      ============================ */}
       <div className="section">
         <h3>Application Management</h3>
 
@@ -65,7 +120,9 @@ const MainTabContent = ({ grant, setGrant, progress, id }) => {
           <input
             type="date"
             value={appManagement["Application Date"] || ""}
-            onChange={(e) => handleChange("Application Management", "Application Date", e.target.value)}
+            onChange={(e) =>
+              handleChange("Application Management", "Application Date", e.target.value)
+            }
           />
         </div>
 
@@ -73,7 +130,9 @@ const MainTabContent = ({ grant, setGrant, progress, id }) => {
           <label>Application Status</label>
           <select
             value={appManagement["Application Status"] || ""}
-            onChange={(e) => handleChange("Application Management", "Application Status", e.target.value)}
+            onChange={(e) =>
+              handleChange("Application Management", "Application Status", e.target.value)
+            }
           >
             <option value="Active">Active</option>
             <option value="Under Review">Under Review</option>
@@ -86,15 +145,20 @@ const MainTabContent = ({ grant, setGrant, progress, id }) => {
           <input
             type="text"
             value={appManagement["Application Type"] || ""}
-            onChange={(e) => handleChange("Application Management", "Application Type", e.target.value)}
+            onChange={(e) =>
+              handleChange("Application Management", "Application Type", e.target.value)
+            }
           />
         </div>
+
         <div className="field-group">
           <label>Date Awarded</label>
           <input
             type="date"
             value={appManagement["Date Awarded"] || ""}
-            onChange={(e) => handleChange("Application Management", "Date Awarded", e.target.value)}
+            onChange={(e) =>
+              handleChange("Application Management", "Date Awarded", e.target.value)
+            }
           />
         </div>
 
@@ -103,15 +167,20 @@ const MainTabContent = ({ grant, setGrant, progress, id }) => {
           <input
             type="text"
             value={appManagement["Grant Period"] || ""}
-            onChange={(e) => handleChange("Application Management", "Grant Period", e.target.value)}
+            onChange={(e) =>
+              handleChange("Application Management", "Grant Period", e.target.value)
+            }
           />
         </div>
+
         <div className="field-group">
           <label>Fiscal Year</label>
           <input
             type="text"
             value={appManagement["Fiscal Year"] || ""}
-            onChange={(e) => handleChange("Application Management", "Fiscal Year", e.target.value)}
+            onChange={(e) =>
+              handleChange("Application Management", "Fiscal Year", e.target.value)
+            }
           />
         </div>
 
@@ -120,7 +189,13 @@ const MainTabContent = ({ grant, setGrant, progress, id }) => {
           <input
             type="date"
             value={appManagement["Anticipated Notification Date"] || ""}
-            onChange={(e) => handleChange("Application Management", "Anticipated Notification Date", e.target.value)}
+            onChange={(e) =>
+              handleChange(
+                "Application Management",
+                "Anticipated Notification Date",
+                e.target.value
+              )
+            }
           />
         </div>
 
@@ -129,7 +204,9 @@ const MainTabContent = ({ grant, setGrant, progress, id }) => {
           <input
             type="date"
             value={appManagement["reportDeadline"] || ""}
-            onChange={(e) => handleChange("Application Management", "reportDeadline", e.target.value)}
+            onChange={(e) =>
+              handleChange("Application Management", "reportDeadline", e.target.value)
+            }
           />
         </div>
 
@@ -138,7 +215,9 @@ const MainTabContent = ({ grant, setGrant, progress, id }) => {
           <input
             type="date"
             value={appManagement["Report Submitted"] || ""}
-            onChange={(e) => handleChange("Application Management", "Report Submitted", e.target.value)}
+            onChange={(e) =>
+              handleChange("Application Management", "Report Submitted", e.target.value)
+            }
           />
         </div>
 
@@ -151,6 +230,9 @@ const MainTabContent = ({ grant, setGrant, progress, id }) => {
         </div>
       </div>
 
+      {/* ============================
+          GRANT PURPOSE & DESCRIPTION
+      ============================ */}
       <div className="section">
         <h3>Grant Purpose and Description</h3>
 
@@ -159,7 +241,13 @@ const MainTabContent = ({ grant, setGrant, progress, id }) => {
           <input
             type="text"
             value={grantPurposeDescription["Expected Outcomes"] || ""}
-            onChange={(e) => handleChange("Grant Purpose and Description", "Expected Outcomes", e.target.value)}
+            onChange={(e) =>
+              handleChange(
+                "Grant Purpose and Description",
+                "Expected Outcomes",
+                e.target.value
+              )
+            }
           />
         </div>
 
@@ -168,7 +256,13 @@ const MainTabContent = ({ grant, setGrant, progress, id }) => {
           <input
             type="text"
             value={grantPurposeDescription["Grant Purpose"] || ""}
-            onChange={(e) => handleChange("Grant Purpose and Description", "Grant Purpose", e.target.value)}
+            onChange={(e) =>
+              handleChange(
+                "Grant Purpose and Description",
+                "Grant Purpose",
+                e.target.value
+              )
+            }
           />
         </div>
 
@@ -177,7 +271,13 @@ const MainTabContent = ({ grant, setGrant, progress, id }) => {
           <input
             type="text"
             value={grantPurposeDescription["Project Objectives"] || ""}
-            onChange={(e) => handleChange("Grant Purpose and Description", "Project Objectives", e.target.value)}
+            onChange={(e) =>
+              handleChange(
+                "Grant Purpose and Description",
+                "Project Objectives",
+                e.target.value
+              )
+            }
           />
         </div>
 
@@ -186,13 +286,20 @@ const MainTabContent = ({ grant, setGrant, progress, id }) => {
           <input
             type="text"
             value={grantPurposeDescription["Project Summary"] || ""}
-            onChange={(e) => handleChange("Grant Purpose and Description", "Project Summary", e.target.value)}
+            onChange={(e) =>
+              handleChange(
+                "Grant Purpose and Description",
+                "Project Summary",
+                e.target.value
+              )
+            }
           />
         </div>
       </div>
     </div>
   );
 };
+
 
 /* ===========================================
     Main Component
