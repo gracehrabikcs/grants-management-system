@@ -52,8 +52,6 @@ const Grants = () => {
           const Organization = raw.Organization || raw.organization || raw.org || "";
           const Title = raw.Title || raw.title || raw.name || "";
           const status =
-            raw.status ||
-            raw.Status ||
             raw.Main?.["Application Management"]?.["Application Status"] ||
             "";
 
@@ -203,6 +201,7 @@ const Grants = () => {
           <div key={g.id} className="grant-card" onClick={() => handleCardClick(g.id)}>
             <h3>{g.Title || "Untitled"}</h3>
             <p className="organization">{g.Organization}</p>
+            <p className="grant-id">Grant ID: {g.id}</p>
             <span
               className={`status ${String(g.status || "").toLowerCase().replace(/\s+/g, "")}`}
             >
