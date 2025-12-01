@@ -75,6 +75,25 @@ function escapeCsv(val) {
   return v;
 }
 
+function computeProgressFromSections(sectionsArray) {
+  if (!sectionsArray || sectionsArray.length === 0) return 0;
+
+  let totalTasks = 0;
+  let completedValue = 0;
+  const statusWeight = { "To Do": 0, "In Progress": 0.5, Done: 1 };
+
+  sectionsArray.forEach((section) => {
+    (section.tasks || []).forEach((task) => {
+      totalTasks += 1;
+      const s = task["Task Status"] || task.TaskStatus || task.status || "";
+      completedValue += statusWeight[s] || 0;
+    });
+  });
+
+  if (totalTasks === 0) return 0;
+  return Math.round((completedValue / totalTasks) * 100);
+}
+
 export default function ReportsPage() {
   // ------- Grants from Firestore -------
   const [grants, setGrants] = useState([]);
@@ -82,26 +101,86 @@ export default function ReportsPage() {
   const [grantsError, setGrantsError] = useState("");
 
   useEffect(() => {
-    async function loadGrants() {
-      setGrantsLoading(true);
-      setGrantsError("");
-      try {
-        const snap = await getDocs(collection(db, "grants"));
-        const rows = snap.docs.map((d) => ({
-          id: d.id,
-          ...d.data(),
-        }));
-        setGrants(rows);
-      } catch (err) {
-        console.error("Error loading grants for reports:", err);
-        setGrantsError("Could not load grants.");
-      } finally {
-        setGrantsLoading(false);
-      }
-    }
+  async function loadGrants() {
+    setGrantsLoading(true);
+    setGrantsError("");
 
-    loadGrants();
-  }, []);
+    try {
+      const snap = await getDocs(collection(db, "grants"));
+      const rows = [];
+
+      // loop each grant doc
+      for (const d of snap.docs) {
+        const data = d.data();
+
+        // normalize amount + status + deadline
+        const amount =
+          typeof data.amount === "number"
+            ? data.amount
+            : Number(data.amount) || 0;
+
+        const status = data.status || data.Status || "Unknown";
+        const deadline = data.deadline || data.Deadline || null;
+
+        // -------- load tracking sections + tasks to compute progress --------
+        const sections = [];
+        try {
+          const sectionsSnap = await getDocs(
+            collection(db, "grants", d.id, "trackingSections")
+          );
+
+          for (const sDoc of sectionsSnap.docs) {
+            const sData = { id: sDoc.id, ...sDoc.data() };
+            const tasks = [];
+
+            try {
+              const tasksSnap = await getDocs(
+                collection(
+                  db,
+                  "grants",
+                  d.id,
+                  "trackingSections",
+                  sDoc.id,
+                  "trackingTasks"
+                )
+              );
+              tasksSnap.forEach((t) =>
+                tasks.push({ id: t.id, ...t.data() })
+              );
+            } catch (e) {
+              // ignore task loading errors for now
+            }
+
+            sections.push({ ...sData, tasks });
+          }
+        } catch (e) {
+          // ignore section loading errors for now
+        }
+
+        const progress = computeProgressFromSections(sections);
+
+        rows.push({
+          id: d.id,
+          ...data,
+          amount,
+          status,
+          deadline,
+          progress,
+        });
+      }
+
+      setGrants(rows);
+    } catch (err) {
+      console.error("Error loading grants for reports:", err);
+      setGrantsError("Could not load grants.");
+    } finally {
+      setGrantsLoading(false);
+    }
+  }
+
+  loadGrants();
+}, []);
+
 
   // ------- Filters -------
   const [dateFrom, setDateFrom] = useState("");
@@ -155,17 +234,23 @@ export default function ReportsPage() {
     [grants, dateFrom, dateTo, status, amountBand]
   );
 
-  const totalGrants = filteredGrants.length;
-  const totalFunding = filteredGrants.reduce(
-    (sum, g) => sum + (Number(g.amount) || 0),
-    0
-  );
-  const approvedCount = filteredGrants.filter(
-    (g) => g.status === "Approved"
-  ).length;
-  const successRate = totalGrants
-    ? Math.round((approvedCount / totalGrants) * 100)
-    : 0;
+const totalGrants = filteredGrants.length;
+const totalFunding = filteredGrants.reduce(
+  (sum, g) => sum + (Number(g.amount) || 0),
+  0
+);
+
+// sum of all progress percentages (0–100) across filtered grants
+const totalProgress = filteredGrants.reduce(
+  (sum, g) => sum + (Number(g.progress) || 0),
+  0
+);
+
+// average progress across all filtered grants
+const successRate = totalGrants
+  ? Math.round(totalProgress / totalGrants)
+  : 0;
+
 
   const kpis = {
     totalGrants,
