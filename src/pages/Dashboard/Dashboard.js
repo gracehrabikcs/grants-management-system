@@ -17,23 +17,14 @@ const Dashboard = () => {
         const grantList = [];
         let globalFunding = 0;
 
-        // Loop through all grant documents
         for (const grantDoc of grantSnap.docs) {
           const data = grantDoc.data();
-
-          const grantData = {
-            id: grantDoc.id,
-            title: data.Title || data.title || "No title",
-            organization: data.Organization || data.organization || "N/A",
-            ...data,
-          };
 
           // Fetch pledges inside each grant
           const pledgesRef = collection(db, "grants", grantDoc.id, "pledges");
           const pledgeSnap = await getDocs(pledgesRef);
 
           let grantFunding = 0;
-
           pledgeSnap.forEach((p) => {
             const received = Number(p.data().received);
             if (!isNaN(received)) {
@@ -42,7 +33,20 @@ const Dashboard = () => {
             }
           });
 
-          grantData.totalFunding = grantFunding;
+          // Extract reportDeadline from Main → Application Management
+          let deadline = null;
+          if (data.Main && data.Main["Application Management"]) {
+            deadline = data.Main["Application Management"].reportDeadline || null;
+          }
+
+          const grantData = {
+            id: grantDoc.id,
+            title: data.Title || data.title || "No Title",
+            organization: data.Organization || data.organization || "N/A",
+            totalFunding: grantFunding,
+            deadline: deadline,
+          };
+
           grantList.push(grantData);
         }
 
@@ -70,7 +74,6 @@ const Dashboard = () => {
       {/* Stat Cards */}
       <div className="stat-grid">
         <StatCard title="Total Grants" value={totalGrants} />
-
         <StatCard
           title="Total Funding"
           value={totalFunding.toLocaleString("en-US", {
@@ -105,13 +108,7 @@ const Dashboard = () => {
                     currency: "USD",
                   })}
                 </td>
-                <td>
-                  {g.deadline
-                    ? new Date(g.deadline.seconds * 1000)
-                        .toISOString()
-                        .split("T")[0]
-                    : "No deadline"}
-                </td>
+                <td>{g.deadline || "No deadline"}</td>
               </tr>
             ))}
           </tbody>
