@@ -106,6 +106,14 @@ const MainTabContent = ({ grant, setGrant, progress, id }) => {
             onChange={(e) => handleChange("Application Management", "Grant Period", e.target.value)}
           />
         </div>
+        <div className="field-group">
+          <label>Fiscal Year</label>
+          <input
+            type="text"
+            value={appManagement["Fiscal Year"] || ""}
+            onChange={(e) => handleChange("Application Management", "Fiscal Year", e.target.value)}
+          />
+        </div>
 
         <div className="field-group">
           <label>Anticipated Notification Date</label>
@@ -120,8 +128,8 @@ const MainTabContent = ({ grant, setGrant, progress, id }) => {
           <label>Report Deadline</label>
           <input
             type="date"
-            value={appManagement["Report Deadline"] || ""}
-            onChange={(e) => handleChange("Application Management", "Report Deadline", e.target.value)}
+            value={appManagement["reportDeadline"] || ""}
+            onChange={(e) => handleChange("Application Management", "reportDeadline", e.target.value)}
           />
         </div>
 
@@ -275,7 +283,7 @@ const GrantDetailsMain = () => {
           {/* FIX APPLIED HERE */}
           <p>
             <strong>Report Deadline:</strong>{" "}
-            {formatTimestamp(grant?.Main?.["Application Management"]?.["Report Deadline"])}
+            {formatTimestamp(grant?.Main?.["Application Management"]?.["reportDeadline"])}
           </p>
 
           <p><strong>Progress:</strong> {calculateProgress(trackingSections)}%</p>

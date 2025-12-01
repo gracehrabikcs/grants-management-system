@@ -73,8 +73,13 @@
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: transform 0.2s;
 }
 
+.grant-card:hover {
+  transform: scale(1.02);
+}
 .status.active { background: #d4f5d4; }
 .status.underreview { background: #fff5c2; }
 .status.approved { background: #d4e8ff; }
