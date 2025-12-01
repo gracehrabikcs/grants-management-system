@@ -1,75 +1,133 @@
 import React, { useState, useEffect } from "react";
 import "../../styles/Calendar.css";
+import { collection, getDocs, addDoc, doc } from "firebase/firestore";
+import { db } from "../../firebase";
 
 const Calendar = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [events, setEvents] = useState([]);
+  const [grants, setGrants] = useState([]);
   const [filterType, setFilterType] = useState("All");
   const [showModal, setShowModal] = useState(false);
-
   const [newEvent, setNewEvent] = useState({
     title: "",
-    org: "",
+    grantId: "",
     date: "",
     type: "Deadline",
   });
 
-  // Fetch both JSON sources
+  const eventTypes = ["All", "Deadline", "Review", "Visit", "Report"];
+  const monthNames = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December",
+  ];
+
+  // ---------------------------
+  // LOAD ALL GRANTS AND EVENTS
+  // ---------------------------
   useEffect(() => {
-    const fetchCalendarEvents = fetch("/data/calendarEvents.json").then(res =>
-      res.json()
-    );
+    const loadEvents = async () => {
+      try {
+        const grantSnapshot = await getDocs(collection(db, "grants"));
+        const grantList = [];
+        const allEvents = [];
 
-    const fetchGrantTracking = fetch("/data/grantDetails.json")
-      .then(res => res.json())
-      .then(grants => {
-        let taskEvents = [];
+        for (const gDoc of grantSnapshot.docs) {
+          const gData = { id: gDoc.id, ...gDoc.data() };
+          grantList.push(gData);
 
-        grants.forEach(grant => {
-          const grantTitle = grant.title;
-          const tracking = grant.tracking || {};
+          // 1️⃣ Add automatic grant deadlines
+          const app = gData.Main?.["Application Management"] || {};
+          const addDeadline = (field, label) => {
+            if (app[field]) {
+              allEvents.push({
+                id: `GR-${gDoc.id}-${label}`,
+                title: `${gData.Title || "Untitled Grant"}: ${label}`,
+                org: gData.Organization || "Unknown Org",
+                date: app[field]?.toDate ? app[field].toDate() : new Date(app[field]),
+                type: "Deadline",
+                grantId: gDoc.id,
+              });
+            }
+          };
+          ["Application Date", "Anticipated Notification Date", "Report Deadline", "Date Awarded", "Report Submitted"].forEach(f => addDeadline(f, f));
 
-          Object.keys(tracking).forEach(section => {
-            tracking[section].forEach(task => {
-              if (task.deadline) {
-                taskEvents.push({
-                  id: `T-${grant.id}-${section}-${task.id}`,
-                  title: `${grantTitle}: ${task.name}`,
-                  section,
-                  grantId: grant.id,
-                  taskId: task.id,
-                  org: grant.organization,
-                  date: task.deadline,
-                  type: task.type || "Deadline" // Default to Deadline if type not set
-                });
-              }
+          // 2️⃣ Load manual events from /Calendar subcollection
+          const calendarSnap = await getDocs(collection(db, "grants", gDoc.id, "Calendar"));
+          calendarSnap.forEach((cDoc) => {
+            const data = cDoc.data();
+            allEvents.push({
+              id: cDoc.id,
+              title: data["Event Title"] || "Untitled Event",
+              type: data["Event Type"] || "Deadline",
+              date: data["Event Date"]?.toDate ? data["Event Date"].toDate() : new Date(data["Event Date"]),
+              grantId: gDoc.id,
+              org: gData.Organization || "Unknown Org",
             });
           });
-        });
+        }
 
-        return taskEvents;
-      });
+        setGrants(grantList);
+        setEvents(allEvents);
+      } catch (err) {
+        console.error("Error loading events:", err);
+      }
+    };
 
-    Promise.all([fetchCalendarEvents, fetchGrantTracking])
-      .then(([calendarData, trackingData]) => {
-        setEvents([...calendarData, ...trackingData]);
-      })
-      .catch(err => console.error("Error loading events:", err));
+    loadEvents();
   }, []);
 
-  const handleAddEvent = () => {
-    const event = {
-      ...newEvent,
-      id: `EVT-${String(events.length + 1).padStart(3, "0")}`,
-    };
-    setEvents([...events, event]);
-    setShowModal(false);
-    setNewEvent({ title: "", org: "", date: "", type: "Deadline" });
+  // ---------------------------
+  // ADD NEW EVENT
+  // ---------------------------
+  const handleAddEvent = async () => {
+    if (!newEvent.grantId || !newEvent.title || !newEvent.date) {
+      alert("Please fill out all fields.");
+      return;
+    }
+
+    try {
+      const calendarRef = collection(db, "grants", newEvent.grantId, "Calendar");
+      const docRef = await addDoc(calendarRef, {
+        "Event Title": newEvent.title,
+        "Event Type": newEvent.type,
+        "Event Date": new Date(newEvent.date),
+        "Event ID": `EVT-${String(events.length + 1).padStart(3, "0")}`,
+        "Grant": doc(db, "grants", newEvent.grantId),
+      });
+
+      const grantData = grants.find((g) => g.id === newEvent.grantId);
+
+      setEvents([
+        ...events,
+        {
+          id: docRef.id,
+          title: newEvent.title,
+          type: newEvent.type,
+          date: new Date(newEvent.date),
+          grantId: newEvent.grantId,
+          org: grantData?.Organization || "Unknown Org",
+        },
+      ]);
+
+      setNewEvent({ title: "", grantId: "", date: "", type: "Deadline" });
+      setShowModal(false);
+    } catch (err) {
+      console.error("Error adding event:", err);
+    }
   };
 
+  // ---------------------------
+  // FILTER EVENTS
+  // ---------------------------
   const filteredEvents =
-    filterType === "All" ? events : events.filter(e => e.type === filterType);
+    filterType === "All"
+      ? events
+      : events.filter((e) => e.type === filterType);
 
+  // ---------------------------
+  // CALENDAR CALCULATIONS
+  // ---------------------------
   const year = selectedDate.getFullYear();
   const month = selectedDate.getMonth();
   const firstDayOfMonth = new Date(year, month, 1);
@@ -80,8 +138,8 @@ const Calendar = () => {
   for (let i = 0; i < startingDay; i++) days.push(null);
   for (let d = 1; d <= daysInMonth; d++) days.push(d);
 
-  const getEventsForDay = day =>
-    filteredEvents.filter(event => {
+  const getEventsForDay = (day) =>
+    filteredEvents.filter((event) => {
       const eventDate = new Date(event.date);
       return (
         eventDate.getDate() === day &&
@@ -93,13 +151,9 @@ const Calendar = () => {
   const prevMonth = () => setSelectedDate(new Date(year, month - 1, 1));
   const nextMonth = () => setSelectedDate(new Date(year, month + 1, 1));
 
-  const monthNames = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December"
-  ];
-
-  const eventTypes = ["All", "Deadline", "Review", "Visit", "Report"];
-
+  // ---------------------------
+  // RENDER
+  // ---------------------------
   return (
     <div className="calendar-page">
       <h1>Calendar</h1>
@@ -116,9 +170,9 @@ const Calendar = () => {
               <select
                 className="filter-dropdown"
                 value={filterType}
-                onChange={e => setFilterType(e.target.value)}
+                onChange={(e) => setFilterType(e.target.value)}
               >
-                {eventTypes.map(type => (
+                {eventTypes.map((type) => (
                   <option key={type} value={type}>{type}</option>
                 ))}
               </select>
@@ -146,7 +200,7 @@ const Calendar = () => {
                           <div className="calendar-day">
                             <span className="day-number">{day}</span>
                             <div className="day-events">
-                              {getEventsForDay(day).map(ev => (
+                              {getEventsForDay(day).map((ev) => (
                                 <div
                                   key={ev.id}
                                   className={`event-entry ${ev.type.toLowerCase()}`}
@@ -154,7 +208,7 @@ const Calendar = () => {
                                 >
                                   <span className={`event-dot ${ev.type.toLowerCase()}`}></span>
                                   <span className="event-title">
-                                    {ev.title.length > 20 ? ev.title.slice(0,20) + "..." : ev.title}
+                                    {ev.title.length > 20 ? ev.title.slice(0, 20) + "..." : ev.title}
                                   </span>
                                 </div>
                               ))}
@@ -172,7 +226,7 @@ const Calendar = () => {
 
         <div className="upcoming-events">
           <h3>Upcoming Events</h3>
-          {filteredEvents.map(event => (
+          {filteredEvents.map((event) => (
             <div key={event.id} className="event-card">
               <div className={`event-icon ${event.type?.toLowerCase()}`}></div>
               <div className="event-details">
@@ -193,26 +247,34 @@ const Calendar = () => {
             <input
               placeholder="Event Title"
               value={newEvent.title}
-              onChange={e => setNewEvent({ ...newEvent, title: e.target.value })}
+              onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
             />
-            <input
-              placeholder="Organization"
-              value={newEvent.org}
-              onChange={e => setNewEvent({ ...newEvent, org: e.target.value })}
-            />
+
+            <select
+              value={newEvent.grantId}
+              onChange={(e) => setNewEvent({ ...newEvent, grantId: e.target.value })}
+            >
+              <option value="">Select Grant</option>
+              {grants.map((g) => (
+                <option key={g.id} value={g.id}>{g.Title || g.Organization}</option>
+              ))}
+            </select>
+
             <input
               type="datetime-local"
               value={newEvent.date}
-              onChange={e => setNewEvent({ ...newEvent, date: e.target.value })}
+              onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })}
             />
+
             <select
               value={newEvent.type}
-              onChange={e => setNewEvent({ ...newEvent, type: e.target.value })}
+              onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })}
             >
-              {eventTypes.filter(t => t !== "All").map(t => (
+              {eventTypes.filter(t => t !== "All").map((t) => (
                 <option key={t} value={t}>{t}</option>
               ))}
             </select>
+
             <div className="modal-actions">
               <button onClick={() => setShowModal(false)}>Cancel</button>
               <button className="save-btn" onClick={handleAddEvent}>Save</button>
@@ -225,3 +287,6 @@ const Calendar = () => {
 };
 
 export default Calendar;
+
+
+

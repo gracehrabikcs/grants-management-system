@@ -7,6 +7,8 @@ import Calendar from "../src/pages/Calendar/Calendar";
 import Reports from "../src/pages/Reports/Reports";
 import "./App.css";
 import GrantDetailsMain from "../src/pages/Grants/GrantDetails/GrantDetailsMain";
+import NewGrant from "./pages/Grants/NewGrant"; // <-- adjust path if needed
+
 
 function App() {
   return (
@@ -17,6 +19,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/grants" element={<Grants />} />
+            <Route path="/grants/new" element={<NewGrant />} />   {/* <-- ADD THIS */}
             <Route path="/grants/:id/*" element={<GrantDetailsMain />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/reports" element={<Reports />} />

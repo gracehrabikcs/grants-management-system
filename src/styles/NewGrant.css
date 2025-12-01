@@ -1,0 +1,110 @@
+/* NewGrant.css - Fully Scoped Styling for New Grant Multi-Step Wizard */
+
+.wizard-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 30px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  font-family: Arial, sans-serif;
+}
+
+/* Headings */
+.wizard-container h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+}
+
+.wizard-container .step h2 {
+  margin-bottom: 10px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #444;
+}
+
+/* Step content layout */
+.wizard-container .step {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Form controls */
+.wizard-container input,
+.wizard-container textarea,
+.wizard-container select {
+  width: 100%;
+  padding: 12px;
+  padding-right: 2px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: 0.2s ease-in-out;
+}
+
+.wizard-container input:focus,
+.wizard-container textarea:focus,
+.wizard-container select:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 4px rgba(74, 144, 226, 0.4);
+}
+
+.wizard-container textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Buttons */
+.wizard-container button {
+  padding: 12px 18px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.wizard-container button[type="button"] {
+  background: #e0e0e0;
+  margin-right: 10px;
+}
+
+.wizard-container button[type="button"]:hover {
+  background: #d5d5d5;
+}
+
+.wizard-container button[type="submit"],
+.wizard-container .next-button {
+  background: #4a90e2;
+  color: white;
+}
+
+.wizard-container button[type="submit"]:hover,
+.wizard-container .next-button:hover {
+  background: #357ac9;
+}
+
+/* Navigation buttons (Back / Next / Submit) */
+.wizard-container .nav-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+/* Checkbox styling */
+.wizard-container input[type="checkbox"] {
+  width: auto;
+  margin-right: 8px;
+}
+
+/* Fade animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
