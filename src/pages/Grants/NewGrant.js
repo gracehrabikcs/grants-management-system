@@ -126,6 +126,7 @@ export default function NewGrant() {
         Title: formData.title,
         Organization: formData.organization,
         updatedAt: serverTimestamp(),
+        // MAIN
         Main: {
           "Application Management": {
             "Anticipated Notification Date": formData.anticipatedNotificationDate,
@@ -301,6 +302,7 @@ export default function NewGrant() {
             {renderInput("Application Status", "applicationStatus")}
             {renderInput("Application Type", "applicationType")}
             {renderInput("Grant Period", "grantPeriod")}
+            {renderInput("Fiscal Year", "fiscalYear")}
             {renderInput("Report Deadline", "reportDeadline", "date")}
             {renderInput("Report Submitted", "reportSubmitted")}
             {renderTextarea("Expected Outcomes", "expectedOutcomes")}
