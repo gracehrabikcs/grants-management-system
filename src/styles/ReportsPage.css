@@ -9,31 +9,103 @@
 .gms-spacer { flex:1; }
 .gms-flex-between { display:flex; align-items:center; justify-content:space-between; }
 
-
-.gms-card { background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:16px; box-shadow:0 1px 2px rgba(0,0,0,.03); }
+.gms-card {
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:16px;
+  padding:16px;
+  box-shadow:0 1px 2px rgba(0,0,0,.03);
+}
 .gms-kpi-value { font-size:28px; font-weight:700; color:#111827; margin-top:4px; }
 .gms-delta { color:#10b981; font-size:12px; margin-top:6px; }
 
-
 .gms-grid-3 { display:grid; gap:16px; grid-template-columns:1fr; }
-@media (min-width: 900px){ .gms-grid-3 { grid-template-columns: repeat(3,1fr); } }
-
+@media (min-width: 900px){
+  .gms-grid-3 { grid-template-columns: repeat(3,1fr); }
+}
 
 .gms-btn { border:1px solid #e5e7eb; background:#fff; padding:8px 12px; border-radius:10px; cursor:pointer; }
 .gms-btn:hover { background:#f9fafb; }
 .gms-btn.primary { background:#111827; color:#fff; border-color:#111827; }
 .gms-btn.ghost { background:#fff; }
-.gms-input { border:1px solid #e5e7eb; background:#fff; padding:8px 10px; border-radius:10px; min-width: 170px; }
+.gms-input {
+  border:1px solid #e5e7eb;
+  background:#fff;
+  padding:8px 10px;
+  border-radius:10px;
+  min-width: 170px;
+}
+
+/* -------- filters row -------- */
+.gms-filter-row {
+  display:grid;
+  gap:12px;
+  grid-template-columns:1fr;
+}
+@media (min-width: 900px){
+  .gms-filter-row { grid-template-columns: 1.3fr 1fr 1fr; }
+}
+
+.gms-filter {
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.gms-filter-label {
+  font-size:13px;
+  color:#374151;
+}
+
+/* NEW: label + radios on a single row */
+.gms-filter-label-row {
+  display:flex;
+  align-items:center;
+  gap:12px;               /* spacing between label and radios */
+}
 
 
-.gms-filter-row { display:grid; gap:12px; grid-template-columns:1fr; }
-@media (min-width: 900px){ .gms-filter-row { grid-template-columns: 1.3fr 1fr 1fr; } }
-.gms-filter { display:flex; flex-direction:column; gap:6px; }
-.gms-filter-label { font-size:13px; color:#374151; }
-.gms-date-row { display:flex; align-items:center; gap:8px; }
+/* NEW: radio group for Application Date / Report Deadline */
+.gms-date-mode {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.gms-date-mode label {
+  display:flex;
+  align-items:center;
+  font-size:12px;
+  color:#4b5563;
+}
+
+.gms-date-mode input[type="radio"] {
+  margin-right:4px;
+}
+
+/* date inputs */
+.gms-date-row {
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
 .gms-date-sep { color:#6b7280; }
 
-
-.gms-report-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
-.gms-report-row { display:flex; align-items:center; gap:12px; border:1px solid #e5e7eb; border-radius:12px; padding:12px 14px; }
+.gms-report-list {
+  list-style:none;
+  margin:0;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.gms-report-row {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  padding:12px 14px;
+}
 .gms-report-title { font-weight:600; color:#111827; }
+
