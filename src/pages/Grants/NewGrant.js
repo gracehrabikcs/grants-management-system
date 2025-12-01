@@ -4,9 +4,103 @@ import { collection, doc, setDoc, getDocs, serverTimestamp } from "firebase/fire
 import { db } from "../../firebase";
 import { useNavigate } from "react-router-dom";
 
+// CLEANER: Convert all undefined values to null recursively
+function clean(obj) {
+  if (obj === undefined) return null;
+  if (obj === null) return null;
+  if (typeof obj !== "object") return obj;
+
+  const result = Array.isArray(obj) ? [] : {};
+
+  for (const key in obj) {
+    const value = obj[key];
+    if (value === undefined) {
+      result[key] = null;
+    } else if (typeof value === "object" && value !== null) {
+      result[key] = clean(value);
+    } else {
+      result[key] = value;
+    }
+  }
+
+  return result;
+}
+
 const initialFormData = {
-  // ... all your initial form data remains the same
+  // --- MAIN ---
+  anticipatedNotificationDate: "",
+  applicationDate: "",
+  applicationStatus: "",
+  applicationType: "",
+  grantPeriod: "",
+  fiscalYear: "",
+  reportDeadline: "",
+  reportSubmitted: "",
+  expectedOutcomes: "",
+  grantPurpose: "",
+  projectObjectives: "",
+  projectSummary: "",
+  organization: "",
+  title: "",
+
+  // --- ADDRESS ---
+  apt: "",
+  city: "",
+  country: "",
+  state: "",
+  street: "",
+  zipCode: "",
+  addressType: "",
+  dateVerified: "",
+  primary: false,
+  type: "",
+
+  // --- BIO ---
+  fundingPreferences: "",
+  organizationDetails: "",
+
+  // --- ORGANIZATION DETAILS ---
+  annualBudget: "",
+  foundedYear: "",
+  keyPrograms: "",
+  missionStatement: "",
+  staffSize: "",
+
+  // --- CONTACTS ---
+  phone: "",
+  email: "",
+  primaryContact: "",
+  secondaryContact: "",
+  contactsNotes: "",
+
+  // --- PLEDGES ---
+  pledgeAmount: "",
+  pledgeDonor: "",
+  pledgeSchedule: "",
+  pledgeReceived: "",
+  pledgedDate: "",
+  pledgeNotes: "",
+
+  // --- INVOICES ---
+  invoiceDate: "",
+  invoicePurpose: "",
+  invoiceSpent: "",
+  invoiceAcknowledged: false,
+
+  // --- OTHER ---
+  otherNotes: "",
+  otherBudgetNotes: "",
+  otherInternalNotes: "",
+
+  // --- INTERACTIONS ---
+  interactionContact: "",
+  interactionDate: "",
+  interactionNext: "",
+  interactionOutcome: "",
+  interactionSubject: "",
+  interactionType: "",
 };
+
 
 export default function NewGrant() {
   const [step, setStep] = useState(1);
@@ -50,11 +144,122 @@ export default function NewGrant() {
           },
         },
       });
+      // ADDRESSES
+      const addressRef = doc(collection(grantRef, "addresses"), "A1");
+      await setDoc(addressRef, {
+        address: {
+          apt: formData.apt,
+          city: formData.city,
+          country: formData.country,
+          state: formData.state,
+          street: formData.street,
+          zipCode: formData.zipCode,
+          addressType: formData.addressType,
+          dateVerified: formData.dateVerified || serverTimestamp(),
+          primary: formData.primary,
+          type: formData.type,
+        },
+      });
+
+      // BIO
+      const bioRef = doc(grantRef, "bio/details"); // fixed path
+      await setDoc(bioRef, {
+        fundingPreferences: formData.fundingPreferences || "",
+        fundingTs: new Date().toLocaleString(),
+        organizationDetails: formData.organizationDetails || "",
+        organizationTs: new Date().toLocaleString(),
+        updatedAt: serverTimestamp(),
+      });
+
+
+      // CONTACTS
+      const contactsRef = doc(collection(grantRef, "contacts"));
+      await setDoc(contactsRef, {
+        id: contactsRef.id,
+        phone: formData.phone || "",
+        email: formData.email || "",
+        primaryContact: formData.primaryContact || "",
+        secondaryContact: formData.secondaryContact || "",
+        notes: formData.contactsNotes || "",
+        updatedAt: serverTimestamp(),
+      });
+
+      // ORGANIZATION DETAILS
+      const orgRef = doc(collection(grantRef, "organizationDetails"), "O1");
+      await setDoc(orgRef, {
+        annualBudget: formData.annualBudget,
+        foundedYear: formData.foundedYear,
+        keyPrograms: formData.keyPrograms,
+        missionStatement: formData.missionStatement,
+        staffSize: formData.staffSize,
+        createdAt: serverTimestamp(),
+      });
+
+      // PLEDGES
+      const pledgeRef = doc(collection(grantRef, "pledges"));
+      await setDoc(pledgeRef, {
+        amount: formData.pledgeAmount ? Number(formData.pledgeAmount) : 0,
+        donor: formData.pledgeDonor || "",
+        received: formData.pledgeReceived ? Number(formData.pledgeReceived) : 0,
+        schedule: formData.pledgeSchedule || "",
+        pledgedDate: formData.pledgedDate || "",
+        notes: formData.pledgeNotes || "",
+        notesUpdatedAt: formData.pledgeNotes ? serverTimestamp() : null,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+
+      // INVOICES
+      const invoiceRef = doc(collection(grantRef, "invoices"));
+      await setDoc(invoiceRef, {
+        id: invoiceRef.id,
+        date: formData.invoiceDate || "",
+        purpose: formData.invoicePurpose || "",
+        spent: formData.invoiceSpent ? Number(formData.invoiceSpent) : 0,
+        acknowledged: formData.invoiceAcknowledged || false,
+        createdAt: serverTimestamp(),
+      });
+
+      // OTHER / TRACKING / INTERACTIONS
+      const otherRef = doc(grantRef, "other/notes"); // fixed path
+      await setDoc(otherRef, {
+        notes: formData.otherNotes || "",
+        budgetNotes: formData.otherBudgetNotes || "",
+        budgetUpdatedAt: serverTimestamp(),
+        internalNotes: formData.otherInternalNotes || "",
+        internalUpdatedAt: serverTimestamp(),
+      });
+
+
+      const trackingSectionRef = doc(collection(grantRef, "trackingSections"), "S1");
+      await setDoc(trackingSectionRef, { "Section Name": "Application Process" });
+
+      const taskRef = doc(collection(trackingSectionRef, "trackingTasks"), "T1");
+      await setDoc(taskRef, {
+        "Assignee Email": "",
+        Task: "",
+        "Task Deadline": "",
+        "Task Notes": "",
+        "Task Status": "To Do",
+      });
+
+      const interactionRef = doc(collection(grantRef, "interactions"), "I1");
+      await setDoc(interactionRef, {
+        contact: formData.interactionContact || "",
+        date: formData.interactionDate || "",
+        next: formData.interactionNext || "",
+        outcome: formData.interactionOutcome || "",
+        subject: formData.interactionSubject || "",
+        type: formData.interactionType || "",
+      });
 
       // Other Firestore writes remain unchanged...
       alert(`Grant saved with ID: ${nextId}`);
       setFormData(initialFormData);
       setStep(1);
+
+      navigate("/grants");
+
     } catch (err) {
       console.error("Error saving grant:", err);
       alert("Something went wrong. Check console.");
