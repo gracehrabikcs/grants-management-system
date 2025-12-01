@@ -16,29 +16,26 @@ const Grants = () => {
   const [statusFilter, setStatusFilter] = useState("All");
   const navigate = useNavigate();
 
-  // Robust date formatter that accepts Firestore Timestamp, Date, ISO string, or {seconds,nanoseconds}
   const formatDate = (val) => {
-    if (!val && val !== 0) return "";
-    // Firestore Timestamp-like object with toDate()
-    if (typeof val === "object" && typeof val.toDate === "function") {
-      return val.toDate().toLocaleDateString();
+    if (!val) return "";
+    
+    let date;
+    if (typeof val.toDate === "function") {
+      date = val.toDate();
+    } else if (val.seconds) {
+      date = new Date(val.seconds * 1000);
+    } else {
+      date = new Date(val);
     }
-    // Plain JS Date
-    if (val instanceof Date) {
-      return val.toLocaleDateString();
-    }
-    // Object like { seconds: ..., nanoseconds: ... }
-    if (typeof val === "object" && val.seconds) {
-      return new Date(val.seconds * 1000).toLocaleDateString();
-    }
-    // ISO string or anything else coercible
-    try {
-      const d = new Date(val);
-      if (!isNaN(d)) return d.toLocaleDateString();
-    } catch (e) {}
-    // fallback to string
-    return String(val);
+
+    // Use UTC to avoid local timezone shifts
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(date.getUTCDate()).padStart(2, "0");
+
+    return `${month}/${day}/${year}`;
   };
+
 
   // Calculate progress using same weights as GrantDetailsMain
   const computeProgressFromSections = (sectionsArray) => {
@@ -120,9 +117,6 @@ const Grants = () => {
           // Report deadline reading from several possible locations
           const reportDeadline =
             raw.Main?.["Application Management"]?.["reportDeadline"] ||
-            raw.Main?.["Application Management"]?.["Report Deadline"] ||
-            raw.reportDeadline ||
-            raw.ReportDeadline ||
             null;
 
           results.push({
