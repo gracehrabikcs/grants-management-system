@@ -22,7 +22,6 @@ function asDate(value) {
 }
 
 // ---- helper: apply filters to a grant list ----
-// ---- helper: apply filters to a grant list ----
 function applyFilters(allGrants, filters) {
   const {
     dateFrom,
@@ -30,6 +29,7 @@ function applyFilters(allGrants, filters) {
     status,
     amountBand,
     dateField = "application", // "application" | "report"
+    organization, // 👈 NEW
   } = filters;
 
   const fromDate = dateFrom ? new Date(dateFrom) : null;
@@ -41,6 +41,7 @@ function applyFilters(allGrants, filters) {
   }
 
   const statusFilter = (status || "").trim().toLowerCase();
+  const orgFilter = (organization || "").trim().toLowerCase(); // 👈 NEW
 
   return allGrants.filter((g) => {
     // which date field should drive the filter?
@@ -62,6 +63,19 @@ function applyFilters(allGrants, filters) {
     if (statusFilter && statusFilter !== "all") {
       const gStatusNorm = (g.status || "").trim().toLowerCase();
       if (gStatusNorm !== statusFilter) return false;
+    }
+
+    // 👇 NEW: organization filter
+    if (orgFilter && orgFilter !== "all") {
+      const gOrgNorm = (
+        g.Organization ||
+        g.organization ||
+        g.org ||
+        ""
+      )
+        .trim()
+        .toLowerCase();
+      if (gOrgNorm !== orgFilter) return false;
     }
 
     // amount band filter – based on totalPledges
@@ -86,6 +100,7 @@ function applyFilters(allGrants, filters) {
     return true;
   });
 }
+
 
 
 
@@ -249,6 +264,17 @@ for (const d of snap.docs) {
   const [status, setStatus] = useState("All");
   const [amountBand, setAmountBand] = useState("All");
   const [reportName, setReportName] = useState("");
+  const [organization, setOrganization] = useState("All");
+
+   const organizationOptions = useMemo(() => {
+    const set = new Set();
+    grants.forEach((g) => {
+      const org =
+        (g.Organization || g.organization || g.org || "").trim();
+      if (org) set.add(org);
+    });
+    return ["All", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
+  }, [grants]);
 
   // ------- Saved Reports (localStorage) -------
   const [reports, setReports] = useState(() => {
@@ -292,8 +318,9 @@ for (const d of snap.docs) {
         status,
         amountBand,
         dateField,
+        organization,
       }),
-    [grants, dateFrom, dateTo, status, amountBand, dateField]
+    [grants, dateFrom, dateTo, status, amountBand, dateField, organization]
   );
 
 const totalGrants = filteredGrants.length;
@@ -351,6 +378,7 @@ const successRate = totalGrants
         status,
         amountBand,
         dateField,
+        organization,
       },
     };
 
@@ -366,6 +394,7 @@ function handleDownload(rep) {
     status: rep.filters?.status || "All",
     amountBand: rep.filters?.amountBand || "All",
     dateField: rep.filters?.dateField || "application",
+    organization: rep.filters?.organization || "All",
   };
 
   const grantsForReport = applyFilters(grants, filtersFromReport);
@@ -406,6 +435,7 @@ function handleDownload(rep) {
     ["Date To", filtersFromReport.dateTo || "Any"],
     ["Status", filtersFromReport.status || "All"],
     ["Amount Band", filtersFromReport.amountBand || "All"],
+    ["Organization", filtersFromReport.organization || "All"],
     [],
     ["Summary"],
     ["Total Grants", totalGrants],
@@ -609,6 +639,7 @@ function handleDownload(rep) {
       <option>Active</option>
       <option>Under Review</option>
       <option>Approved</option>
+      <option>Completed</option>
     </select>
   </div>
 
@@ -625,6 +656,22 @@ function handleDownload(rep) {
       <option>$25k–$100k</option>
       <option>$100k–$250k</option>
       <option>$250k+</option>
+    </select>
+  </div>
+
+ {/* 👇 NEW ORGANIZATION COLUMN */}
+  <div className="gms-filter">
+    <div className="gms-filter-label">Filter by Organization</div>
+    <select
+      className="gms-input"
+      value={organization}
+      onChange={(e) => setOrganization(e.target.value)}
+    >
+      {organizationOptions.map((opt) => (
+        <option key={opt} value={opt}>
+          {opt}
+        </option>
+      ))}
     </select>
   </div>
 

@@ -204,7 +204,7 @@ const Grants = () => {
         />
 
         <div className="filter-buttons">
-          {["All", "Active", "Under Review", "Approved"].map((s) => (
+          {["All", "Active", "Under Review", "Approved", "Completed"].map((s) => (
             <button
               key={s}
               className={`filter-btn ${statusFilter === s ? "active-filter" : ""}`}

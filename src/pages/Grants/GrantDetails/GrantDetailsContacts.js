@@ -125,16 +125,18 @@ export default function GrantDetailsContacts() {
     [selectedId, contacts]
   );
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return contacts;
-    return contacts.filter(
-      (c) =>
-        c.name?.toLowerCase().includes(q) ||
-        c.role?.toLowerCase().includes(q) ||
-        c.email?.toLowerCase().includes(q)
-    );
-  }, [query, contacts]);
+const filtered = useMemo(() => {
+  const q = query.trim().toLowerCase();
+  if (!q) return contacts;
+  return contacts.filter(
+    (c) =>
+      c.name?.toLowerCase().includes(q) ||
+      c.role?.toLowerCase().includes(q) ||
+      c.email?.toLowerCase().includes(q) ||
+      c.institution?.toLowerCase().includes(q)
+  );
+}, [query, contacts]);
+
 
   const metrics = {
     total: contacts.length,
