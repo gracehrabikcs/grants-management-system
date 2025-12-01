@@ -109,7 +109,7 @@ const MainTabContent = ({ grant, setGrant, progress, id }) => {
         <div className="field-group">
           <label>Fiscal Year</label>
           <input
-            type="date"
+            type="text"
             value={appManagement["Fiscal Year"] || ""}
             onChange={(e) => handleChange("Application Management", "Fiscal Year", e.target.value)}
           />

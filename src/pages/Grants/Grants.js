@@ -1,49 +1,33 @@
 import React, { useState, useEffect } from "react";
 import "../../styles/Grants.css";
 import { useNavigate } from "react-router-dom";
-import { deleteDoc } from "firebase/firestore";
-import {
-  collection,
-  getDocs,
-  doc,
-  getDoc,
-} from "firebase/firestore";
+import { deleteDoc, collection, getDocs, doc } from "firebase/firestore";
 import { db } from "../../firebase"; // adjust path if needed
 
 const Grants = () => {
   const [grants, setGrants] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [sortAsc, setSortAsc] = useState(false); // false = descending by default
   const navigate = useNavigate();
 
   const formatDate = (val) => {
     if (!val) return "";
-    
     let date;
-    if (typeof val.toDate === "function") {
-      date = val.toDate();
-    } else if (val.seconds) {
-      date = new Date(val.seconds * 1000);
-    } else {
-      date = new Date(val);
-    }
-
-    // Use UTC to avoid local timezone shifts
+    if (typeof val.toDate === "function") date = val.toDate();
+    else if (val.seconds) date = new Date(val.seconds * 1000);
+    else date = new Date(val);
     const year = date.getUTCFullYear();
     const month = String(date.getUTCMonth() + 1).padStart(2, "0");
     const day = String(date.getUTCDate()).padStart(2, "0");
-
     return `${month}/${day}/${year}`;
   };
 
-
-  // Calculate progress using same weights as GrantDetailsMain
   const computeProgressFromSections = (sectionsArray) => {
     if (!sectionsArray || sectionsArray.length === 0) return 0;
     let totalTasks = 0;
     let completedValue = 0;
     const statusWeight = { "To Do": 0, "In Progress": 0.5, "Done": 1 };
-
     sectionsArray.forEach((section) => {
       (section.tasks || []).forEach((task) => {
         totalTasks += 1;
@@ -51,12 +35,11 @@ const Grants = () => {
         completedValue += statusWeight[s] || 0;
       });
     });
-
     if (totalTasks === 0) return 0;
     return Math.round((completedValue / totalTasks) * 100);
   };
 
-  // Load grants + their pledges + tracking sections/tasks
+  // Load grants
   useEffect(() => {
     const loadAll = async () => {
       try {
@@ -66,18 +49,18 @@ const Grants = () => {
         for (const gDoc of grantsSnap.docs) {
           const raw = { id: gDoc.id, ...gDoc.data() };
 
-          // Normalize basic fields (case differences)
           const Organization = raw.Organization || raw.organization || raw.org || "";
           const Title = raw.Title || raw.title || raw.name || "";
-          // Status could be top-level, or inside Main.Application Management
           const status =
             raw.status ||
             raw.Status ||
-            raw.main?.["Application Management"]?.["Application Status"] ||
             raw.Main?.["Application Management"]?.["Application Status"] ||
             "";
 
-          // ====== PLEDGES: sum amounts ======
+          const fiscalYear =
+            raw.Main?.["Application Management"]?.["Fiscal Year"] || "Unknown";
+
+          // Total pledges
           let totalPledges = 0;
           try {
             const pledgesSnap = await getDocs(collection(db, "grants", gDoc.id, "pledges"));
@@ -86,52 +69,46 @@ const Grants = () => {
               if (typeof amt === "number") totalPledges += amt;
               else if (!isNaN(Number(amt))) totalPledges += Number(amt);
             });
-          } catch (e) {
-            // ignore if no pledges
-          }
+          } catch (e) {}
 
-          // ====== TRACKING SECTIONS & TASKS ======
+          // Tracking sections & tasks
           const sections = [];
           try {
-            const sectionsSnap = await getDocs(collection(db, "grants", gDoc.id, "trackingSections"));
+            const sectionsSnap = await getDocs(
+              collection(db, "grants", gDoc.id, "trackingSections")
+            );
             for (const sDoc of sectionsSnap.docs) {
               const sRaw = { id: sDoc.id, ...sDoc.data() };
-              // fetch its tasks
               const tasks = [];
               try {
                 const tasksSnap = await getDocs(
                   collection(db, "grants", gDoc.id, "trackingSections", sDoc.id, "trackingTasks")
                 );
                 tasksSnap.forEach((t) => tasks.push({ id: t.id, ...t.data() }));
-              } catch (e) {
-                // ignore missing tasks
-              }
+              } catch (e) {}
               sections.push({ ...sRaw, tasks });
             }
-          } catch (e) {
-            // ignore missing trackingSections
-          }
+          } catch (e) {}
 
           const progress = computeProgressFromSections(sections);
-
-          // Report deadline reading from several possible locations
-          const reportDeadline =
-            raw.Main?.["Application Management"]?.["reportDeadline"] ||
-            null;
+          const reportDeadline = raw.Main?.["Application Management"]?.["reportDeadline"] || null;
 
           results.push({
             id: gDoc.id,
             Organization,
             Title,
             status,
+            fiscalYear,
             totalPledges,
             trackingSections: sections,
             progress,
             reportDeadline,
-            raw, // keep raw doc for anything else
+            raw,
           });
         }
 
+        // Default sort: newest fiscal year first
+        results.sort((a, b) => Number(b.fiscalYear) - Number(a.fiscalYear));
         setGrants(results);
       } catch (err) {
         console.error("Error loading grants:", err);
@@ -141,16 +118,18 @@ const Grants = () => {
     loadAll();
   }, []);
 
-  // Filter
-  const filtered = grants.filter((g) => {
-    const q = searchTerm.trim().toLowerCase();
-    const matchesSearch =
-      !q ||
-      (g.Title || "").toLowerCase().includes(q) ||
-      (g.Organization || "").toLowerCase().includes(q);
-    const matchesStatus = statusFilter === "All" || (g.status || "") === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  // Filtered + sorted
+  const filtered = grants
+    .filter((g) => {
+      const q = searchTerm.trim().toLowerCase();
+      const matchesSearch =
+        !q ||
+        (g.Title || "").toLowerCase().includes(q) ||
+        (g.Organization || "").toLowerCase().includes(q);
+      const matchesStatus = statusFilter === "All" || (g.status || "") === statusFilter;
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => (sortAsc ? Number(a.fiscalYear) - Number(b.fiscalYear) : Number(b.fiscalYear) - Number(a.fiscalYear)));
 
   const handleCardClick = (id) => navigate(`/grants/${id}`);
 
@@ -158,35 +137,25 @@ const Grants = () => {
     if (!window.confirm("Delete this grant permanently?")) return;
 
     try {
-      // Delete subcollections: pledges, trackingSections → trackingTasks
       const pledgesSnap = await getDocs(collection(db, "grants", id, "pledges"));
-      for (const p of pledgesSnap.docs) {
-        await deleteDoc(doc(db, "grants", id, "pledges", p.id));
-      }
+      for (const p of pledgesSnap.docs) await deleteDoc(doc(db, "grants", id, "pledges", p.id));
 
       const sectionsSnap = await getDocs(collection(db, "grants", id, "trackingSections"));
       for (const s of sectionsSnap.docs) {
         const tasksSnap = await getDocs(
           collection(db, "grants", id, "trackingSections", s.id, "trackingTasks")
         );
-        for (const t of tasksSnap.docs) {
-          await deleteDoc(
-            doc(db, "grants", id, "trackingSections", s.id, "trackingTasks", t.id)
-          );
-        }
+        for (const t of tasksSnap.docs)
+          await deleteDoc(doc(db, "grants", id, "trackingSections", s.id, "trackingTasks", t.id));
         await deleteDoc(doc(db, "grants", id, "trackingSections", s.id));
       }
 
-      // Delete main grant
       await deleteDoc(doc(db, "grants", id));
-
-      // Remove from UI
       setGrants((prev) => prev.filter((g) => g.id !== id));
     } catch (err) {
       console.error("Delete failed:", err);
     }
   };
-
 
   return (
     <div className="grants-container">
@@ -197,17 +166,11 @@ const Grants = () => {
             <p>Comprehensive view of all grant applications and their current status</p>
           </div>
 
-          <button
-            className="add-grant-btn"
-            onClick={() => navigate("/grants/new")}
-          >
+          <button className="add-grant-btn" onClick={() => navigate("/grants/new")}>
             + Add New Grant
           </button>
         </div>
       </header>
-
-
-
 
       <div className="filter-bar">
         <input
@@ -228,27 +191,30 @@ const Grants = () => {
               {s}
             </button>
           ))}
+
+          <button className="filter-btn" onClick={() => setSortAsc((prev) => !prev)}>
+            Sort by Fiscal Year {sortAsc ? "↑" : "↓"}
+          </button>
         </div>
       </div>
 
       <div className="grant-grid">
         {filtered.map((g) => (
-          <div
-            key={g.id}
-            className="grant-card"
-            onClick={() => handleCardClick(g.id)}
-            style={{ cursor: "pointer" }}
-          >
+          <div key={g.id} className="grant-card" onClick={() => handleCardClick(g.id)}>
             <h3>{g.Title || "Untitled"}</h3>
             <p className="organization">{g.Organization}</p>
-
-            <span className={`status ${String(g.status || "").toLowerCase().replace(/\s+/g, "")}`}>
+            <span
+              className={`status ${String(g.status || "").toLowerCase().replace(/\s+/g, "")}`}
+            >
               {g.status || "Unknown"}
             </span>
 
             <div className="grant-info">
               <p>
                 <strong>Total Pledges:</strong> ${Number(g.totalPledges || 0).toLocaleString()}
+              </p>
+              <p>
+                <strong>Fiscal Year:</strong> {g.fiscalYear}
               </p>
               <p>
                 <strong>Report Deadline:</strong> {formatDate(g.reportDeadline)}
@@ -259,11 +225,11 @@ const Grants = () => {
               <div className="progress-fill" style={{ width: `${g.progress}%` }} />
             </div>
             <p className="progress-text">{g.progress}%</p>
-            
+
             <button
               className="grant-delete-btn"
               onClick={(e) => {
-                e.stopPropagation(); // so clicking delete doesn't open the card
+                e.stopPropagation();
                 handleDelete(g.id);
               }}
             >
