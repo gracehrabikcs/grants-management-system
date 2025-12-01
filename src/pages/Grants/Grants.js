@@ -23,6 +23,14 @@ const Grants = () => {
     return `${month}/${day}/${year}`;
   };
 
+  // Utility to make any date sortable
+  const toDateValue = (d) => {
+    if (!d) return 0;
+    if (typeof d.toDate === "function") return d.toDate().getTime();
+    if (d.seconds) return d.seconds * 1000;
+    return new Date(d).getTime() || 0;
+  };
+
   const computeProgressFromSections = (sectionsArray) => {
     if (!sectionsArray || sectionsArray.length === 0) return 0;
     let totalTasks = 0;
@@ -51,12 +59,15 @@ const Grants = () => {
 
           const Organization = raw.Organization || raw.organization || raw.org || "";
           const Title = raw.Title || raw.title || raw.name || "";
+
           const status =
-            raw.Main?.["Application Management"]?.["Application Status"] ||
-            "";
+            raw.Main?.["Application Management"]?.["Application Status"] || "";
 
           const fiscalYear =
             raw.Main?.["Application Management"]?.["Fiscal Year"] || "Unknown";
+
+          const applicationDate =
+            raw.Main?.["Application Management"]?.["Application Date"] || null;
 
           // Total pledges
           let totalPledges = 0;
@@ -97,6 +108,7 @@ const Grants = () => {
             Title,
             status,
             fiscalYear,
+            applicationDate,
             totalPledges,
             trackingSections: sections,
             progress,
@@ -105,8 +117,9 @@ const Grants = () => {
           });
         }
 
-        // Default sort: newest fiscal year first
-        results.sort((a, b) => Number(b.fiscalYear) - Number(a.fiscalYear));
+        // Default sort: newest first (descending)
+        results.sort((a, b) => toDateValue(b.applicationDate) - toDateValue(a.applicationDate));
+
         setGrants(results);
       } catch (err) {
         console.error("Error loading grants:", err);
@@ -124,10 +137,17 @@ const Grants = () => {
         !q ||
         (g.Title || "").toLowerCase().includes(q) ||
         (g.Organization || "").toLowerCase().includes(q);
-      const matchesStatus = statusFilter === "All" || (g.status || "") === statusFilter;
+
+      const matchesStatus =
+        statusFilter === "All" || (g.status || "") === statusFilter;
+
       return matchesSearch && matchesStatus;
     })
-    .sort((a, b) => (sortAsc ? Number(a.fiscalYear) - Number(b.fiscalYear) : Number(b.fiscalYear) - Number(a.fiscalYear)));
+    .sort((a, b) =>
+      sortAsc
+        ? toDateValue(a.applicationDate) - toDateValue(b.applicationDate)
+        : toDateValue(b.applicationDate) - toDateValue(a.applicationDate)
+    );
 
   const handleCardClick = (id) => navigate(`/grants/${id}`);
 
@@ -136,7 +156,8 @@ const Grants = () => {
 
     try {
       const pledgesSnap = await getDocs(collection(db, "grants", id, "pledges"));
-      for (const p of pledgesSnap.docs) await deleteDoc(doc(db, "grants", id, "pledges", p.id));
+      for (const p of pledgesSnap.docs)
+        await deleteDoc(doc(db, "grants", id, "pledges", p.id));
 
       const sectionsSnap = await getDocs(collection(db, "grants", id, "trackingSections"));
       for (const s of sectionsSnap.docs) {
@@ -144,7 +165,10 @@ const Grants = () => {
           collection(db, "grants", id, "trackingSections", s.id, "trackingTasks")
         );
         for (const t of tasksSnap.docs)
-          await deleteDoc(doc(db, "grants", id, "trackingSections", s.id, "trackingTasks", t.id));
+          await deleteDoc(
+            doc(db, "grants", id, "trackingSections", s.id, "trackingTasks", t.id)
+          );
+
         await deleteDoc(doc(db, "grants", id, "trackingSections", s.id));
       }
 
@@ -191,7 +215,7 @@ const Grants = () => {
           ))}
 
           <button className="filter-btn" onClick={() => setSortAsc((prev) => !prev)}>
-            Sort by Fiscal Year {sortAsc ? "↑" : "↓"}
+            Sort by Application Date {sortAsc ? "↑" : "↓"}
           </button>
         </div>
       </div>
@@ -202,6 +226,7 @@ const Grants = () => {
             <h3>{g.Title || "Untitled"}</h3>
             <p className="organization">{g.Organization}</p>
             <p className="grant-id">Grant ID: {g.id}</p>
+
             <span
               className={`status ${String(g.status || "").toLowerCase().replace(/\s+/g, "")}`}
             >
@@ -210,10 +235,12 @@ const Grants = () => {
 
             <div className="grant-info">
               <p>
-                <strong>Total Pledges:</strong> ${Number(g.totalPledges || 0).toLocaleString()}
+                <strong>Total Pledges:</strong>{" "}
+                ${Number(g.totalPledges || 0).toLocaleString()}
               </p>
               <p>
-                <strong>Fiscal Year:</strong> {g.fiscalYear}
+                <strong>Application Date:</strong>{" "}
+                {formatDate(g.applicationDate)}
               </p>
               <p>
                 <strong>Report Deadline:</strong> {formatDate(g.reportDeadline)}
