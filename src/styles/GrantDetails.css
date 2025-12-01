@@ -467,29 +467,3 @@
   .gifts-summary-container { flex-direction: column; }
   .gifts-meta-row { flex-direction: column; align-items:flex-start; gap:6px; }
 }
-
-/* --------------------------- Bio Tab --------------------------- */
-.grant-bio-container .grant-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 15px;
-}
-
-.grant-bio-container .action-btn {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
-}
-
-.grant-bio-container .action-btn:hover {
-  background-color: #0056b3;
-}
-
-.grant-bio-container .section {
-  margin-bottom: 25px;
-}

@@ -73,8 +73,13 @@
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: transform 0.2s;
 }
 
+.grant-card:hover {
+  transform: scale(1.02);
+}
 .status.active { background: #d4f5d4; }
 .status.underreview { background: #fff5c2; }
 .status.approved { background: #d4e8ff; }
@@ -128,4 +133,48 @@
   font-style: italic;
   font-size: 14px;
 }
+
+.grants-header-top {
+  display: flex;
+  justify-content: space-between; /* title left, button right */
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.grants-title {
+  flex: 1; /* take all available space to push button right */
+  text-align: left; /* ensure text is left-aligned within this space */
+}
+
+.add-grant-btn {
+  background-color: #2e7d32; /* darker green */
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.add-grant-btn:hover {
+  background-color: #1b5e20; /* slightly darker on hover */
+}
+
+.grant-delete-btn {
+  background: #ff5555;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  float: right;
+}
+
+.grant-delete-btn:hover {
+  background: #d94444;
+}
+
+
 

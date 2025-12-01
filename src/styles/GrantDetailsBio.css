@@ -1,0 +1,88 @@
+/* Container grid layout for spacing between sections */
+.grant-bio-container {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+}
+
+/* Card style for each notes section */
+.gms-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.03);
+}
+
+/* Section header styles */
+.gms-head {
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.gms-subtle {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* Margin helper */
+.gms-mb8 {
+  margin-bottom: 8px;
+}
+
+/* Flex container for header + save button */
+.gms-flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Button style */
+.gms-btn {
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.gms-btn:hover {
+  background: #f9fafb;
+}
+
+.gms-btn.primary {
+  background-color: #007bff;
+  color: white;
+  border: none;
+}
+
+.gms-btn.primary:hover {
+  background-color: #0056b3;
+}
+
+/* Notes textarea */
+.gms-notes {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 10px 12px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-top: 8px;
+}
+
+/* Timestamp display */
+.gms-micro {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 8px;
+}
+
+.gms-mt8 {
+  margin-top: 8px;
+}

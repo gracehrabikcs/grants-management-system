@@ -1,178 +1,254 @@
-import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import "../../../styles/GrantDetails.css";
 import "../../../styles/GrantDetailsTracking.css";
+import React, { useEffect, useState } from "react";
+import {
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  onSnapshot,
+} from "firebase/firestore";
+import { db } from "../../../firebase";
 
-const GrantDetailsTracking = () => {
-  const { id } = useParams();
-  const [grant, setGrant] = useState(null);
-  const [tasks, setTasks] = useState({});
-  const [search, setSearch] = useState("");
+export default function GrantDetailsTracking({ grantId }) {
+  const [sections, setSections] = useState([]);
+  const [tasksBySection, setTasksBySection] = useState({});
   const [showSections, setShowSections] = useState({});
+  const [search, setSearch] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
   const [hideDone, setHideDone] = useState(false);
 
+  // NEW — editing section state
+  const [editingSection, setEditingSection] = useState(null);
+  const [sectionNameInput, setSectionNameInput] = useState("");
+
+  // Load sections
   useEffect(() => {
-    fetch("/data/grantDetails.json")
-      .then((res) => res.json())
-      .then((data) => {
-        const selected = data.find((g) => g.id === parseInt(id));
-        if (selected) {
-          setGrant(selected);
+    if (!grantId) return;
+    const ref = collection(db, "grants", grantId, "trackingSections");
 
-          const grantTasks = selected.tracking || {};
-
-          // Ensure all tasks have emails/notes fields
-          Object.keys(grantTasks).forEach((section) => {
-            grantTasks[section] = grantTasks[section].map((task) => ({
-              ...task,
-              assigneeEmail: task.assigneeEmail || "",
-              notes: task.notes || "",
-              deadline: task.deadline || "",   
-            }));
-          });
-
-          setTasks(grantTasks);
-
-          // Show all sections open initially
-          setShowSections(
-            Object.keys(grantTasks).reduce(
-              (acc, key) => ({ ...acc, [key]: true }),
-              {}
-            )
-          );
-        }
-      })
-      .catch((err) => console.error("Error loading grant:", err));
-  }, [id]);
-
-  const handleToggleSection = (section) => {
-    setShowSections((prev) => ({ ...prev, [section]: !prev[section] }));
-  };
-
-  const handleAddSection = () => {
-    const newSection = prompt("Enter new task category/section name:");
-    if (newSection && !tasks[newSection]) {
-      setTasks({ ...tasks, [newSection]: [] });
-      setShowSections({ ...showSections, [newSection]: true });
-    }
-  };
-
-  const handleDeleteSection = (section) => {
-    if (window.confirm(`Delete the entire section "${section}"?`)) {
-      const updated = { ...tasks };
-      delete updated[section];
-      setTasks(updated);
-    }
-  };
-
-  const handleAddTask = (section) => {
-    const taskName = prompt("Enter new task name:");
-    if (!taskName) return;
-
-    const newTask = {
-      id: Date.now(),
-      name: taskName,
-      status: "To Do",
-      files: [],
-      assigneeEmail: "",
-      notes: "",
-    };
-
-    setTasks((prev) => ({
-      ...prev,
-      [section]: [...prev[section], newTask],
-    }));
-  };
-
-  const handleDeleteTask = (section, taskId) => {
-    if (window.confirm("Delete this task?")) {
-      setTasks((prev) => ({
-        ...prev,
-        [section]: prev[section].filter((task) => task.id !== taskId),
+    const unsub = onSnapshot(ref, (snapshot) => {
+      const secList = snapshot.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
       }));
-    }
-  };
 
-  const handleFileChange = (section, taskId, event) => {
-    const file = event.target.files[0];
-    setTasks((prev) => ({
-      ...prev,
-      [section]: prev[section].map((task) =>
-        task.id === taskId ? { ...task, files: [...task.files, file] } : task
-      ),
-    }));
-  };
+      setSections(secList);
 
-  const handleStatusChange = (section, taskId, event) => {
-    const status = event.target.value;
-    setTasks((prev) => ({
-      ...prev,
-      [section]: prev[section].map((task) =>
-        task.id === taskId ? { ...task, status } : task
-      ),
-    }));
-  };
+      // Ensure visibility state is preserved
+      setShowSections((prev) => {
+        const updated = { ...prev };
+        secList.forEach((s) => {
+          if (updated[s.id] === undefined) updated[s.id] = true;
+        });
+        return updated;
+      });
+    });
 
-  const handleNotesChange = (section, taskId, newNotes) => {
-    setTasks((prev) => ({
-      ...prev,
-      [section]: prev[section].map((task) =>
-        task.id === taskId ? { ...task, notes: newNotes } : task
-      ),
-    }));
-  };
+    return unsub;
+  }, [grantId]);
 
+  // Load tasks for each section
+  useEffect(() => {
+    if (!grantId) return;
+    const unsubs = [];
+    const tasksState = {};
 
-  const handleAssigneeEmailChange = (section, task, newEmail) => {
-    setTasks((prev) => ({
-      ...prev,
-      [section]: prev[section].map((t) =>
-        t.id === task.id ? { ...t, assigneeEmail: newEmail } : t
-      ),
-    }));
-  };
-
-  const handleDeadlineChange = (section, taskId, event) => {
-    const deadline = event.target.value;
-
-    setTasks((prev) => ({
-      ...prev,
-      [section]: prev[section].map((task) =>
-        task.id === taskId ? { ...task, deadline } : task
-      ),
-    }));
-  };
-
-
-  const filteredAndSortedTasks = (sectionTasks) => {
-    let result = [...sectionTasks];
-
-    if (search) {
-      result = result.filter((task) =>
-        task.name.toLowerCase().includes(search.toLowerCase())
+    sections.forEach((section) => {
+      const tasksRef = collection(
+        db,
+        "grants",
+        grantId,
+        "trackingSections",
+        section.id,
+        "trackingTasks"
       );
-    }
-    if (hideDone) result = result.filter((task) => task.status !== "Done");
+
+      const unsub = onSnapshot(tasksRef, (snapshot) => {
+        tasksState[section.id] = snapshot.docs.map((d) => {
+          const data = d.data();
+          return { id: d.id, ...data };
+        });
+
+        setTasksBySection((prev) => ({
+          ...prev,
+          ...tasksState,
+        }));
+      });
+
+      unsubs.push(unsub);
+    });
+
+    return () => unsubs.forEach((u) => u());
+  }, [sections, grantId]);
+
+  // --- Section Name Editing ---
+  const startEditingSection = (sectionId, name) => {
+    setEditingSection(sectionId);
+    setSectionNameInput(name);
+  };
+
+  const saveSectionName = async (sectionId) => {
+    await updateDoc(
+      doc(db, "grants", grantId, "trackingSections", sectionId),
+      {
+        "Section Name": sectionNameInput,
+      }
+    );
+    setEditingSection(null);
+  };
+
+  // Section toggle
+  const toggleSection = (sectionId) => {
+    setShowSections((prev) => ({
+      ...prev,
+      [sectionId]: !prev[sectionId],
+    }));
+  };
+
+  const handleAddSection = async () => {
+    const name = prompt("Enter new section name:");
+    if (!name) return;
+    await addDoc(collection(db, "grants", grantId, "trackingSections"), {
+      "Section Name": name,
+    });
+  };
+
+  const handleDeleteSection = async (sectionId) => {
+    if (!window.confirm("Delete this section?")) return;
+    await deleteDoc(
+      doc(db, "grants", grantId, "trackingSections", sectionId)
+    );
+  };
+
+  const handleAddTask = async (sectionId) => {
+    const existing = tasksBySection[sectionId] || [];
+    const maxOrder = existing.reduce(
+      (m, t) => Math.max(m, t["Task Order"] ?? 0),
+      -1
+    );
+
+    await addDoc(
+      collection(
+        db,
+        "grants",
+        grantId,
+        "trackingSections",
+        sectionId,
+        "trackingTasks"
+      ),
+      {
+        Task: "New Task",
+        "Task Status": "To Do",
+        "Assignee Email": "",
+        "Task Notes": "",
+        "Task Deadline": "",
+        "File Location": "",
+        "Task Order": maxOrder + 1,
+      }
+    );
+  };
+
+  const handleDeleteTask = async (sectionId, taskId) => {
+    if (!window.confirm("Delete this task?")) return;
+    await deleteDoc(
+      doc(
+        db,
+        "grants",
+        grantId,
+        "trackingSections",
+        sectionId,
+        "trackingTasks",
+        taskId
+      )
+    );
+  };
+
+  const updateTaskField = async (sectionId, taskId, field, value) => {
+    await updateDoc(
+      doc(
+        db,
+        "grants",
+        grantId,
+        "trackingSections",
+        sectionId,
+        "trackingTasks",
+        taskId
+      ),
+      { [field]: value }
+    );
+  };
+
+  const filteredAndSortedTasks = (tasks) => {
+    let result = [...tasks];
+    if (search)
+      result = result.filter((t) =>
+        t.Task.toLowerCase().includes(search.toLowerCase())
+      );
+    if (hideDone)
+      result = result.filter((t) => t["Task Status"] !== "Done");
 
     const statusOrder = ["To Do", "In Progress", "Done"];
+
     result.sort((a, b) => {
-      const statusDiff =
-        statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
-      if (statusDiff !== 0) return sortAsc ? statusDiff : -statusDiff;
+      const diff =
+        statusOrder.indexOf(a["Task Status"]) -
+        statusOrder.indexOf(b["Task Status"]);
+      if (diff !== 0) return sortAsc ? diff : -diff;
+
       return sortAsc
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name);
+        ? a.Task.localeCompare(b.Task)
+        : b.Task.localeCompare(a.Task);
     });
 
     return result;
   };
 
-  if (!grant) return <p>Loading grant details...</p>;
+  // --- Render Section Header ---
+  const renderSectionHeader = (section) => {
+    return (
+      <div className="task-section-header">
+        {editingSection === section.id ? (
+          <input
+            value={sectionNameInput}
+            onChange={(e) => setSectionNameInput(e.target.value)}
+            onBlur={() => saveSectionName(section.id)}
+            autoFocus
+          />
+        ) : (
+          <h3
+            onClick={() => toggleSection(section.id)}
+            onDoubleClick={() =>
+              startEditingSection(section.id, section["Section Name"])
+            }
+            style={{ cursor: "pointer" }}
+          >
+            {section["Section Name"]}{" "}
+            {showSections[section.id] ? "▼" : "▶"}
+          </h3>
+        )}
+
+        <div className="section-actions">
+          <button
+            className="action-btn small"
+            onClick={() => handleAddTask(section.id)}
+          >
+            + Add Task
+          </button>
+          <button
+            className="action-btn small delete"
+            onClick={() => handleDeleteSection(section.id)}
+          >
+            ✕ Delete Section
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="tracking-container">
-      <h2>{grant.title} – Task Tracking</h2>
+      <h2>Grant Task Tracking</h2>
 
       <div className="tracking-controls">
         <button className="action-btn" onClick={handleAddSection}>
@@ -195,133 +271,125 @@ const GrantDetailsTracking = () => {
         </button>
       </div>
 
-      {Object.keys(tasks).map((section) => (
-        <div className="task-section" key={section}>
-          <div className="task-section-header">
-            <h3
-              className="task-section-title"
-              onClick={() => handleToggleSection(section)}
-              style={{ cursor: "pointer" }}
-            >
-              {section} {showSections[section] ? "▼" : "▶"}
-            </h3>
+      {sections.map((section) => {
+        const tasks =
+          filteredAndSortedTasks(tasksBySection[section.id] || []);
 
-            <div className="section-actions">
-              <button
-                className="action-btn small"
-                onClick={() => handleAddTask(section)}
-              >
-                + Add Task
-              </button>
-              <button
-                className="action-btn small delete"
-                onClick={() => handleDeleteSection(section)}
-              >
-                ✕ Delete Section
-              </button>
-            </div>
-          </div>
+        return (
+          <div key={section.id} className="task-section">
+            {renderSectionHeader(section)}
 
-          {showSections[section] && (
-            <table className="task-table">
-              <thead>
-                <tr>
-                  <th>Task</th>
-                  <th>Status</th>
-                  <th>Files</th>
-                  <th>Assignee Email</th>
-                  <th>Notes</th>
-                  <th>Deadline</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {filteredAndSortedTasks(tasks[section]).map((task) => (
-                  <tr key={task.id}>
-                    <td>{task.name}</td>
-
-                    <td>
-                      <select
-                        value={task.status}
-                        onChange={(e) =>
-                          handleStatusChange(section, task.id, e)
-                        }
-                      >
-                        <option>To Do</option>
-                        <option>In Progress</option>
-                        <option>Done</option>
-                      </select>
-                    </td>
-
-                    <td>
-                      <input
-                        type="file"
-                        onChange={(e) =>
-                          handleFileChange(section, task.id, e)
-                        }
-                      />
-                      {task.files.length > 0 && (
-                        <ul>
-                          {task.files.map((file, idx) => (
-                            <li key={idx}>{file.name}</li>
-                          ))}
-                        </ul>
-                      )}
-                    </td>
-
-                    <td>
-                      <input
-                        type="email"
-                        placeholder="email@example.com"
-                        value={task.assigneeEmail}
-                        onChange={(e) =>
-                          handleAssigneeEmailChange(
-                            section,
-                            task,
-                            e.target.value
-                          )
-                        }
-                      />
-                    </td>
-
-                    <td>
-                      <textarea
-                        value={task.notes}
-                        onChange={(e) =>
-                          handleNotesChange(section, task.id, e.target.value)
-                        }
-                        rows={2}
-                        className="notes-textarea"
-                      />
-                    </td>
-
-                    <td>
-                      <input
-                        type="datetime-local"
-                        value={task.deadline || ""}
-                        onChange={(e) => handleDeadlineChange(section, task.id, e)}
-                      />
-                    </td>
-
-
-                    <td>
-                      <button
-                        className="action-btn small delete"
-                        onClick={() => handleDeleteTask(section, task.id)}
-                      >
-                        Delete
-                      </button>
-                    </td>
+            {showSections[section.id] && (
+              <table className="task-table">
+                <thead>
+                  <tr>
+                    <th>Task</th>
+                    <th>Status</th>
+                    <th>Assignee Email</th>
+                    <th>Notes</th>
+                    <th>Deadline</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      ))}
+                </thead>
+
+                <tbody>
+                  {tasks.map((task) => (
+                    <tr key={task.id}>
+                      <td>
+                        <input
+                          value={task.Task || ""}
+                          onChange={(e) =>
+                            updateTaskField(
+                              section.id,
+                              task.id,
+                              "Task",
+                              e.target.value
+                            )
+                          }
+                        />
+                      </td>
+
+                      <td>
+                        <select
+                          value={task["Task Status"] || "To Do"}
+                          onChange={(e) =>
+                            updateTaskField(
+                              section.id,
+                              task.id,
+                              "Task Status",
+                              e.target.value
+                            )
+                          }
+                        >
+                          <option>To Do</option>
+                          <option>In Progress</option>
+                          <option>Done</option>
+                        </select>
+                      </td>
+
+                      <td>
+                        <input
+                          type="email"
+                          value={task["Assignee Email"] || ""}
+                          onChange={(e) =>
+                            updateTaskField(
+                              section.id,
+                              task.id,
+                              "Assignee Email",
+                              e.target.value
+                            )
+                          }
+                        />
+                      </td>
+
+                      <td>
+                        <textarea
+                          value={task["Task Notes"] || ""}
+                          rows={2}
+                          onChange={(e) =>
+                            updateTaskField(
+                              section.id,
+                              task.id,
+                              "Task Notes",
+                              e.target.value
+                            )
+                          }
+                        />
+                      </td>
+
+                      <td>
+                        <input
+                          type="datetime-local"
+                          value={task["Task Deadline"] || ""}
+                          onChange={(e) =>
+                            updateTaskField(
+                              section.id,
+                              task.id,
+                              "Task Deadline",
+                              e.target.value
+                            )
+                          }
+                        />
+                      </td>
+
+                      <td>
+                        <button
+                          className="action-btn small delete"
+                          onClick={() =>
+                            handleDeleteTask(section.id, task.id)
+                          }
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
-};
-
-export default GrantDetailsTracking;
+}
