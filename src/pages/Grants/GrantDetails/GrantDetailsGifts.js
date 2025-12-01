@@ -107,7 +107,7 @@ export default function GrantDetailsGifts() {
       setGifts(giftsData);
     } catch (err) {
       console.error("Error loading gifts:", err);
-      setError("Could not load gifts.");
+      setError("Could not load invoices.");
       setGifts([]);
     } finally {
       setLoading(false);
@@ -179,16 +179,21 @@ export default function GrantDetailsGifts() {
     }
   };
 
-  /* ------------------ Acknowledge Toggle ------------------ */
+  /* ------------------ Acknowledge Toggle (FIXED) ------------------ */
   const handleToggleAcknowledge = async (giftId) => {
     const gift = gifts.find((g) => g.id === giftId);
     if (!gift) return;
+
     try {
       await setDoc(
-        doc(db, "grants", grantId, "gifts", giftId),
-        { acknowledged: !gift.acknowledged, updatedAt: serverTimestamp() },
+        doc(db, "grants", grantId, "invoices", giftId),
+        {
+          acknowledged: !gift.acknowledged,
+          updatedAt: serverTimestamp(),
+        },
         { merge: true }
       );
+
       setGifts((prev) =>
         prev.map((g) =>
           g.id === giftId ? { ...g, acknowledged: !g.acknowledged } : g
@@ -238,7 +243,8 @@ export default function GrantDetailsGifts() {
 
   const handleModalChange = (field, value) => {
     if (field === "spent") {
-      const num = typeof value === "number" ? value : parseCurrencyInput(value);
+      const num =
+        typeof value === "number" ? value : parseCurrencyInput(value);
       setModal((m) => ({ ...m, gift: { ...m.gift, [field]: num } }));
     } else {
       setModal((m) => ({ ...m, gift: { ...m.gift, [field]: value } }));
@@ -248,6 +254,7 @@ export default function GrantDetailsGifts() {
   /* ------------------ Save Gift ------------------ */
   const handleSaveModal = async () => {
     const g = { ...modal.gift, spent: Number(modal.gift.spent) || 0 };
+
     try {
       const invoicesCol = collection(db, "grants", grantId, "invoices");
 
@@ -259,27 +266,34 @@ export default function GrantDetailsGifts() {
       } else {
         await setDoc(
           doc(invoicesCol, modal.editId),
-          { ...g, updatedAt: serverTimestamp() },
+          {
+            ...g,
+            updatedAt: serverTimestamp(),
+          },
           { merge: true }
         );
         setGifts((prev) =>
-          prev.map((it) => (it.id === modal.editId ? { ...it, ...g } : it))
+          prev.map((it) =>
+            it.id === modal.editId ? { ...it, ...g } : it
+          )
         );
       }
     } catch (err) {
       console.error("Error saving gift:", err);
     }
+
     closeModal();
   };
 
-  /* ------------------ Delete Gift ------------------ */
+  /* ------------------ Delete Gift (FIXED) ------------------ */
   const handleDelete = async (giftId) => {
     if (!window.confirm("Delete this invoice?")) return;
+
     try {
-      await deleteDoc(doc(db, "grants", grantId, "gifts", giftId));
+      await deleteDoc(doc(db, "grants", grantId, "invoices", giftId));
       setGifts((prev) => prev.filter((g) => g.id !== giftId));
     } catch (err) {
-      console.error("Error deleting gift:", err);
+      console.error("Error deleting invoice:", err);
     }
   };
 
@@ -296,11 +310,15 @@ export default function GrantDetailsGifts() {
         </div>
         <div className="summary-card">
           <label>Total Spent</label>
-          <div className="summary-value">{currencyFormat(totals.totalSpent)}</div>
+          <div className="summary-value">
+            {currencyFormat(totals.totalSpent)}
+          </div>
         </div>
         <div className="summary-card">
           <label>Remaining Balance</label>
-          <div className="summary-value">{currencyFormat(totals.remaining)}</div>
+          <div className="summary-value">
+            {currencyFormat(totals.remaining)}
+          </div>
         </div>
       </div>
 
@@ -311,6 +329,7 @@ export default function GrantDetailsGifts() {
             + New Invoice
           </button>
         </div>
+
         <div className="center">
           <input
             className="gifts-search"
@@ -324,23 +343,31 @@ export default function GrantDetailsGifts() {
             </button>
           )}
         </div>
+
         <div className="right">
           <div
             className="sort-controls"
             style={{ display: "inline-flex", marginLeft: 8 }}
           >
             <button
-              className={`btn-sort ${sortBy === "date" ? "active" : ""}`}
+              className={`btn-sort ${
+                sortBy === "date" ? "active" : ""
+              }`}
               onClick={() => toggleSort("date")}
             >
-              Sort by Date {sortBy === "date" ? (sortDir === "asc" ? "↑" : "↓") : ""}
+              Sort by Date{" "}
+              {sortBy === "date" ? (sortDir === "asc" ? "↑" : "↓") : ""}
             </button>
+
             <button
-              className={`btn-sort ${sortBy === "spent" ? "active" : ""}`}
+              className={`btn-sort ${
+                sortBy === "spent" ? "active" : ""
+              }`}
               onClick={() => toggleSort("spent")}
               style={{ marginLeft: 8 }}
             >
-              Sort by Spent {sortBy === "spent" ? (sortDir === "asc" ? "↑" : "↓") : ""}
+              Sort by Spent{" "}
+              {sortBy === "spent" ? (sortDir === "asc" ? "↑" : "↓") : ""}
             </button>
           </div>
         </div>
@@ -348,8 +375,12 @@ export default function GrantDetailsGifts() {
 
       {/* Table */}
       <div className="gifts-table-wrapper">
-        {loading && <div style={{ marginBottom: 8 }}>Loading gifts…</div>}
-        {error && <div style={{ marginBottom: 8, color: "red" }}>{error}</div>}
+        {loading && (
+          <div style={{ marginBottom: 8 }}>Loading invoices…</div>
+        )}
+        {error && (
+          <div style={{ marginBottom: 8, color: "red" }}>{error}</div>
+        )}
 
         <table className="gifts-table">
           <thead>
@@ -362,6 +393,7 @@ export default function GrantDetailsGifts() {
               <th>Actions</th>
             </tr>
           </thead>
+
           <tbody>
             {displayed.length === 0 ? (
               <tr>
@@ -387,51 +419,73 @@ export default function GrantDetailsGifts() {
       {/* Modal */}
       {modal.open && (
         <div className="gifts-modal-backdrop">
-          <div className="gifts-modal" style={{ maxWidth: 620, width: "92%" }}>
+          <div
+            className="gifts-modal"
+            style={{ maxWidth: 620, width: "92%" }}
+          >
             <h2>
               {modal.mode === "add"
                 ? "Add Invoice"
                 : `Edit Invoice #${modal.modalIdPreview}`}
             </h2>
+
             <div className="modal-row">
               <label>Invoice ID</label>
               <input value={modal.modalIdPreview} disabled />
             </div>
+
             <div className="modal-row">
               <label>Date</label>
               <input
                 type="date"
                 value={modal.gift.date || ""}
-                onChange={(e) => handleModalChange("date", e.target.value)}
+                onChange={(e) =>
+                  handleModalChange("date", e.target.value)
+                }
               />
             </div>
+
             <div className="modal-row">
               <label>Spent</label>
               <input
                 type="text"
                 placeholder="$0"
-                value={currencyFormat(Number(modal.gift.spent || 0))}
-                onChange={(e) => handleModalChange("spent", e.target.value)}
+                value={currencyFormat(
+                  Number(modal.gift.spent || 0)
+                )}
+                onChange={(e) =>
+                  handleModalChange("spent", e.target.value)
+                }
                 onFocus={(e) => {
                   const raw = Number(modal.gift.spent) || 0;
                   e.target.value = raw === 0 ? "" : String(raw);
                 }}
                 onBlur={(e) =>
-                  handleModalChange("spent", parseCurrencyInput(e.target.value))
+                  handleModalChange(
+                    "spent",
+                    parseCurrencyInput(e.target.value)
+                  )
                 }
               />
             </div>
+
             <div className="modal-row">
               <label>Purpose</label>
               <textarea
                 rows={3}
                 value={modal.gift.purpose}
-                onChange={(e) => handleModalChange("purpose", e.target.value)}
+                onChange={(e) =>
+                  handleModalChange("purpose", e.target.value)
+                }
               />
             </div>
+
             <div
               className="modal-actions"
-              style={{ justifyContent: "flex-end", marginTop: 16 }}
+              style={{
+                justifyContent: "flex-end",
+                marginTop: 16,
+              }}
             >
               <button
                 className="btn-cancel"
@@ -440,6 +494,7 @@ export default function GrantDetailsGifts() {
               >
                 Cancel
               </button>
+
               <button className="btn-save" onClick={handleSaveModal}>
                 Save
               </button>
